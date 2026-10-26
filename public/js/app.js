@@ -1,24 +1,23 @@
-// app.js - Trez.cloud ERP + Stepper Wizard em Passos + Login Dark (DimensionaTI SC - Lages)
+// app.js - Lógica Dark Minimalista Unificada (DimensionaTI SC - Lages)
 const app = {
   usuarioLogado: null,
-  abaAtiva: 'licitacoes',
   passoAtual: 1,
   totalPassos: 5,
   demandasCarregadas: [],
 
   lotacaoTemp: {
-    setorNome: 'Escolas Municipais (SME Lages)',
-    orgao: 'Prefeitura do Município de Lages - Secretaria Municipal de Educação',
-    cargo: 'Professora e Coordenadora'
+    setorNome: 'Escolas Municipais (SME)',
+    orgao: 'Prefeitura de Lages - SME',
+    cargo: 'Professora / Coordenadora'
   },
 
   demanda: {
     usuarioId: null,
     usuarioNome: '',
     usuarioMatricula: '',
-    setorNome: 'Escolas Municipais (SME Lages)',
-    orgao: 'Prefeitura do Município de Lages - Secretaria Municipal de Educação',
-    cargo: 'Professora e Coordenadora',
+    setorNome: 'Escolas Municipais (SME)',
+    orgao: 'Prefeitura de Lages - SME',
+    cargo: 'Professora / Coordenadora',
     municipio: 'Lages',
     quantidade: 10,
     atividades: [1, 2],
@@ -33,34 +32,27 @@ const app = {
   chartRiscoInst: null,
   chartOrgaosInst: null,
 
-  // ==========================================
-  // INICIALIZAÇÃO
-  // ==========================================
   async init() {
-    await this.carregarPerfisBackend();
+    await this.carregarPerfis();
     this.renderizarDotGrid();
-    this.verificarSessaoSalva();
+    this.verificarSessao();
   },
 
-  // ==========================================
-  // CONTROLE DE TELAS (LOGIN -> LOTAÇÃO -> APP)
-  // ==========================================
-  mostrarTela(telaId) {
+  mostrarTela(id) {
     document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
-    const tela = document.getElementById(telaId);
-    if (tela) tela.classList.add('active');
+    document.getElementById(id)?.classList.add('active');
   },
 
-  verificarSessaoSalva() {
+  verificarSessao() {
     try {
       const salva = localStorage.getItem('dimensionati_sessao');
       if (salva) {
-        const sessao = JSON.parse(salva);
-        if (sessao && sessao.id && sessao.nome) {
-          this.usuarioLogado = sessao;
-          this.aplicarDadosNoApp(sessao);
+        const u = JSON.parse(salva);
+        if (u && u.id && u.nome) {
+          this.usuarioLogado = u;
+          this.aplicarUsuario(u);
           this.mostrarTela('screen-app');
-          this.abrirAba('licitacoes');
+          this.navegar('licitacoes');
           return;
         }
       }
@@ -69,28 +61,27 @@ const app = {
   },
 
   // ==========================================
-  // LOGIN DARK FULLSCREEN
+  // LOGIN
   // ==========================================
-  async fazerLogin(event) {
-    if (event) event.preventDefault();
+  async fazerLogin(e) {
+    if (e) e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
     const senha = document.getElementById('loginSenha').value.trim();
-    const errorMsg = document.getElementById('loginErrorMsg');
-    const btnLogin = document.getElementById('btnLogin');
+    const erro = document.getElementById('loginErrorMsg');
+    const btn = document.getElementById('btnLogin');
 
-    errorMsg.textContent = '';
-
+    erro.textContent = '';
     if (!email || !email.includes('@')) {
-      errorMsg.textContent = 'Por favor, informe um e-mail válido.';
+      erro.textContent = 'Informe um e-mail válido.';
       return;
     }
     if (!senha) {
-      errorMsg.textContent = 'Por favor, informe sua senha.';
+      erro.textContent = 'Informe sua senha.';
       return;
     }
 
-    btnLogin.textContent = 'Entrando...';
-    btnLogin.disabled = true;
+    btn.textContent = 'Entrando...';
+    btn.disabled = true;
 
     try {
       const res = await fetch('/api/login', {
@@ -101,88 +92,53 @@ const app = {
 
       const data = await res.json();
       if (!res.ok) {
-        errorMsg.textContent = data.error || 'Erro ao fazer login.';
+        erro.textContent = data.error || 'Erro no login.';
         return;
       }
 
       this.usuarioLogado = data.usuario;
 
-      // Preenche campos da lotação
+      // Popula tela de lotação
       const wpNome = document.getElementById('wpNome');
-      const wpMatricula = document.getElementById('wpMatricula');
+      const wpMat = document.getElementById('wpMatricula');
       const wpCargo = document.getElementById('wpCargo');
-
       if (wpNome) wpNome.value = data.usuario.nome || '';
-      if (wpMatricula) wpMatricula.value = data.usuario.matricula || '';
+      if (wpMat) wpMat.value = data.usuario.matricula || '';
       if (wpCargo) wpCargo.value = data.usuario.cargo || 'Servidor Público';
 
-      if (data.usuario.setor) {
-        this.preselecionarLotacao(data.usuario.setor);
-      }
-
       this.mostrarTela('screen-workplace');
-    } catch (e) {
-      errorMsg.textContent = 'Erro de conexão com o servidor local.';
+    } catch (err) {
+      erro.textContent = 'Erro ao conectar ao servidor.';
     } finally {
-      btnLogin.innerHTML = 'Entrar no painel <span class="login-arrow">↗</span>';
-      btnLogin.disabled = false;
+      btn.innerHTML = 'Entrar no painel <span class="arrow-icon">↗</span>';
+      btn.disabled = false;
     }
   },
 
   toggleSenha() {
-    const input = document.getElementById('loginSenha');
-    input.type = input.type === 'password' ? 'text' : 'password';
+    const el = document.getElementById('loginSenha');
+    el.type = el.type === 'password' ? 'text' : 'password';
   },
 
   // ==========================================
-  // CONFIRMAÇÃO DE LOTAÇÃO
+  // LOTAÇÃO
   // ==========================================
-  selecionarLotacao(setorNome, orgao, cargo, elemento) {
-    document.querySelectorAll('#wpGridSetores .wp-pill').forEach(p => p.classList.remove('active'));
-    if (elemento) elemento.classList.add('active');
+  selecionarLotacao(setor, orgao, cargo, elem) {
+    document.querySelectorAll('#wpGridSetores .dark-pill').forEach(p => p.classList.remove('active'));
+    if (elem) elem.classList.add('active');
 
-    this.lotacaoTemp.setorNome = setorNome;
-    this.lotacaoTemp.orgao = orgao;
-    this.lotacaoTemp.cargo = cargo;
-
+    this.lotacaoTemp = { setorNome: setor, orgao: orgao, cargo: cargo };
     const wpCargo = document.getElementById('wpCargo');
     if (wpCargo) wpCargo.value = cargo;
   },
 
-  preselecionarLotacao(setor) {
-    const pills = document.querySelectorAll('#wpGridSetores .wp-pill');
-    pills.forEach(p => p.classList.remove('active'));
-
-    if (setor.includes('Educação') || setor.includes('SME')) {
-      pills[0]?.classList.add('active');
-      this.lotacaoTemp = { setorNome: 'Escolas Municipais (SME Lages)', orgao: 'Prefeitura do Município de Lages - Secretaria Municipal de Educação', cargo: 'Professora e Coordenadora' };
-    } else if (setor.includes('Saúde') || setor.includes('UBS')) {
-      pills[1]?.classList.add('active');
-      this.lotacaoTemp = { setorNome: 'Saúde & Unidades Básicas (UBS Lages)', orgao: 'Prefeitura do Município de Lages - Secretaria Municipal de Saúde', cargo: 'Enfermeira Chefe / Gestora UBS' };
-    } else if (setor.includes('Administração')) {
-      pills[2]?.classList.add('active');
-      this.lotacaoTemp = { setorNome: 'Administrativo & Atendimento (Prefeitura)', orgao: 'Prefeitura do Município de Lages - Secretaria de Administração', cargo: 'Auxiliar Administrativo' };
-    } else if (setor.includes('Fazenda') || setor.includes('Finanças')) {
-      pills[3]?.classList.add('active');
-      this.lotacaoTemp = { setorNome: 'Fazenda & Finanças de Lages', orgao: 'Prefeitura do Município de Lages - Secretaria da Fazenda', cargo: 'Auditor Fiscal da Receita' };
-    } else if (setor.includes('Obras') || setor.includes('SEPLAN')) {
-      pills[4]?.classList.add('active');
-      this.lotacaoTemp = { setorNome: 'Planejamento & Obras (SEPLAN Lages)', orgao: 'Prefeitura do Município de Lages - Secretaria de Planejamento e Obras', cargo: 'Engenheiro Civil - Fiscal' };
-    } else if (setor.includes('Câmara')) {
-      pills[5]?.classList.add('active');
-      this.lotacaoTemp = { setorNome: 'Câmara de Vereadores de Lages', orgao: 'Câmara Municipal de Vereadores de Lages', cargo: 'Assessor Legislativo' };
-    } else {
-      pills[0]?.classList.add('active');
-    }
-  },
-
   async confirmarLotacao() {
     const nome = document.getElementById('wpNome').value.trim();
-    const cargo = document.getElementById('wpCargo').value.trim();
     const matricula = document.getElementById('wpMatricula').value.trim();
+    const cargo = document.getElementById('wpCargo').value.trim() || this.lotacaoTemp.cargo;
 
     if (!nome) {
-      alert('Por favor, informe seu nome completo.');
+      alert('Por favor, informe seu nome.');
       document.getElementById('wpNome').focus();
       return;
     }
@@ -194,20 +150,18 @@ const app = {
         body: JSON.stringify({
           usuarioId: this.usuarioLogado.id,
           nome,
-          cargo: cargo || this.lotacaoTemp.cargo,
+          cargo,
           orgao: this.lotacaoTemp.orgao,
           setor: this.lotacaoTemp.setorNome,
           matricula: matricula || this.usuarioLogado.matricula
         })
       });
-    } catch (e) {
-      console.warn('Erro ao salvar no banco:', e);
-    }
+    } catch (e) {}
 
     const sessao = {
       ...this.usuarioLogado,
       nome,
-      cargo: cargo || this.lotacaoTemp.cargo,
+      cargo,
       orgao: this.lotacaoTemp.orgao,
       setor: this.lotacaoTemp.setorNome,
       matricula: matricula || this.usuarioLogado.matricula,
@@ -217,411 +171,376 @@ const app = {
     this.usuarioLogado = sessao;
     localStorage.setItem('dimensionati_sessao', JSON.stringify(sessao));
 
-    this.aplicarDadosNoApp(sessao);
+    this.aplicarUsuario(sessao);
     this.mostrarTela('screen-app');
-    this.abrirAba('licitacoes');
+    this.navegar('licitacoes');
   },
 
-  // ==========================================
-  // DADOS NO PAINEL TREZ.CLOUD
-  // ==========================================
-  aplicarDadosNoApp(usuario) {
-    // Iniciais do avatar
-    const partes = usuario.nome.trim().split(' ');
-    let ini = 'AD';
-    if (partes.length >= 2) {
-      ini = (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
-    } else if (partes.length === 1) {
-      ini = partes[0].substring(0, 2).toUpperCase();
-    }
-    document.getElementById('userInitials').innerText = ini;
-    document.getElementById('userDdNome').innerText = usuario.nome;
-    document.getElementById('userDdCargo').innerText = `${usuario.cargo} • ${usuario.setor || 'Lages'}`;
+  aplicarUsuario(u) {
+    // Avatar iniciais
+    const p = u.nome.trim().split(' ');
+    let ini = 'ME';
+    if (p.length >= 2) ini = (p[0][0] + p[p.length - 1][0]).toUpperCase();
+    else if (p.length === 1) ini = p[0].substring(0, 2).toUpperCase();
 
-    // Atualiza demanda local
-    this.demanda.usuarioId = usuario.id;
-    this.demanda.usuarioNome = usuario.nome;
-    this.demanda.usuarioMatricula = usuario.matricula;
-    this.demanda.orgao = usuario.orgao;
-    this.demanda.setorNome = usuario.setor;
-    this.demanda.cargo = usuario.cargo;
+    document.getElementById('navAvatar').innerText = ini;
+    document.getElementById('navNome').innerText = u.nome.split(' ')[0];
+    document.getElementById('navSetor').innerText = u.setor || 'Lages';
 
-    // Atualiza dados no Wizard (Passo 1)
-    const wizNome = document.getElementById('wizNomeServidor');
-    const wizCargo = document.getElementById('wizCargoServidor');
-    const wizMat = document.getElementById('wizMatriculaServidor');
-    if (wizNome) wizNome.value = usuario.nome;
-    if (wizCargo) wizCargo.value = usuario.cargo;
-    if (wizMat) wizMat.value = usuario.matricula;
-
-    // Seleciona o órgão no select do Wizard
-    const sel = document.getElementById('wizSelectOrgao');
-    if (sel) {
-      for (let i = 0; i < sel.options.length; i++) {
-        if (sel.options[i].value.includes(usuario.setor)) {
-          sel.selectedIndex = i;
-          break;
-        }
-      }
-    }
-  },
-
-  toggleUserMenu() {
-    const dd = document.getElementById('userDropdown');
-    dd.classList.toggle('show');
+    // Demanda local
+    this.demanda.usuarioId = u.id;
+    this.demanda.usuarioNome = u.nome;
+    this.demanda.usuarioMatricula = u.matricula;
+    this.demanda.orgao = u.orgao;
+    this.demanda.setorNome = u.setor;
+    this.demanda.cargo = u.cargo;
   },
 
   logout() {
     this.usuarioLogado = null;
     localStorage.removeItem('dimensionati_sessao');
-    const dd = document.getElementById('userDropdown');
-    if (dd) dd.classList.remove('show');
     this.mostrarTela('screen-login');
   },
 
   // ==========================================
-  // CONTROLE DE ABAS (TREZ.CLOUD SUB-TABS)
+  // NAVEGAÇÃO DE TELAS NO APP
   // ==========================================
-  abrirAba(abaId) {
-    this.abaAtiva = abaId;
+  navegar(viewId) {
+    document.querySelectorAll('.dark-view').forEach(v => v.classList.remove('active'));
+    document.getElementById(`view-${viewId}`)?.classList.add('active');
 
-    // Fechar dropdown de usuário
-    const dd = document.getElementById('userDropdown');
-    if (dd) dd.classList.remove('show');
+    document.getElementById('btnNavLicitacoes')?.classList.toggle('active', viewId === 'licitacoes');
+    document.getElementById('btnNavAuditor')?.classList.toggle('active', viewId === 'auditor');
 
-    // Panes
-    document.querySelectorAll('.trez-pane').forEach(p => p.classList.remove('active'));
-    document.getElementById(`pane-${abaId}`)?.classList.add('active');
-
-    // Sub-tabs
-    document.querySelectorAll('.trez-sub-tab').forEach(t => t.classList.remove('active'));
-
-    // Top menu items
-    document.querySelectorAll('.trez-menu-item').forEach(m => m.classList.remove('active'));
-
-    if (abaId === 'home') {
-      document.getElementById('tabHome')?.classList.add('active');
-    } else if (abaId === 'licitacoes') {
-      document.getElementById('tabLicitacoes')?.classList.add('active');
-      document.getElementById('menuLicitacoes')?.classList.add('active');
-      this.carregarDemandasBackend();
-    } else if (abaId === 'wizard') {
-      const tabNovo = document.getElementById('tabNovo');
-      if (tabNovo) {
-        tabNovo.style.display = 'flex';
-        tabNovo.classList.add('active');
-      }
-    } else if (abaId === 'auditor') {
-      const tabAuditor = document.getElementById('tabAuditor');
-      if (tabAuditor) {
-        tabAuditor.style.display = 'flex';
-        tabAuditor.classList.add('active');
-      }
-      document.getElementById('menuAuditor')?.classList.add('active');
-      this.carregarDadosAuditor();
+    if (viewId === 'licitacoes') {
+      this.carregarDemandas();
+    } else if (viewId === 'auditor') {
+      this.carregarAuditor();
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   },
 
-  iniciarNovoProcesso() {
-    // Gera protocolo sequencial preview
+  // ==========================================
+  // LISTAGEM DE LICITAÇÕES
+  // ==========================================
+  async carregarDemandas() {
+    try {
+      const res = await fetch('/api/demandas');
+      this.demandasCarregadas = await res.json();
+      this.renderizarTabela(this.demandasCarregadas);
+    } catch (e) {
+      console.error(e);
+    }
+  },
+
+  renderizarTabela(demandas) {
+    const tbody = document.getElementById('tbodyLicitacoes');
+    if (!tbody) return;
+
+    if (!demandas || demandas.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 28px; color: var(--dark-muted);">Nenhuma licitação encontrada.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = demandas.map(d => {
+      let stClass = 'ok';
+      let stText = 'AUTORIZADA';
+
+      if (d.status === 'Sob Análise' || d.nivel_risco === 'MEDIO') {
+        stClass = 'warn';
+        stText = 'SOB ANÁLISE';
+      } else if (d.status === 'Bloqueado TCE' || d.nivel_risco === 'ALTO') {
+        stClass = 'danger';
+        stText = 'CANCELADA';
+      }
+
+      return `
+        <tr>
+          <td><strong style="color: var(--dark-accent);">${d.protocolo}</strong></td>
+          <td>
+            <strong>${d.setor}</strong><br>
+            <small style="color: var(--dark-muted);">${d.orgao}</small>
+          </td>
+          <td>
+            ${d.usuario_nome || 'Servidor'}<br>
+            <small style="color: var(--dark-muted);">${d.cargo || ''}</small>
+          </td>
+          <td><strong>${d.quantidade_usuarios}</strong></td>
+          <td><span class="status-chip ${stClass}">${stText}</span></td>
+          <td style="text-align: right; font-weight: 700;">
+            R$ ${d.custo_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          </td>
+          <td style="text-align: center;">
+            <button class="btn-table-action" onclick="app.abrirMinuta('${d.protocolo}')">
+              Ver
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  },
+
+  filtrarTabela() {
+    const term = (document.getElementById('inputBusca')?.value || '').toLowerCase();
+    const filtradas = this.demandasCarregadas.filter(d => 
+      !term ||
+      (d.protocolo || '').toLowerCase().includes(term) ||
+      (d.setor || '').toLowerCase().includes(term) ||
+      (d.orgao || '').toLowerCase().includes(term) ||
+      (d.usuario_nome || '').toLowerCase().includes(term)
+    );
+    this.renderizarTabela(filtradas);
+  },
+
+  // ==========================================
+  // STEPPER WIZARD (PASSOS 1 A 5)
+  // ==========================================
+  abrirWizardNovo() {
     const num = Math.floor(1000 + Math.random() * 9000);
     this.demanda.protocolo = `ETP-2026-${num}`;
-    const idElem = document.getElementById('wizIdentificador');
-    if (idElem) idElem.value = this.demanda.protocolo;
 
-    this.abrirAba('wizard');
+    this.navegar('wizard');
     this.irParaPasso(1);
   },
 
-  // ==========================================
-  // STEPPER WIZARD EM PASSOS (IMAGEM 3)
-  // ==========================================
   irParaPasso(passo) {
     this.passoAtual = passo;
 
-    // Atualiza indicadores visuais do Stepper
     for (let i = 1; i <= this.totalPassos; i++) {
-      const ind = document.getElementById(`stepIndicator-${i}`);
-      const pane = document.getElementById(`wizardPane-${i}`);
+      const node = document.getElementById(`step-node-${i}`);
+      const pane = document.getElementById(`pane-passo-${i}`);
 
-      if (ind) {
-        if (i === passo) {
-          ind.classList.add('active');
-        } else {
-          ind.classList.remove('active');
-        }
-      }
-
-      if (pane) {
-        if (i === passo) {
-          pane.classList.add('active');
-        } else {
-          pane.classList.remove('active');
-        }
-      }
+      node?.classList.toggle('active', i === passo);
+      pane?.classList.toggle('active', i === passo);
     }
 
-    // Botão Voltar
-    const btnVoltar = document.getElementById('btnWizardVoltar');
-    if (btnVoltar) {
-      btnVoltar.style.visibility = passo > 1 ? 'visible' : 'hidden';
-    }
+    const btnVoltar = document.getElementById('btnWizVoltar');
+    if (btnVoltar) btnVoltar.style.visibility = passo > 1 ? 'visible' : 'hidden';
 
-    // Botão Próximo / Finalizar
-    const btnProx = document.getElementById('btnWizardProximo');
-    if (btnProx) {
+    const btnAvancar = document.getElementById('btnWizAvancar');
+    if (btnAvancar) {
       if (passo === this.totalPassos) {
-        btnProx.innerHTML = 'EMITIR MINUTA & SALVAR ✓';
-        btnProx.style.background = '#10B981';
+        btnAvancar.innerHTML = 'Emitir Minuta & Salvar ✓';
       } else {
-        btnProx.innerHTML = 'PRÓXIMO &gt;';
-        btnProx.style.background = 'var(--trez-purple)';
+        btnAvancar.innerHTML = 'Próximo &rarr;';
       }
     }
 
-    // Atualiza cálculos contextuais conforme o passo
-    if (passo === 3) {
-      this.calcularConfiguracaoInterna();
-    } else if (passo === 4) {
-      this.aoMudarNivelManual();
-    } else if (passo === 5) {
-      this.preencherResumoFinal();
-    }
+    if (passo === 3) this.calcularHardware();
+    else if (passo === 4) this.analisarAuditoria();
+    else if (passo === 5) this.preencherResumo();
   },
 
   passoAnterior() {
-    if (this.passoAtual > 1) {
-      this.irParaPasso(this.passoAtual - 1);
-    }
+    if (this.passoAtual > 1) this.irParaPasso(this.passoAtual - 1);
   },
 
   async proximoPasso() {
     if (this.passoAtual === this.totalPassos) {
-      // Salva a licitação e abre a minuta
-      await this.salvarEFinalizarLicitação();
+      await this.salvarLicitação();
     } else {
       this.irParaPasso(this.passoAtual + 1);
     }
   },
 
-  aoMudarOrgaoWizard(val) {
-    const [setor, orgao, cargo] = val.split('|');
+  atualizarOrgaoWizard(val) {
+    const [setor, orgao] = val.split('|');
     this.demanda.setorNome = setor;
     this.demanda.orgao = orgao;
-    this.demanda.cargo = cargo;
-
-    const wizCargo = document.getElementById('wizCargoServidor');
-    if (wizCargo) wizCargo.value = cargo;
   },
 
-  definirQuantidade(qtd, elemento) {
-    document.querySelectorAll('.qty-btn').forEach(b => b.classList.remove('active'));
-    if (elemento) elemento.classList.add('active');
-
-    this.demanda.quantidade = qtd;
-    const inputCustom = document.getElementById('inputQtdCustom');
-    if (inputCustom) inputCustom.value = qtd;
+  setQtd(n, elem) {
+    document.querySelectorAll('.qty-pill').forEach(b => b.classList.remove('active'));
+    if (elem) elem.classList.add('active');
+    this.demanda.quantidade = n;
+    const inp = document.getElementById('inputQtd');
+    if (inp) inp.value = n;
   },
 
-  definirQuantidadeCustom(qtd) {
-    const val = parseInt(qtd) || 1;
-    this.demanda.quantidade = Math.max(1, Math.min(500, val));
-    document.querySelectorAll('.qty-btn').forEach(b => b.classList.remove('active'));
+  setQtdCustom(v) {
+    const n = Math.max(1, Math.min(500, parseInt(v) || 1));
+    this.demanda.quantidade = n;
+    document.querySelectorAll('.qty-pill').forEach(b => b.classList.remove('active'));
   },
 
   toggleAtividade(id) {
-    const card = document.getElementById(`act-${id}`);
-    const index = this.demanda.atividades.indexOf(id);
+    const box = document.getElementById(`act-${id}`);
+    const idx = this.demanda.atividades.indexOf(id);
 
-    if (index > -1) {
+    if (idx > -1) {
       if (this.demanda.atividades.length === 1) {
-        alert('Selecione pelo menos uma atividade realizada no computador.');
+        alert('Selecione ao menos uma atividade.');
         return;
       }
-      this.demanda.atividades.splice(index, 1);
-      if (card) card.classList.remove('selected');
+      this.demanda.atividades.splice(idx, 1);
+      box?.classList.remove('selected');
     } else {
       this.demanda.atividades.push(id);
-      if (card) card.classList.add('selected');
+      box?.classList.add('selected');
     }
   },
 
   // ==========================================
-  // MOTOR DE CÁLCULO E AUDITORIA
+  // CÁLCULOS DO HARDWARE
   // ==========================================
-  async calcularConfiguracaoInterna() {
-    const mapaSoftwares = {
-      1: [1],
-      2: [2, 3],
-      3: [2, 4],
-      4: [5, 6],
-      5: [7, 8],
-      6: [7, 8]
-    };
-
-    let softwareIds = [];
-    this.demanda.atividades.forEach(actId => {
-      if (mapaSoftwares[actId]) {
-        softwareIds = softwareIds.concat(mapaSoftwares[actId]);
-      }
+  async calcularHardware() {
+    const map = { 1: [1], 2: [2, 3], 3: [2, 4], 4: [5, 6], 5: [7, 8], 6: [7, 8] };
+    let sw = [];
+    this.demanda.atividades.forEach(id => {
+      if (map[id]) sw = sw.concat(map[id]);
     });
 
     try {
       const res = await fetch('/api/calcular-perfil', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          softwareIds,
-          quantidadeUsuarios: this.demanda.quantidade
-        })
+        body: JSON.stringify({ softwareIds: sw, quantidadeUsuarios: this.demanda.quantidade })
       });
 
-      const calc = await res.json();
-      this.demanda.perfilRecomendado = calc.perfil;
-      this.demanda.perfilEscolhido = calc.perfil;
+      const data = await res.json();
+      this.demanda.perfilRecomendado = data.perfil;
+      this.demanda.perfilEscolhido = data.perfil;
 
-      this.renderizarResultado(calc.perfil);
+      this.renderizarHardware(data.perfil);
 
-      const selManual = document.getElementById('selectNivelManual');
-      if (selManual) selManual.value = calc.perfil.id.toString();
+      const sel = document.getElementById('selectSimular');
+      if (sel) sel.value = data.perfil.id.toString();
     } catch (e) {
       console.error(e);
     }
   },
 
-  renderizarResultado(perfil) {
-    const titulo = document.getElementById('tituloPerfilAmigavel');
-    const desc = document.getElementById('descPerfilAmigavel');
-    const badge = document.getElementById('badgeNivelRecomendado');
+  renderizarHardware(p) {
+    const badge = document.getElementById('recBadge');
+    const title = document.getElementById('recTitle');
+    const cpu = document.getElementById('recCpu');
+    const ram = document.getElementById('recRam');
+    const ssd = document.getElementById('recSsd');
+    const mon = document.getElementById('recMonitor');
 
-    const perkCpu = document.getElementById('perkCpu');
-    const perkRam = document.getElementById('perkRam');
-    const perkMonitor = document.getElementById('perkMonitor');
-    const perkKit = document.getElementById('perkKit');
-
-    if (perfil.id === 1) {
-      badge.innerText = '✅ NÍVEL 1 - ECONÔMICO E ADEQUADO';
-      titulo.innerText = 'Computador para Atendimento e Rotinas de Escritório';
-      desc.innerText = 'Configuração econômica dimensionada para a realidade da administração de Lages. Rápida para o dia a dia, sem desperdício de dinheiro público e com especificações blindadas para o edital.';
-      perkCpu.innerText = 'Processador Quad-Core eficiente (9.500+ PassMark) com inicialização em segundos.';
-      perkRam.innerText = '8 GB ou 16 GB DDR4 Dual-Channel para abrir várias abas sem travar.';
-      perkMonitor.innerText = 'Tela 23.8" Full HD IPS com ajuste vertical de altura (Norma NR-17).';
-      perkKit.innerText = 'Fonte 80 Plus certificada e garantia presencial de 36 meses em Lages.';
-    } else if (perfil.id === 2) {
-      badge.innerText = '📈 NÍVEL 2 - ANÁLISE DE DADOS E GESTÃO';
-      titulo.innerText = 'Computador com Duas Telas para Relatórios e Dados';
-      desc.innerText = 'Projetado para auditores e equipes que trabalham com relatórios contábeis pesados e Power BI em Lages. Já inclui suporte a dois monitores para agilizar o trabalho.';
-      perkCpu.innerText = 'Processador Hexa/Octa-Core de alto desempenho para cálculos rápidos.';
-      perkRam.innerText = '16 GB a 32 GB de memória para suportar grandes bases de dados.';
-      perkMonitor.innerText = '2x Monitores 23.8" Full HD IPS com suporte ergonômico articulado.';
-      perkKit.innerText = 'Mouse de alta precisão e nobreak senoidal puro para proteger os dados.';
+    if (p.id === 1) {
+      badge.innerText = 'NÍVEL 1 • ADEQUADO';
+      title.innerText = 'Computador para Atendimento e Rotinas';
+      cpu.innerText = 'Quad-Core 3.4GHz+ (PassMark 9.500+)';
+      ram.innerText = '16 GB DDR4 Dual-Channel';
+      ssd.innerText = 'SSD 256GB NVMe M.2';
+      mon.innerText = '23.8" IPS com ajuste de altura (NR-17)';
+    } else if (p.id === 2) {
+      badge.innerText = 'NÍVEL 2 • ANÁLISE DE DADOS';
+      title.innerText = 'Estação com 2 Telas para Relatórios';
+      cpu.innerText = 'Hexa/Octa-Core (PassMark 19.000+)';
+      ram.innerText = '32 GB DDR4/DDR5 Dual-Channel';
+      ssd.innerText = 'SSD 512GB NVMe PCIe 4.0';
+      mon.innerText = '2x Monitores 23.8" IPS com suporte duplo';
     } else {
-      badge.innerText = '📐 NÍVEL 3 - ENGENHARIA E OBRAS (SEPLAN)';
-      titulo.innerText = 'Workstation de Alto Desempenho para Projetos e Obras';
-      desc.innerText = 'Estação de trabalho potente com placa de vídeo dedicada RTX, recomendada exclusivamente para engenheiros de obras públicas (AutoCAD Civil 3D, QGIS e mapas de Lages).';
-      perkCpu.innerText = 'Processador Octa-Core de última geração (32.000+ PassMark).';
-      perkRam.innerText = '32 GB a 64 GB de memória DDR5 para plantas pesadas.';
-      perkMonitor.innerText = '2x Monitores 27" de alta definição com fidelidade de cores sRGB.';
-      perkKit.innerText = 'Placa de vídeo profissional NVIDIA RTX para projetos e maquetes 3D.';
+      badge.innerText = 'NÍVEL 3 • ENGENHARIA & CAD';
+      title.innerText = 'Workstation de Alto Desempenho Gráfico';
+      cpu.innerText = 'Octa-Core 5.0GHz+ (PassMark 32.000+)';
+      ram.innerText = '32 a 64 GB DDR5 5200MHz';
+      ssd.innerText = 'SSD 1TB Gen4 + GPU RTX Dedicada';
+      mon.innerText = '2x Monitores 27" QHD Alta Precisão';
     }
 
-    const custoUnit = perfil.custo_unitario_estimado;
-    const custoTotal = custoUnit * this.demanda.quantidade;
-    const custoPiorCenario = 9800.00 * this.demanda.quantidade;
-    const economia = Math.max(0, custoPiorCenario - custoTotal);
+    const unit = p.custo_unitario_estimado;
+    const total = unit * this.demanda.quantidade;
+    const pior = 9800 * this.demanda.quantidade;
+    const econ = Math.max(0, pior - total);
 
-    this.demanda.custo_total = custoTotal;
+    this.demanda.custo_total = total;
 
-    document.getElementById('resumoCustoTotal').innerText = `R$ ${custoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-    document.getElementById('resumoCustoUnit').innerText = `(R$ ${custoUnit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} por computador completo)`;
-    document.getElementById('resumoEconomiaTexto').innerHTML = `
-      Economia de <strong>R$ ${economia.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> aos cofres públicos de Lages em relação a máquinas de alto desempenho desnecessárias.
-    `;
+    document.getElementById('recPrecoTotal').innerText = `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    document.getElementById('recPrecoUnit').innerText = `(R$ ${unit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} por máquina)`;
+    document.getElementById('recEconomia').innerText = `R$ ${econ.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
   },
 
-  async aoMudarNivelManual() {
-    const sel = document.getElementById('selectNivelManual');
-    const perfilEscolhidoId = parseInt(sel.value);
-
+  async mudarModeloManual(val) {
+    const id = parseInt(val);
     try {
       const res = await fetch('/api/analisar-trava', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           perfilRecomendadoId: this.demanda.perfilRecomendado?.id || 1,
-          perfilEscolhidoId: perfilEscolhidoId,
+          perfilEscolhidoId: id,
           quantidadeUsuarios: this.demanda.quantidade
         })
       });
 
-      const analise = await res.json();
-      this.demanda.analiseTrava = analise;
-      this.demanda.perfilEscolhido = analise.perfilEsc;
-
-      const alertBox = document.getElementById('friendlyLockAlert');
-      const alertTitle = document.getElementById('lockAlertTitle');
-      const alertBody = document.getElementById('lockAlertBody');
-      const boxJust = document.getElementById('boxJustificativaSimples');
-
-      if (analise.nivelRisco === 'BAIXO') {
-        alertBox.style.background = '#ECFDF5';
-        alertBox.style.borderColor = '#A7F3D0';
-        alertTitle.style.color = '#065F46';
-        alertTitle.innerText = '🛡️ Conformidade Plena com as Diretrizes do TCE/SC';
-        alertBody.style.color = '#047857';
-        alertBody.innerText = 'A configuração escolhida está alinhada às atividades diárias. Não há indício de superdimensionamento ou sobrepreço para o erário de Lages.';
-        boxJust.style.display = 'none';
-      } else if (analise.nivelRisco === 'MEDIO') {
-        alertBox.style.background = '#FFFBEB';
-        alertBox.style.borderColor = '#FDE68A';
-        alertTitle.style.color = '#B45309';
-        alertTitle.innerText = '⚠️ Atenção: Configuração Acima do Necessário';
-        alertBody.style.color = '#78350F';
-        alertBody.innerHTML = `
-          Você escolheu uma máquina de Nível 2. Para a rotina cadastrada, o Nível 1 já atende plenamente e economiza <strong>R$ ${analise.diferencaCusto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> dos cofres municipais.
-        `;
-        boxJust.style.display = 'block';
-      } else {
-        alertBox.style.background = '#FEF2F2';
-        alertBox.style.borderColor = '#FECACA';
-        alertTitle.style.color = '#991B1B';
-        alertTitle.innerText = '🚨 ALERTA DO TRIBUNAL DE CONTAS (TCE/SC): Superdimensionamento em Lages!';
-        alertBody.style.color = '#7F1D1D';
-        alertBody.innerHTML = `
-          Você selecionou uma Workstation de Engenharia (Nível 3). Ela custa <strong>R$ ${analise.diferencaCusto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} a mais</strong> para rotinas administrativas sem ganho prático de produtividade.
-        `;
-        boxJust.style.display = 'block';
-      }
-
+      const data = await res.json();
+      this.demanda.analiseTrava = data;
+      this.demanda.perfilEscolhido = data.perfilEsc;
+      this.renderizarHardware(data.perfilEsc);
     } catch (e) {
       console.error(e);
     }
   },
 
-  preencherResumoFinal() {
-    document.getElementById('resumoWizOrgao').innerText = this.demanda.orgao;
-    document.getElementById('resumoWizServidor').innerText = `${this.demanda.usuarioNome} (${this.demanda.cargo})`;
-    document.getElementById('resumoWizQtd').innerText = this.demanda.quantidade;
-    document.getElementById('resumoWizModelo').innerText = this.demanda.perfilEscolhido?.nome || 'Nível 1';
-    
-    const unit = this.demanda.perfilEscolhido?.custo_unitario_estimado || 2200;
-    const tot = unit * this.demanda.quantidade;
-    this.demanda.custo_total = tot;
+  async analisarAuditoria() {
+    const recId = this.demanda.perfilRecomendado?.id || 1;
+    const escId = this.demanda.perfilEscolhido?.id || 1;
 
-    document.getElementById('resumoWizValorUnit').innerText = `R$ ${unit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-    document.getElementById('resumoWizValorTotal').innerText = `R$ ${tot.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    try {
+      const res = await fetch('/api/analisar-trava', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          perfilRecomendadoId: recId,
+          perfilEscolhidoId: escId,
+          quantidadeUsuarios: this.demanda.quantidade
+        })
+      });
+
+      const a = await res.json();
+      this.demanda.analiseTrava = a;
+
+      const card = document.getElementById('auditCard');
+      const icon = document.getElementById('auditIcon');
+      const title = document.getElementById('auditTitle');
+      const desc = document.getElementById('auditDesc');
+      const boxJust = document.getElementById('boxJustificativa');
+
+      if (a.nivelRisco === 'BAIXO') {
+        icon.innerText = '🛡️';
+        title.innerText = 'Conformidade Plena com o TCE/SC';
+        desc.innerText = 'Configuração proporcional à rotina. Processo aprovado sem apontamentos.';
+        card.style.borderColor = 'var(--dark-border)';
+        boxJust.style.display = 'none';
+      } else if (a.nivelRisco === 'MEDIO') {
+        icon.innerText = '⚠️';
+        title.innerText = 'Atenção: Configuração Superior';
+        desc.innerText = `O modelo escolhido custa R$ ${a.diferencaCusto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} a mais. Justifique a necessidade técnica.`;
+        card.style.borderColor = '#F59E0B';
+        boxJust.style.display = 'block';
+      } else {
+        icon.innerText = '🚨';
+        title.innerText = 'Alerta de Superdimensionamento TCE/SC';
+        desc.innerText = `Workstation cara selecionada para rotina básica (Excedente: R$ ${a.diferencaCusto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}). Justificativa obrigatória.`;
+        card.style.borderColor = '#EF4444';
+        boxJust.style.display = 'block';
+      }
+    } catch (e) {
+      console.error(e);
+    }
   },
 
-  async salvarEFinalizarLicitação() {
-    const analise = this.demanda.analiseTrava;
-    const txtJust = document.getElementById('inputJustificativaTexto') ? document.getElementById('inputJustificativaTexto').value.trim() : '';
+  preencherResumo() {
+    document.getElementById('sumProtocolo').innerText = this.demanda.protocolo;
+    document.getElementById('sumOrgao').innerText = this.demanda.setorNome;
+    document.getElementById('sumServidor').innerText = `${this.demanda.usuarioNome} (${this.demanda.cargo})`;
+    document.getElementById('sumQtd').innerText = `${this.demanda.quantidade} PCs`;
+    document.getElementById('sumModelo').innerText = this.demanda.perfilEscolhido?.nome?.split(':')[1] || 'Nível 1';
+    document.getElementById('sumTotal').innerText = `R$ ${this.demanda.custo_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  },
 
-    if (analise && analise.requerJustificativa && !txtJust) {
-      alert('⚠️ Por favor, informe a justificativa formal exigida pelo Tribunal de Contas para esta configuração.');
+  async salvarLicitação() {
+    const analise = this.demanda.analiseTrava;
+    const txt = document.getElementById('txtJustificativa')?.value.trim() || '';
+
+    if (analise && analise.requerJustificativa && !txt) {
+      alert('Por favor, informe a justificativa técnica exigida pelo TCE/SC.');
       this.irParaPasso(4);
-      document.getElementById('inputJustificativaTexto').focus();
+      document.getElementById('txtJustificativa')?.focus();
       return;
     }
 
@@ -638,10 +557,10 @@ const app = {
           setor: this.demanda.setorNome,
           cargo: this.demanda.cargo,
           quantidadeUsuarios: this.demanda.quantidade,
-          softwares: this.demanda.atividades.map(id => `Atividade #${id}`),
+          softwares: this.demanda.atividades.map(i => `Atividade #${i}`),
           perfilRecomendadoId: this.demanda.perfilRecomendado?.id || 1,
           perfilEscolhidoId: this.demanda.perfilEscolhido?.id || 1,
-          justificativaUsuario: txtJust,
+          justificativaUsuario: txt,
           status: analise ? analise.status : 'Aprovado Direto',
           irs: analise ? analise.irs : 5,
           nivelRisco: analise ? analise.nivelRisco : 'BAIXO'
@@ -650,125 +569,23 @@ const app = {
 
       const data = await res.json();
       if (data.success) {
-        this.demanda.protocolo = data.demanda.protocolo;
-        this.demanda.custo_total = data.demanda.custo_total;
-
-        // Recarrega lista e abre minuta
-        await this.carregarDemandasBackend();
         this.renderizarModalEtp(data.demanda, this.demanda.perfilEscolhido);
       }
     } catch (e) {
-      alert('Erro ao formalizar licitação: ' + e.message);
+      alert('Erro ao salvar licitação: ' + e.message);
     }
   },
 
   // ==========================================
-  // TABELA DE LICITAÇÕES (TREZ.CLOUD ERP)
+  // MODAL DA MINUTA A4
   // ==========================================
-  async carregarDemandasBackend() {
-    try {
-      const res = await fetch('/api/demandas');
-      this.demandasCarregadas = await res.json();
-      this.renderizarTabelaLicitacoes(this.demandasCarregadas);
-    } catch (e) {
-      console.error('Erro ao buscar demandas:', e);
-    }
-  },
-
-  renderizarTabelaLicitacoes(demandas) {
-    const tbody = document.getElementById('tbodyLicitacoesTrez');
-    if (!tbody) return;
-
-    if (!demandas || demandas.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 28px; color: #64748B;">Nenhum processo licitatório encontrado.</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = demandas.map(d => {
-      let statusClass = 'autorizada';
-      let statusLabel = 'AUTORIZADA';
-
-      if (d.status === 'Sob Análise' || d.nivel_risco === 'MEDIO') {
-        statusClass = 'sob-analise';
-        statusLabel = 'SOB ANÁLISE';
-      } else if (d.status === 'Bloqueado TCE' || d.nivel_risco === 'ALTO') {
-        statusClass = 'cancelada';
-        statusLabel = 'CANCELADA';
-      }
-
-      let catmat = '463821';
-      if (d.perfil_escolhido_id === 2) catmat = '471209';
-      if (d.perfil_escolhido_id === 3) catmat = '482914';
-
-      const dataFormatada = (d.created_at || '').substring(0, 10).split('-').reverse().join('/') || '26/10/2026';
-
-      return `
-        <tr>
-          <td><strong>${d.id}</strong></td>
-          <td><strong style="color: var(--trez-blue);">${d.protocolo}</strong></td>
-          <td>${dataFormatada}</td>
-          <td>
-            <strong>${d.setor}</strong><br>
-            <small style="color: #64748B;">${d.orgao}</small>
-          </td>
-          <td>
-            ${d.usuario_nome || 'Servidor'}<br>
-            <small style="color: #64748B;">${d.cargo || ''}</small>
-          </td>
-          <td style="text-align: center;"><code>${catmat}</code></td>
-          <td style="text-align: center;">
-            <span class="trez-status-pill ${statusClass}">${statusLabel}</span>
-          </td>
-          <td style="text-align: right; font-weight: 700; color: #0F172A;">
-            R$ ${d.custo_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-          </td>
-          <td style="text-align: center;">
-            <button class="trez-action-btn-circle" title="Visualizar Minuta Oficial" onclick="app.abrirDossie('${d.protocolo}')">
-              •••
-            </button>
-          </td>
-        </tr>
-      `;
-    }).join('');
-  },
-
-  filtrarTabelaLocal() {
-    const busca = (document.getElementById('inputBuscaLicitacao')?.value || '').toLowerCase();
-    const orgao = document.getElementById('filtroOrgaoTrez')?.value || '';
-    const status = document.getElementById('filtroStatusTrez')?.value || '';
-
-    const filtradas = this.demandasCarregadas.filter(d => {
-      const matchBusca = !busca || 
-        (d.protocolo || '').toLowerCase().includes(busca) ||
-        (d.setor || '').toLowerCase().includes(busca) ||
-        (d.orgao || '').toLowerCase().includes(busca) ||
-        (d.usuario_nome || '').toLowerCase().includes(busca) ||
-        (d.id || '').toString().includes(busca);
-
-      const matchOrgao = !orgao || (d.setor || '').includes(orgao) || (d.orgao || '').includes(orgao);
-
-      let statusReal = 'AUTORIZADA';
-      if (d.status === 'Sob Análise' || d.nivel_risco === 'MEDIO') statusReal = 'SOB ANÁLISE';
-      if (d.status === 'Bloqueado TCE' || d.nivel_risco === 'ALTO') statusReal = 'CANCELADA';
-
-      const matchStatus = !status || statusReal === status;
-
-      return matchBusca && matchOrgao && matchStatus;
-    });
-
-    this.renderizarTabelaLicitacoes(filtradas);
-  },
-
-  // ==========================================
-  // MODAL DA MINUTA OFICIAL DE CONTRATO (A4)
-  // ==========================================
-  async abrirDossie(protocolo) {
+  async abrirMinuta(protocolo) {
     try {
       const res = await fetch(`/api/demandas/${protocolo}`);
       const data = await res.json();
       this.renderizarModalEtp(data.demanda, data.perfilEsc);
     } catch (e) {
-      alert('Erro ao abrir documento: ' + e.message);
+      alert('Erro ao carregar minuta.');
     }
   },
 
@@ -786,60 +603,44 @@ const app = {
     const numContrato = demanda.protocolo.replace('ETP-', 'CT-');
     const processoAdm = `Processo Licitatório nº ${demanda.protocolo.replace('ETP-', '')}/${ano} - PML`;
 
-    let catmat = '463821';
-    let catmatNome = 'Microcomputador Desktop Tipo I (Administrativo / Atendimento)';
-    if (perfil.id === 2) {
-      catmat = '471209';
-      catmatNome = 'Microcomputador Desktop Tipo II (Análise de Dados / Dual Head)';
-    } else if (perfil.id === 3) {
-      catmat = '482914';
-      catmatNome = 'Estação de Trabalho Workstation Tipo III (Engenharia / Alto Desempenho Gráfico)';
-    }
+    let catmat = perfil.id === 3 ? '482914' : perfil.id === 2 ? '471209' : '463821';
+    let catmatNome = perfil.id === 3 ? 'Workstation Engenharia' : perfil.id === 2 ? 'Desktop Análise Dados' : 'Microcomputador Desktop Padrão';
 
-    const valorUnitFmt = demanda.custo_unitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-    const valorTotFmt = demanda.custo_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-
-    const nomeServidor = demanda.usuario_nome || (this.usuarioLogado ? this.usuarioLogado.nome : 'Servidor Responsável');
-    const matriculaServidor = demanda.usuario_matricula || (this.usuarioLogado ? this.usuarioLogado.matricula : 'MAT-00000/PML');
+    const valUnit = demanda.custo_unitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    const valTot = demanda.custo_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    const nomeServ = demanda.usuario_nome || 'Servidor Responsável';
+    const matServ = demanda.usuario_matricula || 'MAT-00000/PML';
 
     corpo.innerHTML = `
       <div class="gov-contract-doc">
-
-        <!-- TIMBRE OFICIAL DA PREFEITURA DE LAGES / SC -->
         <div class="gov-contract-header">
-          <div style="font-weight: 800; font-size: 0.85rem; letter-spacing: 1px; color: #374151;">ESTADO DE SANTA CATARINA</div>
+          <div style="font-weight: 800; font-size: 0.82rem; letter-spacing: 1px; color: #4B5563;">ESTADO DE SANTA CATARINA</div>
           <h2>PREFEITURA DO MUNICÍPIO DE LAGES</h2>
           <p style="font-weight: 700; color: #111827; margin-top: 2px;">${demanda.orgao.toUpperCase()}</p>
-          <p style="font-size: 0.78rem; color: #4B5563;">DIRETORIA DE TECNOLOGIA DA INFORMAÇÃO E COMUNICAÇÃO</p>
-          
-          <div style="margin-top: 10px; padding: 6px; background: #F3F4F6; border: 1px solid #D1D5DB; font-size: 8.5pt;">
-            <strong>MINUTA OFICIAL DE CONTRATO DE TIC • LEI Nº 14.133/2021 (NOVA LEI DE LICITAÇÕES)</strong><br>
+          <div style="margin-top: 8px; padding: 6px; background: #F3F4F6; border: 1px solid #D1D5DB; font-size: 8.5pt;">
+            <strong>MINUTA OFICIAL DE CONTRATO TIC • LEI Nº 14.133/2021</strong><br>
             ${processoAdm} • Contrato Administrativo nº ${numContrato}
           </div>
         </div>
 
-        <!-- PREÂMBULO -->
         <p class="gov-clause-p">
-          O <strong>MUNICÍPIO DE LAGES</strong>, pessoa jurídica de direito público interno, por intermédio do(a) <strong>${demanda.orgao}</strong>, neste ato representado pelo servidor responsável <strong>${nomeServidor}</strong>, portador da matrícula funcional nº <strong>${matriculaServidor}</strong>, e a empresa vencedora do certame licitatório, inscrita no CNPJ sob o nº 00.000.000/0001-00, doravante designada <strong>CONTRATADA</strong>, em estrita observância à <strong>Lei nº 14.133/2021</strong> e diretrizes preventivas do <strong>Tribunal de Contas de Santa Catarina (TCE/SC)</strong>, celebram o presente contrato sob as cláusulas a seguir:
+          O <strong>MUNICÍPIO DE LAGES</strong>, por intermédio do(a) <strong>${demanda.orgao}</strong>, representado pelo servidor <strong>${nomeServ}</strong>, matrícula nº <strong>${matServ}</strong>, e a empresa vencedora do certame, celebram o presente contrato com as cláusulas a seguir:
         </p>
 
-        <!-- CLÁUSULA PRIMEIRA: OBJETO COM ESPECIFICAÇÃO BLINDADA -->
         <div class="gov-clause">
-          <div class="gov-clause-title">CLÁUSULA PRIMEIRA – OBJETO E ESPECIFICAÇÃO TÉCNICA PADRONIZADA</div>
+          <div class="gov-clause-title">CLÁUSULA PRIMEIRA – OBJETO E ESPECIFICAÇÃO BLINDADA</div>
           <p class="gov-clause-p">
-            Aquisição de equipamentos de informática padronizados para atendimento das necessidades operacionais do setor de <strong>${demanda.setor}</strong>, conforme especificações técnicas e diretrizes de dimensionamento do sistema DimensionaTI SC.
+            Aquisição de computadores para o setor de <strong>${demanda.setor}</strong>, conforme diretrizes técnicas do sistema DimensionaTI SC.
           </p>
 
           <table class="gov-table">
             <thead>
               <tr>
                 <th style="width: 5%; text-align: center;">ITEM</th>
-                <th style="width: 45%;">ESPECIFICAÇÃO TÉCNICA PADRONIZADA (LICITAÇÃO BLINDADA)</th>
-                <th style="width: 14%; text-align: center;">CATMAT</th>
-                <th style="width: 8%; text-align: center;">UNID.</th>
-                <th style="width: 8%; text-align: center;">QTD.</th>
-                <th style="width: 10%; text-align: right;">VALOR UNIT.</th>
-                <th style="width: 10%; text-align: right;">VALOR TOTAL</th>
+                <th style="width: 50%;">ESPECIFICAÇÃO PADRONIZADA (ANTI-PRODUTO INFERIOR)</th>
+                <th style="width: 15%; text-align: center;">CATMAT</th>
+                <th style="width: 10%; text-align: center;">QTD.</th>
+                <th style="width: 20%; text-align: right;">VALOR TOTAL</th>
               </tr>
             </thead>
             <tbody>
@@ -848,82 +649,59 @@ const app = {
                 <td>
                   <strong>${perfil.nome}</strong><br>
                   <small>
-                    • <strong>CPU:</strong> ${perfil.processador}<br>
-                    • <strong>RAM:</strong> ${perfil.ram}<br>
-                    • <strong>SSD:</strong> ${perfil.armazenamento}<br>
-                    • <strong>Vídeo:</strong> ${perfil.gpu}<br>
-                    • <strong>Monitor e Ergonomia:</strong> ${perfil.perifericos}
+                    • CPU: ${perfil.processador}<br>
+                    • RAM: ${perfil.ram}<br>
+                    • SSD: ${perfil.armazenamento}<br>
+                    • Periféricos: ${perfil.perifericos}
                   </small>
                 </td>
-                <td style="text-align: center;">
-                  <strong>${catmat}</strong><br>
-                  <span style="font-size: 7pt; color: #4B5563;">${catmatNome}</span>
-                </td>
-                <td style="text-align: center;">Unidade</td>
+                <td style="text-align: center;"><strong>${catmat}</strong><br><span style="font-size: 7pt;">${catmatNome}</span></td>
                 <td style="text-align: center;"><strong>${demanda.quantidade_usuarios}</strong></td>
-                <td style="text-align: right;">R$ ${valorUnitFmt}</td>
-                <td style="text-align: right;"><strong>R$ ${valorTotFmt}</strong></td>
+                <td style="text-align: right;"><strong>R$ ${valTot}</strong></td>
               </tr>
             </tbody>
           </table>
 
-          <!-- REQUISITOS TÉCNICOS DETALHADOS -->
           <div class="tech-spec-box">
-            <strong>REQUISITOS MÍNIMOS OBRIGATÓRIOS DO FORNECEDOR (CLÁUSULA ANTI-ENTREGA DE PRODUTO INFERIOR):</strong><br>
-            • <strong>Placa-mãe e BIOS:</strong> Padrão corporativo OEM desenvolvida pelo mesmo fabricante do equipamento ou com BIOS customizada contendo logo institucional da marca, chip TPM 2.0 de segurança em hardware ativo e UEFI 2.8+ com Secure Boot.<br>
-            • <strong>Fonte de Alimentação:</strong> Fonte bivolt automática de alta eficiência energética com certificação mínima <strong>80 Plus Bronze</strong> (eficiência >= 85%) e PFC Ativo (vedada fonte genérica sem certificação).<br>
-            • <strong>Monitor e Ergonomia (NR-17):</strong> Painel IPS com ajuste vertical de altura (mínimo 100mm), rotação e inclinação conforme a Norma NR-17 de Ergonomia do Ministério do Trabalho.<br>
-            • <strong>Laudos e Certificações na Entrega:</strong> Certificação de Segurança Elétrica (Portaria INMETRO / IEC 62368-1), Compatibilidade Eletromagnética (CISPR 32 / FCC) e Laudo de Ruído Acústico (ISO 7779 / 9296 inferior a 30 dB).<br>
-            • <strong>Garantia e Assistência Presencial em Lages/SC:</strong> Garantia técnica integral de <strong>36 (trinta e seis) meses on-site</strong>, com prazo de atendimento no município de Lages de no máximo 48 horas úteis e substituição de peças defeituosas por novas originais.
+            <strong>CLÁUSULAS OBRIGATÓRIAS DE BLINDAGEM:</strong><br>
+            • <strong>Placa-mãe OEM Corporativa:</strong> BIOS com logo da marca e chip TPM 2.0 ativo.<br>
+            • <strong>Fonte 80 Plus Bronze Certificada:</strong> PFC Ativo com eficiência mínima de 85%.<br>
+            • <strong>Monitor Ergonômico (NR-17):</strong> Painel IPS com ajuste de altura vertical de 100mm.<br>
+            • <strong>Garantia On-Site 36 Meses em Lages/SC:</strong> Atendimento presencial no município em até 48 horas úteis.
           </div>
         </div>
 
-        <!-- CLÁUSULA SEGUNDA -->
         <div class="gov-clause">
-          <div class="gov-clause-title">CLÁUSULA SEGUNDA – VIGÊNCIA E PRAZOS DE ENTREGA</div>
+          <div class="gov-clause-title">CLÁUSULA SEGUNDA – VALOR E VIGÊNCIA</div>
           <p class="gov-clause-p">
-            O prazo de vigência contratual é de <strong>12 (doze) meses</strong>, prorrogável nos termos da Lei nº 14.133/2021. O prazo de entrega dos computadores em Lages/SC é de até <strong>30 (trinta) dias corridos</strong> após a emissão da Ordem de Fornecimento.
+            O valor total do fornecimento é de <strong>R$ ${valTot}</strong> (R$ ${valUnit} unitário). Prazo de vigência contratual de 12 meses, prorrogável para efeito de garantia técnica de 3 anos.
           </p>
         </div>
 
-        <!-- CLÁUSULA TERCEIRA -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">CLÁUSULA TERCEIRA – VALOR CONTRATUAL E CONDIÇÕES DE PAGAMENTO</div>
-          <p class="gov-clause-p">
-            O valor total da contratação é de <strong>R$ ${valorTotFmt}</strong>, compreendendo frete, impostos e garantia presencial de 3 anos em Lages.
-          </p>
+        <div style="background: #F9FAFB; border: 1px solid #D1D5DB; padding: 8px 12px; margin-top: 14px; font-size: 8pt;">
+          <strong>CERTIFICAÇÃO AUDITORIA TCE/SC:</strong> IRS ${demanda.irs}% (${demanda.nivel_risco}) • Aprovado para ${demanda.cargo} no município de Lages/SC.
         </div>
 
-        <!-- CERTIFICAÇÃO PREVENTIVA TCE/SC -->
-        <div style="background: #F9FAFB; border: 1px solid #D1D5DB; padding: 10px 14px; margin-top: 14px; font-size: 8pt; break-inside: avoid;">
-          <strong>CERTIFICAÇÃO DE AUDITORIA PREVENTIVA TCE/SC (DIMENSIONATI):</strong><br>
-          Índice de Risco de Superdimensionamento (IRS): <strong>${demanda.irs}% — ${demanda.nivel_risco === 'BAIXO' ? '🟢 CONFORMIDADE PLENA' : demanda.nivel_risco === 'MEDIO' ? '🟡 MONITORAMENTO TÉCNICO' : '🔴 ALERTA DE SUPERDIMENSIONAMENTO'}</strong>.<br>
-          Dimensionamento aprovado para o cargo de <strong>${demanda.cargo}</strong> ocupado por <strong>${nomeServidor} (Matrícula: ${matriculaServidor})</strong> no município de Lages/SC.
-          ${demanda.justificativa_usuario ? `<br><em>Justificativa: "${demanda.justificativa_usuario}"</em>` : ''}
-        </div>
-
-        <!-- DATA E ASSINATURAS -->
-        <div style="margin-top: 24px; text-align: right; font-weight: 700; font-size: 9pt; break-inside: avoid;">
+        <div style="margin-top: 24px; text-align: right; font-weight: 700; font-size: 9pt;">
           Lages/SC, ${dia} de ${mes} de ${ano}.
         </div>
 
         <div class="gov-signatures-block">
           <div>
             <div class="gov-sig-line">
-              <strong>${nomeServidor.toUpperCase()}</strong><br>
+              <strong>${nomeServ.toUpperCase()}</strong><br>
               ${demanda.cargo}<br>
-              <small>Matrícula nº ${matriculaServidor} • ${demanda.orgao}</small>
+              <small>Matrícula nº ${matServ} • PML</small>
             </div>
           </div>
           <div>
             <div class="gov-sig-line">
-              <strong>EMPRESA VENCEDORA DO CERTAME</strong><br>
-              Representante Legal da CONTRATADA<br>
+              <strong>EMPRESA VENCEDORA DO PREGÃO</strong><br>
+              Representante Legal da Contratada<br>
               <small>Assinatura Digital ICP-Brasil</small>
             </div>
           </div>
         </div>
-
       </div>
     `;
 
@@ -939,126 +717,110 @@ const app = {
     const box = document.getElementById('boxEncaminharEmail');
     if (!box) return;
     box.style.display = 'block';
-    const input = document.getElementById('inputEmailDestino');
-    if (input) {
-      if (this.usuarioLogado && !input.value) {
-        input.value = this.usuarioLogado.email;
-      }
-      input.focus();
+    const inp = document.getElementById('inputEmailDestino');
+    if (inp) {
+      if (this.usuarioLogado && !inp.value) inp.value = this.usuarioLogado.email;
+      inp.focus();
     }
   },
 
   fecharCaixaEmail() {
     const box = document.getElementById('boxEncaminharEmail');
     if (box) box.style.display = 'none';
-    const feedback = document.getElementById('emailFeedbackMsg');
-    if (feedback) feedback.style.display = 'none';
   },
 
   enviarPorEmail() {
-    const input = document.getElementById('inputEmailDestino');
+    const inp = document.getElementById('inputEmailDestino');
     const msg = document.getElementById('emailFeedbackMsg');
-    const email = input ? input.value.trim() : '';
+    const email = inp ? inp.value.trim() : '';
 
-    if (!email || !email.includes('@') || !email.includes('.')) {
-      alert('Por favor, informe um endereço de e-mail válido.');
-      if (input) input.focus();
+    if (!email || !email.includes('@')) {
+      alert('Informe um e-mail válido.');
       return;
     }
 
-    const protocolo = this.demanda.protocolo || 'ETP-2026-OFICIAL';
-    const orgao = this.demanda.orgao || 'Prefeitura de Lages';
-
     if (msg) {
       msg.style.display = 'block';
-      msg.style.background = '#ECFDF5';
-      msg.style.color = '#065F46';
-      msg.style.border = '1px solid #A7F3D0';
-      msg.innerHTML = `
-        ✅ <strong>Minuta Oficial Encaminhada com Sucesso!</strong><br>
-        O documento protocolado sob o nº <strong>${protocolo}</strong> foi despachado para <strong>${email}</strong> e anexado aos autos de Lages/SC.
-      `;
+      msg.innerText = `✓ Minuta encaminhada com sucesso para ${email}!`;
     }
 
-    const assunto = encodeURIComponent(`Minuta de Contrato TIC Blindada - ${protocolo} - ${orgao}`);
-    const corpoEmail = encodeURIComponent(`Prezados,\n\nSegue a minuta oficial do Termo de Contrato de TIC com especificações técnicas blindadas gerada pelo DimensionaTI SC para a Prefeitura de Lages/SC em conformidade com a Lei nº 14.133/2021.\n\n• Protocolo: ${protocolo}\n• Responsável: ${this.demanda.usuarioNome || 'Servidor'}\n• Órgão Contratante: ${orgao}\n• Valor Estimado: R$ ${this.demanda.custo_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}\n\nAtenciosamente,\nDiretoria de TIC - Município de Lages`);
-
+    const prot = this.demanda.protocolo || 'ETP-2026';
+    const subj = encodeURIComponent(`Minuta de Contrato TIC Blindada - ${prot}`);
+    const body = encodeURIComponent(`Segue a minuta oficial gerada para a Prefeitura de Lages/SC.\n\nProtocolo: ${prot}\nValor: R$ ${this.demanda.custo_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`);
+    
     setTimeout(() => {
-      window.open(`mailto:${email}?subject=${assunto}&body=${corpoEmail}`, '_blank');
-    }, 700);
+      window.open(`mailto:${email}?subject=${subj}&body=${body}`, '_blank');
+    }, 600);
   },
 
   imprimirDocumento() {
-    this.fecharCaixaEmail();
     window.print();
   },
 
   // ==========================================
-  // PAINEL AUDITOR TCE/SC
+  // AUDITORIA TCE/SC
   // ==========================================
-  async carregarDadosAuditor() {
+  async carregarAuditor() {
     try {
       const res = await fetch('/api/estatisticas');
-      const stats = await res.json();
+      const s = await res.json();
 
-      document.getElementById('kpiTotalDemandas').innerText = stats.totalDemandas;
-      document.getElementById('kpiTotalEconomia').innerText = `R$ ${stats.totalEconomia.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`;
-      document.getElementById('kpiMediaIrs').innerText = `${stats.mediaIrs}%`;
+      document.getElementById('kpiTotal').innerText = s.totalDemandas;
+      document.getElementById('kpiEco').innerText = `R$ ${s.totalEconomia.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`;
+      document.getElementById('kpiRisco').innerText = `${s.mediaIrs}%`;
 
-      const criticos = (stats.riscoContagem.find(r => r.nivel_risco === 'ALTO') || {}).qtd || 0;
-      document.getElementById('kpiAlertasCriticos').innerText = criticos;
+      const cr = (s.riscoContagem.find(r => r.nivel_risco === 'ALTO') || {}).qtd || 0;
+      document.getElementById('kpiAlertas').innerText = cr;
 
-      this.renderizarGraficosAuditor(stats);
+      this.renderizarGraficosAuditor(s);
     } catch (e) {
       console.error(e);
     }
   },
 
-  renderizarGraficosAuditor(stats) {
+  renderizarGraficosAuditor(s) {
     if (typeof Chart === 'undefined') return;
 
-    const ctxRisco = document.getElementById('chartRiscoClean');
-    if (ctxRisco) {
+    const ctxR = document.getElementById('chartRisco');
+    if (ctxR) {
       if (this.chartRiscoInst) this.chartRiscoInst.destroy();
+      const b = (s.riscoContagem.find(r => r.nivel_risco === 'BAIXO') || {}).qtd || 0;
+      const m = (s.riscoContagem.find(r => r.nivel_risco === 'MEDIO') || {}).qtd || 0;
+      const a = (s.riscoContagem.find(r => r.nivel_risco === 'ALTO') || {}).qtd || 0;
 
-      const b = (stats.riscoContagem.find(r => r.nivel_risco === 'BAIXO') || {}).qtd || 0;
-      const m = (stats.riscoContagem.find(r => r.nivel_risco === 'MEDIO') || {}).qtd || 0;
-      const a = (stats.riscoContagem.find(r => r.nivel_risco === 'ALTO') || {}).qtd || 0;
-
-      this.chartRiscoInst = new Chart(ctxRisco, {
+      this.chartRiscoInst = new Chart(ctxR, {
         type: 'doughnut',
         data: {
           labels: ['Baixo Risco', 'Médio Risco', 'Alto Risco'],
           datasets: [{
             data: [b, m, a],
-            backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
+            backgroundColor: ['#34D399', '#F59E0B', '#EF4444'],
             borderWidth: 0
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom' } },
+          plugins: { legend: { position: 'bottom', labels: { color: '#8493A8' } } },
           cutout: '72%'
         }
       });
     }
 
-    const ctxOrgaos = document.getElementById('chartOrgaosClean');
-    if (ctxOrgaos) {
+    const ctxO = document.getElementById('chartOrgaos');
+    if (ctxO) {
       if (this.chartOrgaosInst) this.chartOrgaosInst.destroy();
+      const labels = s.porOrgao.map(o => o.orgao.length > 15 ? o.orgao.substring(0, 15) + '...' : o.orgao);
+      const vals = s.porOrgao.map(o => o.valor_total);
 
-      const labels = stats.porOrgao.map(o => o.orgao.length > 20 ? o.orgao.substring(0, 20) + '...' : o.orgao);
-      const valores = stats.porOrgao.map(o => o.valor_total);
-
-      this.chartOrgaosInst = new Chart(ctxOrgaos, {
+      this.chartOrgaosInst = new Chart(ctxO, {
         type: 'bar',
         data: {
           labels,
           datasets: [{
-            data: valores,
-            backgroundColor: '#2E46C8',
-            borderRadius: 6
+            data: vals,
+            backgroundColor: '#34D399',
+            borderRadius: 4
           }]
         },
         options: {
@@ -1066,23 +828,21 @@ const app = {
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
           scales: {
-            y: { ticks: { callback: v => 'R$ ' + (v / 1000) + 'k' } }
+            x: { ticks: { color: '#8493A8' }, grid: { display: false } },
+            y: { ticks: { color: '#8493A8', callback: v => 'R$' + (v/1000) + 'k' }, grid: { color: '#1E293B' } }
           }
         }
       });
     }
   },
 
-  async carregarPerfisBackend() {
+  async carregarPerfis() {
     try {
       const res = await fetch('/api/perfis');
       this.perfisDisponiveis = await res.json();
-    } catch (e) {
-      console.error('Erro ao buscar perfis:', e);
-    }
+    } catch (e) {}
   },
 
-  // CANVAS DE PONTOS DECORATIVOS DO LOGIN DARK
   renderizarDotGrid() {
     const canvas = document.getElementById('loginDotsCanvas');
     if (!canvas) return;
@@ -1107,7 +867,7 @@ const app = {
         const x = c * spacing + spacing / 2;
         const y = r * spacing + spacing / 2;
         const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
-        const alpha = Math.max(0.03, 0.5 - (dist / maxDist) * 0.5);
+        const alpha = Math.max(0.03, 0.45 - (dist / maxDist) * 0.45);
         const size = Math.max(0.8, 2.2 - (dist / maxDist) * 1.5);
 
         ctx.beginPath();
