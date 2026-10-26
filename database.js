@@ -174,40 +174,40 @@ function initDatabase() {
       [
         1,
         'Perfil 1: Administrativo e Atendimento Básico (Padronizado Lages)',
-        'Configuração econômica dimensionada para navegação no SGPe/SEI, sistemas web municipais, digitação de documentos e PDFs.',
-        'Processador x86-64 Quad-Core físico, 8 threads, clock base 3.4GHz, cache 12MB (Intel Core i3 12ª/13ª Ger ou AMD Ryzen 3 4100/5300G), pontuação mínima PassMark CPU Mark de 9.500 pontos, suporte TPM 2.0 integrado.',
-        '8 GB ou 16 GB DDR4 3200MHz (2x 8GB Dual Channel), 2 slots DIMM com suporte a expansão até 64GB.',
-        'SSD 256 GB ou 512 GB NVMe M.2 PCIe 3.0 x4, taxa de leitura sequencial mínima de 2.100 MB/s e escrita de 1.200 MB/s, TBW mínimo de 150 TBW.',
-        'Controlador Gráfico Integrado compatível com DirectX 12 e OpenGL 4.5, com saídas HDMI 2.0 e DisplayPort nativas.',
-        'Monitor 23.8" Full HD (1920x1080) painel IPS anti-reflexo, bordas ultrafinas, base com ajuste de altura mínimo de 100mm, rotação e inclinação (Conforme NR-17 de Ergonomia); Kit Teclado e Mouse USB ABNT2 durabilidade 10M cliques; Fonte PFC Ativo 80 Plus Bronze 85%+ de eficiência.',
-        2200.00,
-        'ESPECIFICAÇÃO DE LICITAÇÃO BLINDADA: Placa-mãe OEM corporativa desenvolvida pelo mesmo fabricante ou homologada formalmente, com BIOS em português; suporte a UEFI 2.8+; chip TPM 2.0 físico integrado; gabinete tool-less com sensor de intrusão; certificação de segurança elétrica INMETRO/IEC 62368-1 e compatibilidade eletromagnética CISPR 32; garantia técnica on-site de 36 meses com atendimento em Lages/SC.',
-        '#059669'
+        'Configuração econômica dimensionada para navegação no SGPe/SEI, portais municipais, digitação de textos, ofícios e planilhas de rotina.',
+        'Processador x86-64 Quad-Core físico, 8 threads, clock base 3.4GHz, cache 12MB (Intel Core i3 12ª/13ª Ger ou AMD Ryzen 3 4100/5300G), pontuação mínima PassMark de 8.500 pontos, suporte TPM 2.0 integrado.',
+        '8 GB DDR4 3200MHz (1x 8GB ou 2x 4GB Dual-Channel), com slot DIMM livre para expansão futura até 32GB ou 64GB.',
+        'SSD 256 GB NVMe M.2 PCIe 3.0, leitura mínima de 2.000 MB/s, durabilidade mínima de 150 TBW.',
+        'Controlador Gráfico Integrado compatível com DirectX 12 e saídas digitais HDMI / DisplayPort.',
+        'Monitor 23.8" Full HD IPS com base ergonômica ajustável em altura (Norma Regulamentadora NR-17); Kit Teclado e Mouse USB ABNT2; Fonte bivolt PFC Ativo certificada 80 Plus Bronze.',
+        1850.00,
+        'ESPECIFICAÇÃO DE LICITAÇÃO BLINDADA: Placa-mãe OEM corporativa desenvolvida pelo fabricante do equipamento ou com BIOS customizada contendo logo institucional da marca; chip TPM 2.0 físico ativo; gabinete tool-less com sensor de intrusão; fonte certificada 80 Plus Bronze; garantia técnica on-site de 36 meses com atendimento presencial em Lages/SC.',
+        '#10B981'
       ],
       [
         2,
         'Perfil 2: Análise de Dados e Gestão Intermediária',
-        'Configuração intermediária para análise de grandes planilhas, relatórios contábeis, Power BI, DBeaver e múltiplos sistemas concorrentes.',
-        'Processador Hexa-Core com 12 threads ou Octa-Core, clock turbo 4.4GHz+, cache 18MB+ (Intel Core i5 12400/13400 ou AMD Ryzen 5 5600G/7600), pontuação mínima PassMark de 19.000 pontos.',
-        '16 GB ou 32 GB DDR4/DDR5 3200/4800MHz Dual Channel, expansível até 64GB.',
-        'SSD 512 GB NVMe M.2 PCIe 4.0 x4, leitura sequencial mínima de 3.500 MB/s e escrita de 2.500 MB/s.',
-        'Controlador Gráfico de Alta Performance com suporte a multitelas simultâneas (mínimo 2 saídas digitais HDMI/DP).',
-        '2x Monitores 23.8" Full HD IPS com suporte articulado ergonômico a pistão a gás (Dual-Monitor); Teclado e Mouse ergonômicos; Nobreak Senoidal puro 1000VA com autonomia mínima de 20 minutos para salvar rotinas de dados.',
-        4500.00,
-        'ESPECIFICAÇÃO DE LICITAÇÃO BLINDADA: Suporte a virtualização VT-x/AMD-V; 4 portas USB 3.2 Gen1; placa de rede Gigabit Ethernet 10/100/1000 com Wake-on-LAN; fonte bivolt automática 80 Plus Bronze; garantia on-site de 36 meses com reposição de peças em Lages/SC.',
+        'Configuração intermediária para análise de grandes volumes contábeis, Power BI, relatórios analíticos, DBeaver e múltiplos sistemas concorrentes.',
+        'Processador Hexa-Core com 12 threads, clock turbo 4.4GHz+, cache 18MB+ (Intel Core i5 12400/13400 ou AMD Ryzen 5 5600G), pontuação mínima PassMark de 18.000 pontos.',
+        '16 GB DDR4 ou DDR5 3200/4800MHz (2x 8GB Dual-Channel), expansível até 64GB.',
+        'SSD 512 GB NVMe M.2 PCIe 4.0 x4, leitura mínima de 3.500 MB/s e escrita de 2.500 MB/s.',
+        'Controlador Gráfico de Alta Performance com suporte a 2 telas simultâneas nativas.',
+        '2x Monitores 23.8" Full HD IPS com suporte articulado ergonômico a pistão a gás (Dual-Head); Nobreak Senoidal 1000VA; Teclado e Mouse ergonômicos.',
+        3600.00,
+        'ESPECIFICAÇÃO DE LICITAÇÃO BLINDADA: Suporte a virtualização VT-x/AMD-V; 4 portas USB 3.2; fonte 80 Plus Bronze; garantia on-site de 36 meses com atendimento em até 48h úteis em Lages/SC.',
         '#2563EB'
       ],
       [
         3,
         'Perfil 3: Engenharia, Obras e Geoprocessamento (SEPLAN / Obras)',
-        'Estação de trabalho de alto desempenho gráfico com GPU dedicada para projetos viários, AutoCAD Civil 3D, QGIS, Revit BIM e edição de imagem/vídeo.',
-        'Processador Octa-Core de Alta Performance com 16+ threads, clock turbo 5.0GHz+, cache 24MB+ (Intel Core i7 13700/14700 ou AMD Ryzen 7 7700X), pontuação mínima PassMark de 32.000 pontos.',
-        '32 GB a 64 GB DDR5 5200MHz Dual Channel com dissipador de calor metálico.',
-        'SSD 1 TB NVMe M.2 PCIe 4.0 Gen4, leitura sequencial mínima de 5.000 MB/s e escrita de 4.200 MB/s.',
-        'Placa de Vídeo Dedicada Profissional NVIDIA GeForce RTX 3060/4060 8GB GDDR6 ou NVIDIA RTX A1000/A2000 com 3072+ núcleos CUDA e barramento 128-bit mínimo.',
-        '2x Monitores 27" IPS com resolução QHD (2560x1440) ou 4K, 99% sRGB fidelidade de cor, base com ajuste vertical ergonômico; Mouse vertical ergonômico de precisão; Nobreak Senoidal 1500VA.',
-        9800.00,
-        'ESPECIFICAÇÃO DE LICITAÇÃO BLINDADA: Sistema de refrigeração para trabalho contínuo sob carga 100%; fonte de 650W com certificação 80 Plus Gold com 90%+ de eficiência energética; certificação ISV (Independent Software Vendor) para Autodesk e ArcGIS; garantia técnica on-site de 36 meses com atendimento em Lages/SC.',
+        'Estação de trabalho de alto desempenho gráfico com GPU dedicada para projetos viários, AutoCAD Civil 3D, QGIS, maquetes 3D e renderização de obras municipais.',
+        'Processador Octa-Core de Alta Performance com 16+ threads, clock turbo 5.0GHz+, cache 24MB+ (Intel Core i7 13700/14700 ou AMD Ryzen 7 7700X), pontuação mínima PassMark de 30.000 pontos.',
+        '32 GB DDR5 5200MHz Dual-Channel (2x 16GB) com dissipador de calor.',
+        'SSD 1 TB NVMe M.2 PCIe 4.0 Gen4, leitura mínima de 5.000 MB/s e escrita de 4.200 MB/s.',
+        'Placa de Vídeo Dedicada Profissional NVIDIA GeForce RTX 4060 8GB GDDR6 ou NVIDIA RTX A1000/A2000 com barramento de 128-bit mínimo.',
+        '2x Monitores 27" IPS QHD (2560x1440) 99% sRGB; Mouse vertical de precisão; Nobreak Senoidal 1500VA.',
+        8200.00,
+        'ESPECIFICAÇÃO DE LICITAÇÃO BLINDADA: Certificação ISV para Autodesk e ArcGIS; refrigeração para carga contínua; fonte 650W 80 Plus Gold; garantia técnica on-site de 36 meses com atendimento presencial em Lages/SC.',
         '#7C3AED'
       ]
     ];
@@ -373,6 +373,40 @@ function initDatabase() {
     for (const d of demandasSeed) {
       insertDemanda.run(...d);
     }
+  }
+
+  // Atualização garantida dos valores de mercado e 8GB de RAM para o Perfil 1
+  try {
+    db.exec(`
+      UPDATE perfis_hardware SET
+        processador = 'Quad-Core x86-64 3.4GHz+ (PassMark 8.500+)',
+        ram = '8 GB DDR4 3200MHz (expansível até 32GB)',
+        armazenamento = 'SSD 256 GB NVMe M.2',
+        perifericos = 'Monitor 23.8" IPS com ajuste vertical de altura (NR-17); Kit Teclado/Mouse ABNT2; Fonte 80 Plus Bronze.',
+        custo_unitario_estimado = 1850.00
+      WHERE id = 1;
+
+      UPDATE perfis_hardware SET
+        processador = 'Hexa-Core 4.4GHz+ (PassMark 18.000+)',
+        ram = '16 GB DDR4/DDR5 Dual-Channel',
+        armazenamento = 'SSD 512 GB NVMe M.2',
+        perifericos = '2x Monitores 23.8" Full HD IPS com suporte articulado (Dual-Monitor); Nobreak 1000VA.',
+        custo_unitario_estimado = 3600.00
+      WHERE id = 2;
+
+      UPDATE perfis_hardware SET
+        processador = 'Octa-Core 5.0GHz+ (PassMark 30.000+)',
+        ram = '32 GB DDR5 5200MHz Dual-Channel',
+        armazenamento = 'SSD 1 TB NVMe Gen4 + GPU NVIDIA RTX Dedicada',
+        perifericos = '2x Monitores 27" IPS QHD (2560x1440); Mouse de precisão; Nobreak 1500VA.',
+        custo_unitario_estimado = 8200.00
+      WHERE id = 3;
+
+      UPDATE demandas SET custo_unitario = 1850.00, custo_total = 18500.00 WHERE perfil_escolhido_id = 1 AND quantidade_usuarios = 10;
+      UPDATE demandas SET custo_unitario = 1850.00, custo_total = 27750.00 WHERE perfil_escolhido_id = 1 AND quantidade_usuarios = 15;
+    `);
+  } catch (e) {
+    console.warn('Aviso atualização perfis:', e.message);
   }
 
   // Reativa chaves estrangeiras

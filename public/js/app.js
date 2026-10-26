@@ -25,7 +25,7 @@ const app = {
     perfilEscolhido: null,
     analiseTrava: null,
     protocolo: 'ETP-2026-0000',
-    custo_total: 22000.00
+    custo_total: 18500.00
   },
 
   perfisDisponiveis: [],
@@ -385,7 +385,14 @@ const app = {
   // CÁLCULOS DO HARDWARE
   // ==========================================
   async calcularHardware() {
-    const map = { 1: [1], 2: [2, 3], 3: [2, 4], 4: [5, 6], 5: [7, 8], 6: [7, 8] };
+    // Mapeamento justo e econômico para cada tipo de rotina pública:
+    // 1 (Internet/SGPe) -> 8GB RAM
+    // 2 (Textos/Ofícios/PDFs) -> 8GB RAM
+    // 3 (Planilhas administrativas comuns) -> 8GB RAM
+    // 4 (Power BI / Análise Pesada de Dados) -> 16GB RAM
+    // 5 (Plantas CAD / QGIS) -> 32GB RAM + GPU
+    // 6 (Edição 3D / Vídeos) -> 32GB RAM + GPU
+    const map = { 1: [1], 2: [2], 3: [3], 4: [4], 5: [5], 6: [6] };
     let sw = [];
     this.demanda.atividades.forEach(id => {
       if (map[id]) sw = sw.concat(map[id]);
@@ -420,31 +427,31 @@ const app = {
     const mon = document.getElementById('recMonitor');
 
     if (p.id === 1) {
-      badge.innerText = 'NÍVEL 1 • ADEQUADO';
-      title.innerText = 'Computador para Atendimento e Rotinas';
-      cpu.innerText = 'Quad-Core 3.4GHz+ (PassMark 9.500+)';
-      ram.innerText = '16 GB DDR4 Dual-Channel';
+      badge.innerText = 'NÍVEL 1 • ADEQUADO E ECONÔMICO';
+      title.innerText = 'Computador para Atendimento e Navegação';
+      cpu.innerText = 'Quad-Core 3.4GHz+ (PassMark 8.500+)';
+      ram.innerText = '8 GB DDR4 3200MHz (expansível)';
       ssd.innerText = 'SSD 256GB NVMe M.2';
       mon.innerText = '23.8" IPS com ajuste de altura (NR-17)';
     } else if (p.id === 2) {
-      badge.innerText = 'NÍVEL 2 • ANÁLISE DE DADOS';
-      title.innerText = 'Estação com 2 Telas para Relatórios';
-      cpu.innerText = 'Hexa/Octa-Core (PassMark 19.000+)';
-      ram.innerText = '32 GB DDR4/DDR5 Dual-Channel';
+      badge.innerText = 'NÍVEL 2 • ANÁLISE DE DADOS E BI';
+      title.innerText = 'Estação com 2 Telas para Relatórios e BI';
+      cpu.innerText = 'Hexa-Core 4.4GHz+ (PassMark 18.000+)';
+      ram.innerText = '16 GB DDR4/DDR5 Dual-Channel';
       ssd.innerText = 'SSD 512GB NVMe PCIe 4.0';
-      mon.innerText = '2x Monitores 23.8" IPS com suporte duplo';
+      mon.innerText = '2x Monitores 23.8" IPS com suporte articulado';
     } else {
       badge.innerText = 'NÍVEL 3 • ENGENHARIA & CAD';
       title.innerText = 'Workstation de Alto Desempenho Gráfico';
-      cpu.innerText = 'Octa-Core 5.0GHz+ (PassMark 32.000+)';
-      ram.innerText = '32 a 64 GB DDR5 5200MHz';
-      ssd.innerText = 'SSD 1TB Gen4 + GPU RTX Dedicada';
+      cpu.innerText = 'Octa-Core 5.0GHz+ (PassMark 30.000+)';
+      ram.innerText = '32 GB DDR5 5200MHz Dual-Channel';
+      ssd.innerText = 'SSD 1TB Gen4 + GPU NVIDIA RTX';
       mon.innerText = '2x Monitores 27" QHD Alta Precisão';
     }
 
     const unit = p.custo_unitario_estimado;
     const total = unit * this.demanda.quantidade;
-    const pior = 9800 * this.demanda.quantidade;
+    const pior = 8200 * this.demanda.quantidade;
     const econ = Math.max(0, pior - total);
 
     this.demanda.custo_total = total;

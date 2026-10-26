@@ -121,18 +121,18 @@ app.post('/api/calcular-perfil', (req, res) => {
     let requerGpuDedicada = false;
     const motivos = [];
 
-    if (softwareIds.includes(5) || softwareIds.includes(6) || softwareIds.includes(7) || softwareIds.includes(8)) {
+    if (softwareIds.includes(5) || softwareIds.includes(6)) {
       maxPerfil = 3;
       requerMultiMonitor = true;
       requerGpuDedicada = true;
-      motivos.push('Softwares de Engenharia (AutoCAD / QGIS / BIM) exigem aceleração gráfica pesada e GPU dedicada.');
+      motivos.push('Softwares de Engenharia (AutoCAD / QGIS / BIM) exigem 32 GB RAM e aceleração gráfica com GPU dedicada.');
     } else if (softwareIds.includes(4)) {
       maxPerfil = 2;
       requerMultiMonitor = true;
-      motivos.push('Análise de dados contábeis e Power BI demandam maior capacidade multitarefa e dual-monitor.');
+      motivos.push('Análise pesada de dados fiscais e Power BI demandam 16 GB RAM e suporte a dois monitores.');
     } else {
       maxPerfil = 1;
-      motivos.push('Rotinas de texto, navegação em portais municipais e SGPe/SEI compatíveis com hardware padrão econômico.');
+      motivos.push('Navegação web, portais municipais (SGPe/SEI), digitação de ofícios e planilhas operam com agilidade em 8 GB de RAM, gerando máxima economia aos cofres públicos de Lages.');
     }
 
     const perfilRecomendado = db.prepare('SELECT * FROM perfis_hardware WHERE id = ?').get(maxPerfil);
