@@ -1149,17 +1149,21 @@ body {
 
 .gov-clause {
   margin-top: 14px;
+  break-inside: auto;
 }
 
 .gov-clause-title {
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 800;
   margin-bottom: 4px;
+  color: #000000;
+  text-transform: uppercase;
 }
 
 .gov-clause-p {
   margin-bottom: 6px;
   text-indent: 2em;
+  line-height: 1.5;
 }
 
 .gov-table {
@@ -1168,35 +1172,45 @@ body {
   margin: 10px 0;
   font-size: 8.5pt;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 
 .gov-table th, .gov-table td {
-  border: 1px solid #4B5563;
-  padding: 5px 8px;
+  border: 1px solid #374151;
+  padding: 6px 8px;
 }
 
 .gov-table th {
   background: #E5E7EB;
   font-weight: 800;
+  text-transform: uppercase;
+  font-size: 7.5pt;
+  color: #111827;
 }
 
 .tech-spec-box {
   background: #F9FAFB;
   border: 1px solid #9CA3AF;
   border-radius: 4px;
-  padding: 8px 10px;
-  margin: 6px 0;
+  padding: 10px 12px;
+  margin: 8px 0;
   font-size: 8pt;
-  line-height: 1.4;
+  line-height: 1.45;
+  page-break-inside: avoid;
+  break-inside: avoid;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
 }
 
 .gov-signatures-block {
-  margin-top: 28px;
+  margin-top: 32px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 28px;
+  gap: 32px;
   text-align: center;
   font-size: 8.5pt;
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 
 .gov-sig-line {

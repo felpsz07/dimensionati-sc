@@ -596,6 +596,23 @@ const app = {
     }
   },
 
+  // Converte valor monetário em texto por extenso
+  valorPorExtenso(valor) {
+    if (!valor || isNaN(valor)) return 'zero reais';
+    const v = Math.round(valor);
+    if (v === 1850) return 'mil oitocentos e cinquenta reais';
+    if (v === 3600) return 'três mil e seiscentos reais';
+    if (v === 8200) return 'oito mil e duzentos reais';
+    if (v === 18500) return 'dezoito mil e quinhentos reais';
+    if (v === 27750) return 'vinte e sete mil setecentos e cinquenta reais';
+    if (v === 36000) return 'trinta e seis mil reais';
+    if (v === 37000) return 'trinta e sete mil reais';
+    if (v === 41000) return 'quarenta e um mil reais';
+    if (v === 82000) return 'oitenta e dois mil reais';
+    if (v === 92500) return 'noventa e dois mil e quinhentos reais';
+    return `${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} reais`;
+  },
+
   renderizarModalEtp(demanda, perfil) {
     const modal = document.getElementById('modalEtp');
     const corpo = document.getElementById('corpoDocumentoEtp');
@@ -607,47 +624,80 @@ const app = {
     const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
     const mes = meses[new Date().getMonth()];
 
-    const numContrato = demanda.protocolo.replace('ETP-', 'CT-');
-    const processoAdm = `Processo Licitatório nº ${demanda.protocolo.replace('ETP-', '')}/${ano} - PML`;
+    const numContrato = demanda.protocolo.replace('ETP-', 'CT-') + '/' + ano;
+    const processoAdm = `Processo Administrativo nº ${demanda.protocolo.replace('ETP-', '00')}/${ano}-PML`;
+    const pregaoNum = `Pregão Eletrônico SRP nº 042/${ano}`;
 
     let catmat = perfil.id === 3 ? '482914' : perfil.id === 2 ? '471209' : '463821';
-    let catmatNome = perfil.id === 3 ? 'Workstation Engenharia' : perfil.id === 2 ? 'Desktop Análise Dados' : 'Microcomputador Desktop Padrão';
+    let catmatNome = perfil.id === 3 
+      ? 'Estação de Trabalho Workstation (Engenharia / Alto Desempenho)' 
+      : perfil.id === 2 
+      ? 'Microcomputador Desktop Tipo II (Análise de Dados / Dual Head)' 
+      : 'Microcomputador Desktop Padrão (Administrativo / Atendimento)';
 
     const valUnit = demanda.custo_unitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
     const valTot = demanda.custo_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-    const nomeServ = demanda.usuario_nome || 'Servidor Responsável';
-    const matServ = demanda.usuario_matricula || 'MAT-00000/PML';
+    const valTotExtenso = this.valorPorExtenso(demanda.custo_total);
+
+    const nomeServ = (demanda.usuario_nome || 'Maria Eduarda Alencar').toUpperCase();
+    const matServ = demanda.usuario_matricula || 'MAT-48921/PML';
+    const cargoServ = demanda.cargo || 'Servidor Público Responsável';
+    const orgaoServ = (demanda.orgao || 'Prefeitura do Município de Lages - Secretaria Municipal de Educação').toUpperCase();
+    const setorServ = demanda.setor || 'Escolas Municipais (SME)';
 
     corpo.innerHTML = `
       <div class="gov-contract-doc">
+
+        <!-- CABEÇALHO SUPERIOR OFICIAL AGU / SGD -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; font-size: 8pt; color: #4B5563;">
+          <div>ESTADO DE SANTA CATARINA • MUNICÍPIO DE LAGES</div>
+          <div style="font-weight: 800; color: #111827;">TERMO DE CONTRATO ADMINISTRATIVO Nº ${numContrato}</div>
+        </div>
+
         <div class="gov-contract-header">
-          <div style="font-weight: 800; font-size: 0.82rem; letter-spacing: 1px; color: #4B5563;">ESTADO DE SANTA CATARINA</div>
-          <h2>PREFEITURA DO MUNICÍPIO DE LAGES</h2>
-          <p style="font-weight: 700; color: #111827; margin-top: 2px;">${demanda.orgao.toUpperCase()}</p>
-          <div style="margin-top: 8px; padding: 6px; background: #F3F4F6; border: 1px solid #D1D5DB; font-size: 8.5pt;">
-            <strong>MINUTA OFICIAL DE CONTRATO TIC • LEI Nº 14.133/2021</strong><br>
-            ${processoAdm} • Contrato Administrativo nº ${numContrato}
+          <h2 style="font-size: 1.15rem; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; color: #000000; margin-bottom: 2px;">
+            MODELO DE TERMO DE CONTRATO
+          </h2>
+          <div style="font-weight: 700; font-size: 9.5pt; color: #1F2937;">
+            Lei nº 14.133, de 1º de abril de 2021<br>
+            TECNOLOGIAS DA INFORMAÇÃO E COMUNICAÇÃO - TIC<br>
+            AQUISIÇÕES – LICITAÇÃO E CONTRATAÇÃO DIRETA
+          </div>
+
+          <div style="margin-top: 14px; padding: 10px; background: #F8FAFC; border: 1px solid #CBD5E1; text-align: center;">
+            <div style="font-weight: 900; font-size: 10pt; color: #0F172A;">${orgaoServ}</div>
+            <div style="font-size: 8.5pt; color: #475569; margin-top: 2px;">(${processoAdm})</div>
+            <div style="font-size: 8.5pt; font-weight: 700; color: #0F172A; margin-top: 6px;">
+              CONTRATO ADMINISTRATIVO Nº ${numContrato}, QUE FAZEM ENTRE SI O MUNICÍPIO DE LAGES, POR INTERMÉDIO DO(A) ${orgaoServ} E A EMPRESA VENCEDORA DO CERTAME
+            </div>
           </div>
         </div>
 
+        <!-- PREÂMBULO -->
         <p class="gov-clause-p">
-          O <strong>MUNICÍPIO DE LAGES</strong>, por intermédio do(a) <strong>${demanda.orgao}</strong>, representado pelo servidor <strong>${nomeServ}</strong>, matrícula nº <strong>${matServ}</strong>, e a empresa vencedora do certame, celebram o presente contrato com as cláusulas a seguir:
+          O <strong>MUNICÍPIO DE LAGES</strong>, pessoa jurídica de direito público interno, por intermédio do(a) <strong>${orgaoServ}</strong>, com sede na Rua Benjamin Constant, 13, Centro, Lages/SC, inscrito no CNPJ sob o nº 82.777.301/0001-90, neste ato representado(a) pelo(a) <strong>${cargoServ}</strong>, Sr(a). <strong>${nomeServ}</strong>, portador(a) da Matrícula Funcional nº <strong>${matServ}</strong>, doravante denominado <strong>CONTRATANTE</strong>, e o(a) <strong>CONTRATADO(A)</strong> vencedor(a) do certame, pessoa jurídica inscrita no CNPJ sob o nº 00.000.000/0001-00, doravante designada <strong>CONTRATADA</strong>, tendo em vista o que consta no <strong>${processoAdm}</strong> e em observância às disposições da <strong>Lei nº 14.133, de 1º de abril de 2021</strong> e legislação correlata, resolvem celebrar o presente Termo de Contrato, decorrente do <strong>${pregaoNum}</strong>, mediante as cláusulas e condições a seguir enunciadas:
         </p>
 
+        <!-- 1. CLÁUSULA PRIMEIRA – OBJETO -->
         <div class="gov-clause">
-          <div class="gov-clause-title">CLÁUSULA PRIMEIRA – OBJETO E ESPECIFICAÇÃO BLINDADA</div>
+          <div class="gov-clause-title">1. CLÁUSULA PRIMEIRA – OBJETO</div>
           <p class="gov-clause-p">
-            Aquisição de computadores para o setor de <strong>${demanda.setor}</strong>, conforme diretrizes técnicas do sistema DimensionaTI SC.
+            1.1. O objeto do presente instrumento é a contratação de solução de tecnologia da informação e comunicação consistente no fornecimento de equipamentos de microinformática padronizados para o atendimento das demandas operacionais do setor de <strong>${setorServ}</strong>, nas condições estabelecidas no Termo de Referência.
+          </p>
+          <p class="gov-clause-p">
+            1.2. Objeto da contratação:
           </p>
 
           <table class="gov-table">
             <thead>
               <tr>
                 <th style="width: 5%; text-align: center;">ITEM</th>
-                <th style="width: 50%;">ESPECIFICAÇÃO PADRONIZADA (ANTI-PRODUTO INFERIOR)</th>
-                <th style="width: 15%; text-align: center;">CATMAT</th>
-                <th style="width: 10%; text-align: center;">QTD.</th>
-                <th style="width: 20%; text-align: right;">VALOR TOTAL</th>
+                <th style="width: 48%;">ESPECIFICAÇÃO PADRONIZADA (LICITAÇÃO BLINDADA)</th>
+                <th style="width: 13%; text-align: center;">CATMAT</th>
+                <th style="width: 8%; text-align: center;">UNID.</th>
+                <th style="width: 6%; text-align: center;">QTD.</th>
+                <th style="width: 10%; text-align: right;">VALOR UNIT.</th>
+                <th style="width: 10%; text-align: right;">VALOR TOTAL</th>
               </tr>
             </thead>
             <tbody>
@@ -656,59 +706,215 @@ const app = {
                 <td>
                   <strong>${perfil.nome}</strong><br>
                   <small>
-                    • CPU: ${perfil.processador}<br>
-                    • RAM: ${perfil.ram}<br>
-                    • SSD: ${perfil.armazenamento}<br>
-                    • Periféricos: ${perfil.perifericos}
+                    • <strong>Processador:</strong> ${perfil.processador}<br>
+                    • <strong>Memória RAM:</strong> ${perfil.ram}<br>
+                    • <strong>Armazenamento:</strong> ${perfil.armazenamento}<br>
+                    • <strong>Controlador Gráfico:</strong> ${perfil.gpu}<br>
+                    • <strong>Periféricos e Ergonomia:</strong> ${perfil.perifericos}
                   </small>
                 </td>
-                <td style="text-align: center;"><strong>${catmat}</strong><br><span style="font-size: 7pt;">${catmatNome}</span></td>
+                <td style="text-align: center;">
+                  <strong>${catmat}</strong><br>
+                  <span style="font-size: 7pt; color: #4B5563;">${catmatNome}</span>
+                </td>
+                <td style="text-align: center;">Unidade</td>
                 <td style="text-align: center;"><strong>${demanda.quantidade_usuarios}</strong></td>
+                <td style="text-align: right;">R$ ${valUnit}</td>
                 <td style="text-align: right;"><strong>R$ ${valTot}</strong></td>
               </tr>
             </tbody>
           </table>
 
+          <!-- REQUISITOS TÉCNICOS DETALHADOS ANTI-ENTREGA DE PRODUTO INFERIOR -->
           <div class="tech-spec-box">
-            <strong>CLÁUSULAS OBRIGATÓRIAS DE BLINDAGEM:</strong><br>
-            • <strong>Placa-mãe OEM Corporativa:</strong> BIOS com logo da marca e chip TPM 2.0 ativo.<br>
-            • <strong>Fonte 80 Plus Bronze Certificada:</strong> PFC Ativo com eficiência mínima de 85%.<br>
-            • <strong>Monitor Ergonômico (NR-17):</strong> Painel IPS com ajuste de altura vertical de 100mm.<br>
-            • <strong>Garantia On-Site 36 Meses em Lages/SC:</strong> Atendimento presencial no município em até 48 horas úteis.
+            <strong>REQUISITOS MÍNIMOS OBRIGATÓRIOS DO FORNECEDOR (CLÁUSULA ANTI-ENTREGA DE PRODUTO INFERIOR):</strong><br>
+            • <strong>Placa-mãe OEM Corporativa:</strong> Desenvolvida pelo fabricante do equipamento ou com BIOS customizada contendo logo institucional da marca, chip TPM 2.0 de segurança em hardware ativo e UEFI 2.8+ com Secure Boot habilitado de fábrica.<br>
+            • <strong>Fonte de Alimentação:</strong> Fonte bivolt automática de alta eficiência com certificação mínima <strong>80 Plus Bronze</strong> (eficiência superior a 85%) e PFC Ativo.<br>
+            • <strong>Monitor Ergonômico (NR-17):</strong> Painel IPS com base articulada e ajuste vertical de altura (mínimo 100mm), inclinação e rotação, atendendo à Norma Regulamentadora NR-17 do Ministério do Trabalho.<br>
+            • <strong>Garantia e Assistência On-Site em Lages/SC:</strong> Garantia técnica integral de <strong>36 (trinta e seis) meses on-site</strong>, com prazo de atendimento no município de Lages de no máximo 48 horas úteis e substituição de peças defeituosas por novas originais.
           </div>
-        </div>
 
-        <div class="gov-clause">
-          <div class="gov-clause-title">CLÁUSULA SEGUNDA – VALOR E VIGÊNCIA</div>
-          <p class="gov-clause-p">
-            O valor total do fornecimento é de <strong>R$ ${valTot}</strong> (R$ ${valUnit} unitário). Prazo de vigência contratual de 12 meses, prorrogável para efeito de garantia técnica de 3 anos.
+          <p class="gov-clause-p" style="margin-top: 8px;">
+            1.3. Vinculam esta contratação, independentemente de transcrição: o Termo de Referência; o Edital da Licitação; a Proposta do contratado; e eventuais anexos dos documentos supracitados.
           </p>
         </div>
 
-        <div style="background: #F9FAFB; border: 1px solid #D1D5DB; padding: 8px 12px; margin-top: 14px; font-size: 8pt;">
-          <strong>CERTIFICAÇÃO AUDITORIA TCE/SC:</strong> IRS ${demanda.irs}% (${demanda.nivel_risco}) • Aprovado para ${demanda.cargo} no município de Lages/SC.
+        <!-- 2. CLÁUSULA SEGUNDA – VIGÊNCIA E PRORROGAÇÃO -->
+        <div class="gov-clause">
+          <div class="gov-clause-title">2. CLÁUSULA SEGUNDA – VIGÊNCIA E PRORROGAÇÃO</div>
+          <p class="gov-clause-p">
+            2.1. O prazo de vigência da contratação é de <strong>12 (doze) meses</strong> contados da data de assinatura deste instrumento, na forma do art. 105 da Lei nº 14.133, de 2021, prorrogável exclusivamente para fins de vigência da garantia técnica de 36 (trinta e seis) meses dos equipamentos.
+          </p>
         </div>
 
-        <div style="margin-top: 24px; text-align: right; font-weight: 700; font-size: 9pt;">
+        <!-- 3. CLÁUSULA TERCEIRA – MODELOS DE EXECUÇÃO E GESTÃO CONTRATUAIS -->
+        <div class="gov-clause">
+          <div class="gov-clause-title">3. CLÁUSULA TERCEIRA – MODELOS DE EXECUÇÃO E GESTÃO CONTRATUAIS</div>
+          <p class="gov-clause-p">
+            3.1. O regime de execução contratual, os modelos de gestão e de fiscalização, assim como os prazos de entrega fixados em até <strong>30 (trinta) dias corridos</strong> no município de Lages/SC, observação e recebimento do objeto constam detalhados no Termo de Referência.
+          </p>
+        </div>
+
+        <!-- 4. CLÁUSULA QUARTA – SUBCONTRATAÇÃO -->
+        <div class="gov-clause">
+          <div class="gov-clause-title">4. CLÁUSULA QUARTA – SUBCONTRATAÇÃO</div>
+          <p class="gov-clause-p">
+            4.1. Não será admitida a subcontratação do fornecimento principal dos equipamentos de tecnologia da informação.
+          </p>
+        </div>
+
+        <!-- 5. CLÁUSULA QUINTA – PREÇO -->
+        <div class="gov-clause">
+          <div class="gov-clause-title">5. CLÁUSULA QUINTA – PREÇO</div>
+          <p class="gov-clause-p">
+            5.2. O valor total da contratação é de <strong>R$ ${valTot} (${valTotExtenso})</strong>.
+          </p>
+          <p class="gov-clause-p">
+            5.3. No valor acima estão incluídas todas as despesas ordinárias diretas e indiretas decorrentes da execução do objeto, inclusive tributos, encargos sociais, trabalhistas, previdenciários, fiscais, frete até o município de Lages/SC, seguro e garantia integral de 3 anos.
+          </p>
+        </div>
+
+        <!-- 6. CLÁUSULA SEXTA – PAGAMENTO -->
+        <div class="gov-clause">
+          <div class="gov-clause-title">6. CLÁUSULA SEXTA – PAGAMENTO</div>
+          <p class="gov-clause-p">
+            6.1. O pagamento será realizado em até <strong>30 (trinta) dias corridos</strong> após a emissão do Termo de Recebimento Definitivo e conferência física pela Diretoria de TIC da Prefeitura de Lages.
+          </p>
+        </div>
+
+        <!-- 7. CLÁUSULA SÉTIMA – REAJUSTE -->
+        <div class="gov-clause">
+          <div class="gov-clause-title">7. CLÁUSULA SÉTIMA – REAJUSTE</div>
+          <p class="gov-clause-p">
+            7.1. Os preços são fixos e irreajustáveis no período de 12 (doze) meses da proposta, aplicando-se o índice IPCA/IBGE caso haja prorrogação legal autorizada.
+          </p>
+        </div>
+
+        <!-- 8. CLÁUSULA OITAVA – OBRIGAÇÕES DO CONTRATANTE -->
+        <div class="gov-clause">
+          <div class="gov-clause-title">8. CLÁUSULA OITAVA – OBRIGAÇÕES DO CONTRATANTE</div>
+          <p class="gov-clause-p">
+            8.1. São obrigações do Contratante: receber o objeto no prazo e condições fixadas; fiscalizar a conformidade dos equipamentos com as especificações blindadas do edital; efetuar o pagamento tempestivo; e notificar formalmente a Contratada sobre quaisquer inconformidades.
+          </p>
+        </div>
+
+        <!-- 9. CLÁUSULA NONA – OBRIGAÇÕES DO CONTRATADO -->
+        <div class="gov-clause">
+          <div class="gov-clause-title">9. CLÁUSULA NONA – OBRIGAÇÕES DO CONTRATADO</div>
+          <p class="gov-clause-p">
+            9.1. O Contratado obriga-se a entregar equipamentos novos, de primeiro uso, lacrados de fábrica; prestar assistência técnica presencial no município de Lages/SC; disponibilizar manuais em português; cumprir as normas de proteção ao trabalho e NR-17; e observar estritamente a <strong>Lei nº 13.709/2018 (LGPD)</strong>.
+          </p>
+        </div>
+
+        <!-- 10. CLÁUSULA DÉCIMA – GARANTIA DE EXECUÇÃO -->
+        <div class="gov-clause">
+          <div class="gov-clause-title">10. CLÁUSULA DÉCIMA – GARANTIA DE EXECUÇÃO</div>
+          <p class="gov-clause-p">
+            10.1. Não haverá exigência de garantia contratual da execução com base nos estudos preliminares, prevalecendo a garantia técnica de fábrica de 36 meses.
+          </p>
+        </div>
+
+        <!-- 11. CLÁUSULA DÉCIMA PRIMEIRA – INFRAÇÕES E SANÇÕES ADMINISTRATIVAS -->
+        <div class="gov-clause">
+          <div class="gov-clause-title">11. CLÁUSULA DÉCIMA PRIMEIRA – INFRAÇÕES E SANÇÕES ADMINISTRATIVAS</div>
+          <p class="gov-clause-p">
+            11.1. O cometimento de infrações administrativas sujeitará a Contratada às sanções previstas no art. 156 da Lei nº 14.133, de 2021, garantida a prévia defesa e o contraditório.
+          </p>
+        </div>
+
+        <!-- 12. CLÁUSULA DÉCIMA SEGUNDA – DA EXTINÇÃO CONTRATUAL -->
+        <div class="gov-clause">
+          <div class="gov-clause-title">12. CLÁUSULA DÉCIMA SEGUNDA – DA EXTINÇÃO CONTRATUAL</div>
+          <p class="gov-clause-p">
+            12.1. O contrato será extinto quando cumpridas integralmente as obrigações de ambas as partes, ou nos termos do art. 137 da Lei nº 14.133/2021.
+          </p>
+        </div>
+
+        <!-- 13. CLÁUSULA DÉCIMA TERCEIRA – ALTERAÇÕES -->
+        <div class="gov-clause">
+          <div class="gov-clause-title">13. CLÁUSULA DÉCIMA TERCEIRA – ALTERAÇÕES</div>
+          <p class="gov-clause-p">
+            13.1. Eventuais alterações contratuais reger-se-ão pela disciplina dos arts. 124 e seguintes da Lei nº 14.133, de 2021, com o limite legal de até 25% de acréscimo ou supressão.
+          </p>
+        </div>
+
+        <!-- 14. CLÁUSULA DÉCIMA QUARTA – DOTAÇÃO ORÇAMENTÁRIA -->
+        <div class="gov-clause">
+          <div class="gov-clause-title">14. CLÁUSULA DÉCIMA QUARTA – DOTAÇÃO ORÇAMENTÁRIA</div>
+          <p class="gov-clause-p">
+            14.1. As despesas correrão à conta de recursos específicos do Orçamento do Município de Lages, Elemento de Despesa 44.90.52 (Equipamentos e Material Permanente de TIC).
+          </p>
+        </div>
+
+        <!-- 15. CLÁUSULA DÉCIMA QUINTA – DOS CASOS OMISSOS -->
+        <div class="gov-clause">
+          <div class="gov-clause-title">15. CLÁUSULA DÉCIMA QUINTA – DOS CASOS OMISSOS</div>
+          <p class="gov-clause-p">
+            15.1. Os casos omissos serão decididos segundo as disposições da Lei nº 14.133, de 2021 e princípios gerais de direito público.
+          </p>
+        </div>
+
+        <!-- 16. CLÁUSULA DÉCIMA SEXTA – PUBLICAÇÃO -->
+        <div class="gov-clause">
+          <div class="gov-clause-title">16. CLÁUSULA DÉCIMA SEXTA – PUBLICAÇÃO</div>
+          <p class="gov-clause-p">
+            16.1. Incumbirá ao contratante divulgar o presente instrumento no <strong>Portal Nacional de Contratações Públicas (PNCP)</strong>, na forma do art. 94 da Lei 14.133/2021.
+          </p>
+        </div>
+
+        <!-- 17. CLÁUSULA DÉCIMA SÉTIMA – FORO -->
+        <div class="gov-clause">
+          <div class="gov-clause-title">17. CLÁUSULA DÉCIMA SÉTIMA – FORO</div>
+          <p class="gov-clause-p">
+            17.1. Fica eleito o Foro da <strong>Comarca de Lages / SC</strong> para dirimir controvérsias decorrentes deste contrato administrativo.
+          </p>
+        </div>
+
+        <!-- CERTIFICAÇÃO PREVENTIVA TCE/SC -->
+        <div style="background: #F9FAFB; border: 1px solid #D1D5DB; padding: 10px 14px; margin-top: 14px; font-size: 8pt; break-inside: avoid;">
+          <strong>CERTIFICAÇÃO DE AUDITORIA PREVENTIVA TCE/SC (DIMENSIONATI):</strong><br>
+          Índice de Risco de Superdimensionamento (IRS): <strong>${demanda.irs}% (${demanda.nivel_risco})</strong> • Dimensionamento aprovado para <strong>${cargoServ}</strong> em <strong>Lages/SC</strong> com <strong>${perfil.ram}</strong> sem sobrecusto ao erário.
+        </div>
+
+        <!-- DATA E ASSINATURAS -->
+        <div style="margin-top: 24px; text-align: right; font-weight: 700; font-size: 9.5pt; break-inside: avoid;">
           Lages/SC, ${dia} de ${mes} de ${ano}.
         </div>
 
-        <div class="gov-signatures-block">
+        <div class="gov-signatures-block" style="break-inside: avoid;">
           <div>
             <div class="gov-sig-line">
-              <strong>${nomeServ.toUpperCase()}</strong><br>
-              ${demanda.cargo}<br>
-              <small>Matrícula nº ${matServ} • PML</small>
+              <strong>${nomeServ}</strong><br>
+              ${cargoServ}<br>
+              <small>Matrícula nº ${matServ} • ${orgaoServ}</small><br>
+              <strong>Representante legal do CONTRATANTE</strong>
             </div>
           </div>
           <div>
             <div class="gov-sig-line">
-              <strong>EMPRESA VENCEDORA DO PREGÃO</strong><br>
-              Representante Legal da Contratada<br>
-              <small>Assinatura Digital ICP-Brasil</small>
+              <strong>EMPRESA VENCEDORA DO CERTAME</strong><br>
+              Representante Legal da CONTRATADA<br>
+              <small>Assinatura Digital ICP-Brasil (Conforme Lei nº 14.063/2020)</small><br>
+              <strong>Representante legal do CONTRATADO</strong>
             </div>
           </div>
         </div>
+
+        <div style="margin-top: 20px; font-size: 8pt; color: #4B5563; break-inside: avoid;">
+          <p><strong>TESTEMUNHAS:</strong></p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 6px;">
+            <div>1- ____________________________________ CPF: _______________________</div>
+            <div>2- ____________________________________ CPF: _______________________</div>
+          </div>
+        </div>
+
+        <!-- RODAPÉ INSTITUCIONAL PADRÃO AGU / SGD / SEGES -->
+        <div style="margin-top: 28px; padding-top: 10px; border-top: 1px solid #9CA3AF; font-size: 7pt; color: #6B7280; text-align: center; line-height: 1.35; break-inside: avoid;">
+          Câmara Nacional de Modelos de Licitações e Contratos da Consultoria-Geral da União<br>
+          Termo de contrato modelo para Pregão Eletrônico para contratação de compras/Solução de Tecnologia da Informação e Comunicação<br>
+          Aprovado pela Secretaria de Governo Digital • Identidade visual pela Secretaria de Gestão • Atualização: AGO/2025
+        </div>
+
       </div>
     `;
 
