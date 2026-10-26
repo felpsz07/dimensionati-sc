@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DimensionaTI Cloud - Gestão e Licitações de Hardware TIC (Lages / SC)</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- ============================================================ -->
+  <!-- TELA 1: LOGIN FULLSCREEN (DARK, SPLIT-SCREEN INSPIRADO NEXA) -->
+  <!-- ============================================================ -->
+  <div id="screen-login" class="app-screen active">
+
+    <!-- LADO ESQUERDO: FORMULÁRIO DE LOGIN -->
+    <div class="login-split login-form-side">
+      <div class="login-form-container">
+
+        <!-- LOGO E BRANDING -->
+        <div class="login-brand">
+          <div class="login-brand-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+            </svg>
+          </div>
+          <span class="login-brand-name">DimensionaTI<span style="color: var(--dark-accent);">.cloud</span></span>
+        </div>
+
+        <p class="login-step-label">01 / ACESSO DO SERVIDOR PÚBLICO</p>
+        
+        <div class="login-sparkle">✦</div>
+
+        <h1 class="login-title">Acesse seu espaço.</h1>
+        <p class="login-subtitle">
+          Gestão e dimensionamento de compras públicas de TI.<br>
+          Prefeitura do Município de Lages / SC • Lei nº 14.133.
+        </p>
+
+        <!-- FORMULÁRIO -->
+        <form id="formLogin" onsubmit="app.fazerLogin(event)">
+          <div class="login-field">
+            <label class="login-label">E-mail Institucional</label>
+            <input type="email" id="loginEmail" class="login-input" placeholder="nome@lages.sc.gov.br" value="maria.prof@lages.sc.gov.br" required autocomplete="email">
+          </div>
+
+          <div class="login-field">
+            <div class="login-label-row">
+              <label class="login-label">Senha</label>
+              <span class="login-forgot">Padrão da demo: 123456</span>
+            </div>
+            <div class="login-password-wrap">
+              <input type="password" id="loginSenha" class="login-input" placeholder="Sua senha" value="123456" required autocomplete="current-password">
+              <button type="button" class="login-eye-btn" onclick="app.toggleSenha()" tabindex="-1">👁</button>
+            </div>
+          </div>
+
+          <button type="submit" class="login-submit-btn" id="btnLogin">
+            Entrar no painel <span class="login-arrow">↗</span>
+          </button>
+        </form>
+
+        <div class="login-error-msg" id="loginErrorMsg"></div>
+
+        <!-- RODAPÉ DO FORMULÁRIO -->
+        <div class="login-footer-links">
+          <span>PORTAL DA TRANSPARÊNCIA</span>
+          <span>LEI 14.133/2021</span>
+        </div>
+
+      </div>
+
+      <!-- COPYRIGHT BOTTOM -->
+      <div class="login-copyright">
+        © 2026 DimensionaTI SC • Edição Município de Lages
+      </div>
+    </div>
+
+    <!-- LADO DIREITO: PAINEL DECORATIVO HERO -->
+    <div class="login-split login-hero-side">
+      <div class="login-hero-content">
+
+        <p class="login-hero-badge">● CONFORMIDADE PREVENTIVA TCE/SC</p>
+
+        <!-- GRID DECORATIVO DE PONTOS -->
+        <div class="login-dot-grid" aria-hidden="true">
+          <canvas id="loginDotsCanvas"></canvas>
+        </div>
+
+        <div class="login-hero-text">
+          <p class="login-hero-tagline">LAGES • SANTA CATARINA</p>
+          <h2 class="login-hero-headline">
+            Licitações de TI sem superdimensionamento,<br>
+            <span class="login-hero-highlight">ao seu alcance.</span>
+          </h2>
+          <p class="login-hero-desc">
+            Especificações técnicas blindadas com cláusulas anti-entrega de produtos inferiores e auditoria preventiva em tempo real.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="login-hero-footer">
+        <span>TRANSPARÊNCIA E EFICIÊNCIA NO GASTO PÚBLICO</span>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- TELA 2: MODAL / SELEÇÃO DE LOTAÇÃO (PÓS-LOGIN, DARK)         -->
+  <!-- ============================================================ -->
+  <div id="screen-workplace" class="app-screen">
+    <div class="wp-wrapper">
+      <div class="wp-card">
+
+        <div class="wp-header">
+          <div class="login-brand" style="justify-content: center;">
+            <div class="login-brand-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+              </svg>
+            </div>
+            <span class="login-brand-name">DimensionaTI<span style="color: var(--dark-accent);">.cloud</span></span>
+          </div>
+          <p class="wp-badge">✦ DADOS DO SERVIDOR RESPONSÁVEL</p>
+          <h2 class="wp-title">Confirme sua lotação em Lages</h2>
+          <p class="wp-subtitle">Selecione sua secretaria. Esses dados preencherão automaticamente o Estudo Técnico Preliminar e a Minuta do Contrato.</p>
+        </div>
+
+        <!-- GRID DE SECRETARIAS -->
+        <div class="wp-grid" id="wpGridSetores">
+          <div class="wp-pill active" onclick="app.selecionarLotacao('Escolas Municipais (SME Lages)', 'Prefeitura do Município de Lages - Secretaria Municipal de Educação', 'Professora e Coordenadora', this)">
+            <div class="wp-pill-icon">🏫</div>
+            <div class="wp-pill-info">
+              <h5>Educação (SME)</h5>
+              <p>Escolas municipais, creches e CMEI</p>
+            </div>
+          </div>
+          <div class="wp-pill" onclick="app.selecionarLotacao('Saúde & Unidades Básicas (UBS Lages)', 'Prefeitura do Município de Lages - Secretaria Municipal de Saúde', 'Enfermeira Chefe / Gestora UBS', this)">
+            <div class="wp-pill-icon">🏥</div>
+            <div class="wp-pill-info">
+              <h5>Saúde (SMS)</h5>
+              <p>UBS, postos de saúde e PSF</p>
+            </div>
+          </div>
+          <div class="wp-pill" onclick="app.selecionarLotacao('Administrativo & Atendimento (Prefeitura)', 'Prefeitura do Município de Lages - Secretaria de Administração', 'Auxiliar Administrativo', this)">
+            <div class="wp-pill-icon">🏢</div>
+            <div class="wp-pill-info">
+              <h5>Administração</h5>
+              <p>Escritório, atendimento e protocolo</p>
+            </div>
+          </div>
+          <div class="wp-pill" onclick="app.selecionarLotacao('Fazenda & Finanças de Lages', 'Prefeitura do Município de Lages - Secretaria da Fazenda', 'Auditor Fiscal da Receita', this)">
+            <div class="wp-pill-icon">📊</div>
+            <div class="wp-pill-info">
+              <h5>Fazenda & Finanças</h5>
+              <p>Contabilidade, fiscalização e tributos</p>
+            </div>
+          </div>
+          <div class="wp-pill" onclick="app.selecionarLotacao('Planejamento & Obras (SEPLAN Lages)', 'Prefeitura do Município de Lages - Secretaria de Planejamento e Obras', 'Engenheiro Civil - Fiscal', this)">
+            <div class="wp-pill-icon">🚧</div>
+            <div class="wp-pill-info">
+              <h5>SEPLAN & Obras</h5>
+              <p>Engenharia, projetos e fiscalização</p>
+            </div>
+          </div>
+          <div class="wp-pill" onclick="app.selecionarLotacao('Câmara de Vereadores de Lages', 'Câmara Municipal de Vereadores de Lages', 'Assessor Legislativo', this)">
+            <div class="wp-pill-icon">🏛️</div>
+            <div class="wp-pill-info">
+              <h5>Câmara de Vereadores</h5>
+              <p>Assessoria parlamentar e plenário</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAMPOS ADICIONAIS -->
+        <div class="wp-fields">
+          <div class="wp-field-row">
+            <div class="wp-field">
+              <label class="login-label">Nome Completo do Servidor</label>
+              <input type="text" id="wpNome" class="login-input" placeholder="Ex: Maria Eduarda Alencar">
+            </div>
+            <div class="wp-field">
+              <label class="login-label">Cargo / Função Pública</label>
+              <input type="text" id="wpCargo" class="login-input" placeholder="Ex: Professora">
+            </div>
+          </div>
+          <div class="wp-field-row">
+            <div class="wp-field">
+              <label class="login-label">Matrícula Funcional (PML)</label>
+              <input type="text" id="wpMatricula" class="login-input" placeholder="Ex: MAT-48921/PML">
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="login-submit-btn" onclick="app.confirmarLotacao()" style="width: 100%; max-width: 420px; margin: 0 auto; display: flex;">
+          Acessar Painel Principal <span class="login-arrow">↗</span>
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- TELA 3: PAINEL PRINCIPAL (TEMPLATE TREZ.CLOUD ERP)           -->
+  <!-- ============================================================ -->
+  <div id="screen-app" class="app-screen">
+
+    <!-- BARRA SUPERIOR AZUL ROYAL (ESTILO TREZ.CLOUD) -->
+    <header class="trez-navbar">
+      <div class="trez-nav-left">
+        <div class="trez-brand" onclick="app.abrirAba('home')">
+          <div class="trez-cloud-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+              <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+            </svg>
+          </div>
+          <span class="trez-brand-text">DimensionaTI<span class="trez-brand-cloud">.cloud</span></span>
+        </div>
+
+        <!-- MENU PRINCIPAL -->
+        <nav class="trez-menu">
+          <a href="#" class="trez-menu-item" onclick="app.abrirAba('home'); return false;">Início</a>
+          <a href="#" class="trez-menu-item" onclick="app.abrirAba('licitacoes'); return false;">Cadastros</a>
+          <a href="#" class="trez-menu-item active" id="menuLicitacoes" onclick="app.abrirAba('licitacoes'); return false;">Licitações TIC</a>
+          <a href="#" class="trez-menu-item" onclick="app.iniciarNovoProcesso(); return false;">Compras</a>
+          <a href="#" class="trez-menu-item" id="menuAuditor" onclick="app.abrirAba('auditor'); return false;">Auditoria TCE/SC</a>
+          <a href="#" class="trez-menu-item" onclick="app.abrirAba('auditor'); return false;">Relatórios</a>
+        </nav>
+      </div>
+
+      <!-- ITENS À DIREITA -->
+      <div class="trez-nav-right">
+        <button class="trez-icon-btn" title="Imprimir" onclick="window.print()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+            <path d="M6 14h12v8H6z"/>
+          </svg>
+        </button>
+
+        <button class="trez-icon-btn" title="Ajuda e Legislação" onclick="alert('Sistema de Dimensionamento e Licitação de TIC em conformidade com a Lei Federal nº 14.133/2021 e diretrizes do TCE/SC.')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </button>
+
+        <!-- AVATAR DO USUÁRIO -->
+        <div class="trez-user-avatar-wrap" onclick="app.toggleUserMenu()">
+          <div class="trez-user-circle" id="userInitials">AD</div>
+          <div class="trez-user-dropdown" id="userDropdown">
+            <div class="user-dd-header">
+              <strong id="userDdNome">Servidor</strong>
+              <small id="userDdCargo">Cargo • Lages/SC</small>
+            </div>
+            <button class="user-dd-item" onclick="app.mostrarTela('screen-workplace')">
+              🏢 Alterar Secretaria / Lotação
+            </button>
+            <button class="user-dd-item" style="color: #EF4444;" onclick="app.logout()">
+              🚪 Sair do Sistema
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- BARRA DE ABAS SUBHEADER (ESTILO TREZ) -->
+    <div class="trez-sub-tabs">
+      <div class="trez-sub-tab" id="tabHome" onclick="app.abrirAba('home')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        </svg>
+        Home
+      </div>
+      <div class="trez-sub-tab active" id="tabLicitacoes" onclick="app.abrirAba('licitacoes')">
+        Processos Licitatórios
+        <span class="trez-tab-close" onclick="app.abrirAba('home'); event.stopPropagation();">✕</span>
+      </div>
+      <div class="trez-sub-tab" id="tabNovo" style="display: none;" onclick="app.abrirAba('wizard')">
+        Nova Licitação TIC
+        <span class="trez-tab-close" onclick="app.abrirAba('licitacoes'); event.stopPropagation();">✕</span>
+      </div>
+      <div class="trez-sub-tab" id="tabAuditor" style="display: none;" onclick="app.abrirAba('auditor')">
+        Auditoria TCE/SC
+        <span class="trez-tab-close" onclick="app.abrirAba('licitacoes'); event.stopPropagation();">✕</span>
+      </div>
+    </div>
+
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="trez-body">
+
+      <!-- ============================================================ -->
+      <!-- ABA 1: HOME (ESTILO IMAGEM 1)                                -->
+      <!-- ============================================================ -->
+      <section id="pane-home" class="trez-pane">
+        <div class="trez-home-center">
+          <div class="trez-home-hero-cloud">
+            <div class="trez-cloud-graphic">
+              <svg width="140" height="90" viewBox="0 0 160 110" fill="none">
+                <path d="M45 90H125C141.569 90 155 76.5685 155 60C155 43.4315 141.569 30 125 30C123.36 30 121.751 30.1319 120.181 30.3871C114.739 12.8711 98.487 0 79 0C54.6995 0 35 19.6995 35 44C35 46.7454 35.2504 49.4326 35.7317 52.0402C32.9691 50.7183 29.8712 50 26.6 50C11.9092 50 0 61.9092 0 76.6C0 91.2908 11.9092 103.2 26.6 103.2H45V90Z" fill="url(#cloudGrad)"/>
+                <defs>
+                  <linearGradient id="cloudGrad" x1="0" y1="0" x2="160" y2="110" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#7B92F7"/>
+                    <stop offset="0.5" stop-color="#60A5FA"/>
+                    <stop offset="1" stop-color="#38BDF8"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="trez-home-brand-title">DimensionaTI<span style="color: #60A5FA;">.cloud</span></div>
+          </div>
+
+          <p class="trez-home-desc">
+            Plataforma Governamental de Dimensionamento e Licitação de Hardware TIC<br>
+            Município de Lages / SC • Lei Federal nº 14.133/2021
+          </p>
+
+          <div style="display: flex; gap: 14px; justify-content: center; margin-top: 24px; flex-wrap: wrap;">
+            <button class="trez-btn-primary" onclick="app.abrirAba('licitacoes')">
+              📋 Ver Licitações em Andamento
+            </button>
+            <button class="trez-btn-success" onclick="app.iniciarNovoProcesso()">
+              ✨ + Nova Licitação de Hardware
+            </button>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- ABA 2: LISTA DE LICITAÇÕES (ESTILO IMAGEM 2)                 -->
+      <!-- ============================================================ -->
+      <section id="pane-licitacoes" class="trez-pane active">
+
+        <!-- BARRA SUPERIOR DE AÇÃO: BUSCAR + BOTÃO + NOVO -->
+        <div class="trez-action-bar">
+          <div class="trez-search-box">
+            <span class="trez-search-tag">Buscar</span>
+            <input type="text" id="inputBuscaLicitacao" class="trez-search-input" placeholder="ID, Número, Processo, Destinatário, Órgão, Dados adicionais ..." oninput="app.filtrarTabelaLocal()">
+          </div>
+
+          <button class="trez-btn-novo" onclick="app.iniciarNovoProcesso()">
+            + Novo
+            <span style="font-size: 0.75rem; margin-left: 4px;">▼</span>
+          </button>
+        </div>
+
+        <!-- CARD PRINCIPAL COM A TABELA LIMPA -->
+        <div class="trez-card">
+          <div class="trez-card-header">
+            <h3 class="trez-card-title">Processos Licitatórios de Informática (Lages / SC)</h3>
+
+            <!-- FILTROS COMPACTOS -->
+            <div class="trez-filters">
+              <button class="trez-filter-icon-btn" title="Filtros avançados">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                </svg>
+              </button>
+
+              <div class="trez-select-wrap">
+                <span>Série:</span>
+                <select id="filtroSerie" onchange="app.filtrarTabelaLocal()">
+                  <option value="">MANUAL</option>
+                  <option value="TIC">TIC 2026</option>
+                </select>
+              </div>
+
+              <div class="trez-select-wrap">
+                <span>Órgão:</span>
+                <select id="filtroOrgaoTrez" onchange="app.filtrarTabelaLocal()">
+                  <option value="">Todos</option>
+                  <option value="Educação">SME Educação</option>
+                  <option value="Saúde">SMS Saúde</option>
+                  <option value="Administração">Administração</option>
+                  <option value="Fazenda">Fazenda</option>
+                  <option value="Obras">SEPLAN Obras</option>
+                  <option value="Câmara">Câmara</option>
+                </select>
+              </div>
+
+              <div class="trez-select-wrap">
+                <span>Status:</span>
+                <select id="filtroStatusTrez" onchange="app.filtrarTabelaLocal()">
+                  <option value="">Todos</option>
+                  <option value="AUTORIZADA">AUTORIZADA</option>
+                  <option value="SOB ANÁLISE">SOB ANÁLISE</option>
+                  <option value="CANCELADA">CANCELADA</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- TABELA DE LICITAÇÕES -->
+          <div class="trez-table-wrap">
+            <table class="trez-table">
+              <thead>
+                <tr>
+                  <th style="width: 5%;">ID ↑</th>
+                  <th style="width: 13%;">Nº PROCESSO</th>
+                  <th style="width: 10%;">EMISSÃO</th>
+                  <th style="width: 25%;">ÓRGÃO / SECRETARIA</th>
+                  <th style="width: 15%;">RESPONSÁVEL</th>
+                  <th style="width: 8%; text-align: center;">CATMAT</th>
+                  <th style="width: 11%; text-align: center;">STATUS</th>
+                  <th style="width: 10%; text-align: right;">VALOR TOTAL</th>
+                  <th style="width: 5%; text-align: center;">AÇÕES</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyLicitacoesTrez">
+                <tr>
+                  <td colspan="9" style="text-align: center; padding: 28px; color: #64748B;">
+                    Carregando processos licitatórios do banco SQLite...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- ABA 3: STEPPER WIZARD DE LICITAÇÃO (ESTILO IMAGEM 3)         -->
+      <!-- ============================================================ -->
+      <section id="pane-wizard" class="trez-pane">
+        
+        <div class="trez-card wizard-card">
+          <div class="wizard-header">
+            <h2 class="wizard-title" id="wizardMainTitle">Nova Licitação de Hardware TIC</h2>
+            <p class="wizard-subtitle">Dimensionamento técnico automatizado e emissão de minuta contratual conforme a Lei nº 14.133/2021.</p>
+          </div>
+
+          <!-- STEPPER HORIZONTAL COM ÍCONES E SETAS (ESTILO IMAGEM 3) -->
+          <div class="trez-stepper">
+            
+            <div class="trez-step-item active" id="stepIndicator-1" onclick="app.irParaPasso(1)">
+              <div class="trez-step-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </div>
+              <span class="trez-step-name">1 - Destinatário / Órgão</span>
+            </div>
+
+            <div class="trez-step-arrow">→</div>
+
+            <div class="trez-step-item" id="stepIndicator-2" onclick="app.irParaPasso(2)">
+              <div class="trez-step-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                  <path d="m3.3 7 8.7 5 8.7-5"/>
+                  <path d="M12 22V12"/>
+                </svg>
+              </div>
+              <span class="trez-step-name">2 - Rotina & Atividades</span>
+            </div>
+
+            <div class="trez-step-arrow">→</div>
+
+            <div class="trez-step-item" id="stepIndicator-3" onclick="app.irParaPasso(3)">
+              <div class="trez-step-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                  <line x1="8" y1="21" x2="16" y2="21"/>
+                  <line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+              </div>
+              <span class="trez-step-name">3 - Hardware Dimensionado</span>
+            </div>
+
+            <div class="trez-step-arrow">→</div>
+
+            <div class="trez-step-item" id="stepIndicator-4" onclick="app.irParaPasso(4)">
+              <div class="trez-step-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+              </div>
+              <span class="trez-step-name">4 - Auditoria TCE/SC</span>
+            </div>
+
+            <div class="trez-step-arrow">→</div>
+
+            <div class="trez-step-item" id="stepIndicator-5" onclick="app.irParaPasso(5)">
+              <div class="trez-step-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M9 11l3 3L22 4"/>
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                </svg>
+              </div>
+              <span class="trez-step-name">5 - Finalizar Licitação</span>
+            </div>
+
+          </div>
+
+
+          <!-- ========================================== -->
+          <!-- CONTEÚDO DO PASSO 1: DESTINATÁRIO / ÓRGÃO  -->
+          <!-- ========================================== -->
+          <div class="wizard-step-pane active" id="wizardPane-1">
+            
+            <div class="form-grid-row">
+              <div class="form-col">
+                <label class="trez-label">Identificador</label>
+                <input type="text" class="trez-input" id="wizIdentificador" value="ETP-2026-AUTO" readonly style="background: #F8FAFC;">
+              </div>
+
+              <div class="form-col">
+                <label class="trez-label">Data de Emissão</label>
+                <input type="text" class="trez-input" id="wizDataEmissao" value="26/10/2026" readonly style="background: #F8FAFC;">
+              </div>
+
+              <div class="form-col">
+                <label class="trez-label">Município</label>
+                <input type="text" class="trez-input" value="Lages / SC" readonly style="background: #F8FAFC;">
+              </div>
+
+              <div class="form-col">
+                <label class="trez-label">Número do Pregão / Processo</label>
+                <input type="text" class="trez-input" value="Pregão Eletrônico SRP nº 042/2026" readonly style="background: #F8FAFC;">
+              </div>
+            </div>
+
+            <div class="form-grid-row">
+              <div class="form-col full">
+                <label class="trez-label">Órgão / Secretaria Contratante</label>
+                <select class="trez-input" id="wizSelectOrgao" onchange="app.aoMudarOrgaoWizard(this.value)">
+                  <option value="Escolas Municipais (SME Lages)|Prefeitura do Município de Lages - Secretaria Municipal de Educação|Professora e Coordenadora">Prefeitura de Lages - Secretaria Municipal de Educação (SME)</option>
+                  <option value="Saúde & Unidades Básicas (UBS Lages)|Prefeitura do Município de Lages - Secretaria Municipal de Saúde|Enfermeira Chefe / Gestora UBS">Prefeitura de Lages - Secretaria Municipal de Saúde (SMS)</option>
+                  <option value="Administrativo & Atendimento (Prefeitura)|Prefeitura do Município de Lages - Secretaria de Administração|Auxiliar Administrativo">Prefeitura de Lages - Secretaria Municipal de Administração</option>
+                  <option value="Fazenda & Finanças de Lages|Prefeitura do Município de Lages - Secretaria da Fazenda|Auditor Fiscal da Receita">Prefeitura de Lages - Secretaria Municipal da Fazenda</option>
+                  <option value="Planejamento & Obras (SEPLAN Lages)|Prefeitura do Município de Lages - Secretaria de Planejamento e Obras|Engenheiro Civil - Fiscal">Prefeitura de Lages - Secretaria de Planejamento e Obras (SEPLAN)</option>
+                  <option value="Câmara de Vereadores de Lages|Câmara Municipal de Vereadores de Lages|Assessor Legislativo">Câmara Municipal de Vereadores de Lages</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-grid-row">
+              <div class="form-col">
+                <label class="trez-label">Servidor Responsável (Autenticado)</label>
+                <input type="text" class="trez-input" id="wizNomeServidor" readonly style="background: #F8FAFC;">
+              </div>
+
+              <div class="form-col">
+                <label class="trez-label">Cargo / Função Pública</label>
+                <input type="text" class="trez-input" id="wizCargoServidor" readonly style="background: #F8FAFC;">
+              </div>
+
+              <div class="form-col">
+                <label class="trez-label">Matrícula Funcional</label>
+                <input type="text" class="trez-input" id="wizMatriculaServidor" readonly style="background: #F8FAFC;">
+              </div>
+            </div>
+
+            <div style="margin-top: 14px;">
+              <label class="trez-label">Quantidade de Computadores a Licitar</label>
+              <div class="qty-selector">
+                <button type="button" class="qty-btn" onclick="app.definirQuantidade(1, this)">1 PC</button>
+                <button type="button" class="qty-btn" onclick="app.definirQuantidade(5, this)">5 PCs</button>
+                <button type="button" class="qty-btn active" onclick="app.definirQuantidade(10, this)">10 PCs</button>
+                <button type="button" class="qty-btn" onclick="app.definirQuantidade(25, this)">25 PCs</button>
+                <button type="button" class="qty-btn" onclick="app.definirQuantidade(50, this)">50 PCs</button>
+                
+                <div class="qty-custom-box">
+                  <span style="font-size: 0.85rem; color: #64748B;">Outro número:</span>
+                  <input type="number" id="inputQtdCustom" class="qty-input" min="1" max="500" value="10" onchange="app.definirQuantidadeCustom(this.value)">
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+
+          <!-- ========================================== -->
+          <!-- CONTEÚDO DO PASSO 2: ROTINA & ATIVIDADES   -->
+          <!-- ========================================== -->
+          <div class="wizard-step-pane" id="wizardPane-2">
+            <p style="font-size: 0.88rem; color: #64748B; margin-bottom: 18px;">
+              Marque apenas as tarefas que os servidores realmente desempenham todos os dias. O sistema dimensionará o hardware ideal para evitar impugnação por superdimensionamento.
+            </p>
+
+            <div class="activity-grid">
+              
+              <div class="activity-card selected" id="act-1" onclick="app.toggleAtividade(1)">
+                <div class="activity-checkbox">✓</div>
+                <div class="activity-content">
+                  <h4>🌐 Navegar na internet e sistemas municipais</h4>
+                  <p>Acessar portais da Prefeitura de Lages, SGPe, SEI, sistemas Betha/IPM ou prontuários da Saúde.</p>
+                </div>
+              </div>
+
+              <div class="activity-card selected" id="act-2" onclick="app.toggleAtividade(2)">
+                <div class="activity-checkbox">✓</div>
+                <div class="activity-content">
+                  <h4>📄 Digitar cartas, ofícios e ler documentos PDF</h4>
+                  <p>Criar memorandos, ofícios simples, ler processos digitais e assinar com Gov.br / ICP-Brasil.</p>
+                </div>
+              </div>
+
+              <div class="activity-card" id="act-3" onclick="app.toggleAtividade(3)">
+                <div class="activity-checkbox">✓</div>
+                <div class="activity-content">
+                  <h4>📊 Fazer contas e planilhas de rotina</h4>
+                  <p>Tabelas de controle de despesas, conferência de almoxarifado, IPTU e rotinas administrativas.</p>
+                </div>
+              </div>
+
+              <div class="activity-card" id="act-4" onclick="app.toggleAtividade(4)">
+                <div class="activity-checkbox">✓</div>
+                <div class="activity-content">
+                  <h4>📈 Criar painéis gerenciais e gráficos avançados</h4>
+                  <p>Uso de Power BI, cruzamento de grandes bases contábeis e relatórios de auditoria financeira.</p>
+                </div>
+              </div>
+
+              <div class="activity-card" id="act-5" onclick="app.toggleAtividade(5)">
+                <div class="activity-checkbox">✓</div>
+                <div class="activity-content">
+                  <h4>📐 Desenhar plantas de obras, mapas e projetos técnicos</h4>
+                  <p>Projetos de pavimentação, drenagem, plantas prediais e georreferenciamento de Lages (AutoCAD, QGIS).</p>
+                </div>
+              </div>
+
+              <div class="activity-card" id="act-6" onclick="app.toggleAtividade(6)">
+                <div class="activity-checkbox">✓</div>
+                <div class="activity-content">
+                  <h4>🎬 Edição pesada de vídeos, campanhas e maquetes 3D</h4>
+                  <p>Produção de vídeos oficiais, animações da comunicação social e renderização 3D de obras.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+
+          <!-- ========================================== -->
+          <!-- CONTEÚDO DO PASSO 3: HARDWARE DIMENSIONADO -->
+          <!-- ========================================== -->
+          <div class="wizard-step-pane" id="wizardPane-3">
+            
+            <div class="result-header-badge" id="badgeNivelRecomendado">
+              ✅ RECOMENDAÇÃO VALIDADA
+            </div>
+            
+            <h3 class="result-title" id="tituloPerfilAmigavel">
+              Computador para Atendimento e Rotinas de Escritório
+            </h3>
+            <p class="result-explanation" id="descPerfilAmigavel">
+              Configuração equilibrada e sem desperdício para a administração pública de Lages/SC. Rápida para o dia a dia, com especificações blindadas para a licitação.
+            </p>
+
+            <div class="perks-grid">
+              <div class="perk-box">
+                <div class="perk-icon">⚡</div>
+                <h5>Rápido e Sem Travar</h5>
+                <p id="perkCpu">Processador moderno e ágil para sistemas web, navegação e documentos.</p>
+              </div>
+
+              <div class="perk-box">
+                <div class="perk-icon">🚀</div>
+                <h5>Multitarefa Eficiente</h5>
+                <p id="perkRam">Memória rápida em canal duplo (Dual-Channel) para abrir várias abas sem engasgar.</p>
+              </div>
+
+              <div class="perk-box">
+                <div class="perk-icon">🖥️</div>
+                <h5>Monitor Confortável (NR-17)</h5>
+                <p id="perkMonitor">Tela 24" IPS com ajuste vertical de altura para proteger a postura do servidor.</p>
+              </div>
+
+              <div class="perk-box">
+                <div class="perk-icon">🛡️</div>
+                <h5>Garantia Local em Lages</h5>
+                <p id="perkKit">Fonte 80 Plus certificada e garantia presencial de 36 meses em Lages.</p>
+              </div>
+            </div>
+
+            <!-- CARD DE VALORES -->
+            <div class="economy-banner">
+              <div class="economy-info">
+                <h4>💡 Dimensionamento Eficiente (Sem Superdimensionamento)</h4>
+                <p id="resumoEconomiaTexto">
+                  Economia estimada aos cofres públicos de Lages em relação a máquinas de alto desempenho desnecessárias.
+                </p>
+              </div>
+              <div class="price-tag">
+                <span>Investimento Total Estimado</span>
+                <h3 id="resumoCustoTotal">R$ 22.000,00</h3>
+                <small style="color: #047857; font-size: 0.75rem;" id="resumoCustoUnit">
+                  (R$ 2.200,00 por máquina completa)
+                </small>
+              </div>
+            </div>
+
+            <!-- SIMULADOR COM TRAVA -->
+            <div class="override-box">
+              <label for="selectNivelManual" style="font-size: 0.88rem; font-weight: 700; color: #0F172A; display: block; margin-bottom: 6px;">
+                Deseja simular outro modelo de computador?
+              </label>
+
+              <select id="selectNivelManual" class="trez-input" style="width: 100%;" onchange="app.aoMudarNivelManual()">
+                <option value="1">Nível 1: Atendimento e Escritório (R$ 2.200 por PC)</option>
+                <option value="2">Nível 2: Análise de Dados e Gestão (R$ 4.500 por PC)</option>
+                <option value="3">Nível 3: Super Máquina de Engenharia e Obras (R$ 9.800 por PC)</option>
+              </select>
+            </div>
+
+          </div>
+
+
+          <!-- ========================================== -->
+          <!-- CONTEÚDO DO PASSO 4: AUDITORIA TCE/SC      -->
+          <!-- ========================================== -->
+          <div class="wizard-step-pane" id="wizardPane-4">
+            
+            <div class="friendly-lock-alert show" id="friendlyLockAlert" style="display: block;">
+              <div class="friendly-lock-header">
+                <span>🛡️</span>
+                <span id="lockAlertTitle">Conformidade Plena com as Diretrizes do TCE/SC</span>
+              </div>
+              <div class="friendly-lock-body" id="lockAlertBody">
+                O modelo recomendado (Nível 1) atende com precisão às necessidades funcionais declaradas pelo servidor. Não há indício de superdimensionamento ou sobrepreço para o erário de Lages.
+              </div>
+
+              <div style="margin-top: 14px; display: none;" id="boxJustificativaSimples">
+                <label style="font-size: 0.8rem; font-weight: 700; color: #991B1B;">
+                  Justificativa Técnica Formal Obrigatória para o Tribunal de Contas:
+                </label>
+                <textarea id="inputJustificativaTexto" rows="3" style="width: 100%; margin-top: 4px; padding: 10px; border-radius: 8px; border: 1px solid #FECACA; font-size: 0.85rem;" placeholder="Explique formalmente por que o modelo de menor custo não atende..."></textarea>
+              </div>
+            </div>
+
+            <!-- BOX DE ESPECIFICAÇÃO BLINDADA ANTI-PRODUTO INFERIOR -->
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px; margin-top: 18px;">
+              <h4 style="font-size: 0.92rem; font-weight: 800; color: #0F172A; margin-bottom: 8px;">
+                🔒 Cláusulas de Blindagem Licitatória que serão inseridas no Edital:
+              </h4>
+              <ul style="font-size: 0.82rem; color: #475569; line-height: 1.6; padding-left: 20px;">
+                <li><strong>Benchmark Mínimo PassMark:</strong> Garante processador moderno sem permitir peças defasadas ou remanufaturadas.</li>
+                <li><strong>Placa-mãe OEM com BIOS Homologada:</strong> Proíbe placas genéricas ou sem suporte institucional.</li>
+                <li><strong>Chip de Segurança TPM 2.0 Ativo:</strong> Conformidade com os padrões de segurança do Gov.br.</li>
+                <li><strong>Fonte 80 Plus Bronze Certificada:</strong> Eficiência energética comprovada para economizar energia da Prefeitura.</li>
+                <li><strong>Garantia On-Site 36 Meses em Lages:</strong> Atendimento presencial em até 48 horas úteis no município.</li>
+              </ul>
+            </div>
+
+          </div>
+
+
+          <!-- ========================================== -->
+          <!-- CONTEÚDO DO PASSO 5: FINALIZAR & MINUTA    -->
+          <!-- ========================================== -->
+          <div class="wizard-step-pane" id="wizardPane-5">
+            
+            <div style="background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 12px; padding: 22px; text-align: center; margin-bottom: 24px;">
+              <div style="font-size: 2.2rem; margin-bottom: 8px;">🎉</div>
+              <h3 style="font-size: 1.25rem; font-weight: 800; color: #065F46;">Licitação Pronta para Formalização!</h3>
+              <p style="font-size: 0.88rem; color: #047857; margin-top: 4px;">
+                Todos os dados foram validados conforme a Lei Federal nº 14.133/2021. Clique abaixo para salvar o processo e visualizar a minuta oficial do contrato.
+              </p>
+            </div>
+
+            <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; font-size: 0.88rem;">
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: #0F172A; margin-bottom: 12px; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px;">
+                Resumo da Licitação:
+              </h4>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div><strong>Órgão:</strong> <span id="resumoWizOrgao">--</span></div>
+                <div><strong>Servidor:</strong> <span id="resumoWizServidor">--</span></div>
+                <div><strong>Quantidade:</strong> <span id="resumoWizQtd">--</span> computadores</div>
+                <div><strong>Modelo:</strong> <span id="resumoWizModelo">--</span></div>
+                <div><strong>Valor Unitário:</strong> <span id="resumoWizValorUnit">--</span></div>
+                <div><strong>Valor Total:</strong> <strong id="resumoWizValorTotal" style="color: #059669;">--</strong></div>
+              </div>
+            </div>
+
+          </div>
+
+
+          <!-- BARRA DE NAVEGAÇÃO DOS PASSOS (BOTÕES VOLTAR / PRÓXIMO) -->
+          <div class="wizard-actions">
+            <button type="button" class="trez-btn-secondary" id="btnWizardVoltar" onclick="app.passoAnterior()" style="visibility: hidden;">
+              &larr; Voltar
+            </button>
+
+            <button type="button" class="trez-btn-wizard-next" id="btnWizardProximo" onclick="app.proximoPasso()">
+              PRÓXIMO &gt;
+            </button>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- ABA 4: AUDITORIA TCE/SC                                      -->
+      <!-- ============================================================ -->
+      <section id="pane-auditor" class="trez-pane">
+        
+        <!-- CARDS DE METRICAS PRINCIPAIS -->
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <span>Licitações Monitoradas</span>
+            <h3 id="kpiTotalDemandas">--</h3>
+          </div>
+
+          <div class="kpi-card">
+            <span>Economia aos Cofres Públicos</span>
+            <h3 id="kpiTotalEconomia" style="color: #059669;">R$ --</h3>
+          </div>
+
+          <div class="kpi-card">
+            <span>Índice de Risco Médio (IRS)</span>
+            <h3 id="kpiMediaIrs">--%</h3>
+          </div>
+
+          <div class="kpi-card">
+            <span>Alertas Críticos TCE</span>
+            <h3 id="kpiAlertasCriticos" style="color: #EF4444;">--</h3>
+          </div>
+        </div>
+
+        <!-- GRÁFICOS VISUAIS -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px;">
+          <div class="trez-card" style="padding: 24px; margin-bottom: 0;">
+            <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 16px; color: #0F172A;">
+              Classificação das Compras por Risco
+            </h4>
+            <div style="height: 220px; position: relative;">
+              <canvas id="chartRiscoClean"></canvas>
+            </div>
+          </div>
+
+          <div class="trez-card" style="padding: 24px; margin-bottom: 0;">
+            <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 16px; color: #0F172A;">
+              Maiores Volumes de Compras de TI por Órgão
+            </h4>
+            <div style="height: 220px; position: relative;">
+              <canvas id="chartOrgaosClean"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- MODAL: VISUALIZADOR ENQUADRADO A4 DE MINUTA DE CONTRATO   -->
+  <!-- ========================================================= -->
+  <div class="modal-overlay" id="modalEtp">
+    <div class="modal-content">
+      
+      <!-- BARRA DE AÇÕES (NO-PRINT) -->
+      <div class="doc-top-bar no-print">
+        <div>
+          <h3 style="font-size: 1.05rem; font-weight: 800; color: #0F172A;">
+            📜 Minuta Oficial Padronizada de TIC (Lei nº 14.133/2021)
+          </h3>
+          <p style="font-size: 0.78rem; color: #64748B;">Padrão Gov.br / AGU / TCE-SC com Cláusulas de Blindagem Técnica</p>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="trez-btn-secondary" onclick="app.abrirCaixaEmail()">
+            ✉️ Encaminhar via E-mail
+          </button>
+          <button type="button" class="trez-btn-success" style="padding: 6px 16px; font-size: 0.85rem;" onclick="app.imprimirDocumento()">
+            🖨️ Imprimir / Salvar PDF
+          </button>
+          <button type="button" class="trez-btn-secondary" onclick="app.fecharModalEtp()">
+            ✕ Fechar
+          </button>
+        </div>
+      </div>
+
+      <!-- CAMPO: ENCAMINHAR VIA E-MAIL (NO-PRINT) -->
+      <div id="boxEncaminharEmail" class="no-print" style="display: none; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h4 style="font-size: 0.95rem; font-weight: 700; color: #0F172A; display: flex; align-items: center; gap: 8px;">
+            ✉️ Encaminhar Minuta Oficial via E-mail
+          </h4>
+          <button type="button" style="background: none; border: none; cursor: pointer; color: #64748B; font-size: 1.1rem;" onclick="app.fecharCaixaEmail()">✕</button>
+        </div>
+        <p style="font-size: 0.82rem; color: #64748B; margin-bottom: 12px;">
+          Informe o e-mail do setor de compras da Prefeitura de Lages ou do responsável pela licitação:
+        </p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <input type="email" id="inputEmailDestino" class="trez-input" style="flex: 1; min-width: 280px;" placeholder="ex: compras@lages.sc.gov.br ou licitacoes@lages.sc.gov.br">
+          <button type="button" class="trez-btn-success" style="padding: 10px 22px; font-size: 0.88rem;" onclick="app.enviarPorEmail()">
+            🚀 Enviar Minuta Agora
+          </button>
+        </div>
+        <div id="emailFeedbackMsg" style="display: none; margin-top: 10px; font-size: 0.85rem; font-weight: 600; padding: 8px 12px; border-radius: 6px;"></div>
+      </div>
+
+      <!-- FOLHA ENQUADRADA DO DOCUMENTO OFICIAL -->
+      <div id="corpoDocumentoEtp">
+        <!-- Preenchido via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT PRINCIPAL -->
+  <script src="js/app.js"></script>
+
+</body>
+</html>
