@@ -540,21 +540,78 @@
 
 
       <!-- ============================================================ -->
-      <!-- VISTA 3: AUDITORIA TCE (GRÁFICOS MINIMALISTAS)                -->
+      <!-- VISTA 3: AUDITORIA PREVENTIVA TCE/SC (RADAR DE RISCO)         -->
       <!-- ============================================================ -->
       <section id="view-auditor" class="dark-view">
         
+        <!-- CABEÇALHO DO PAINEL DO AUDITOR -->
+        <div style="margin-bottom: 20px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <span class="rotina-banner-badge" style="background: rgba(124, 58, 237, 0.2); color: #A78BFA;">
+              TRIBUNAL DE CONTAS DO ESTADO DE SANTA CATARINA
+            </span>
+            <span style="font-size: 0.75rem; color: var(--dark-muted);">DIRETORIA DE CONTROLE DE LICITAÇÕES • DLC / TCE-SC</span>
+          </div>
+          <h2 style="font-size: 1.45rem; font-weight: 800; color: var(--dark-text); letter-spacing: -0.5px;">
+            Painel de Auditoria Preventiva em TIC (Lages / SC)
+          </h2>
+          <p style="font-size: 0.85rem; color: var(--dark-muted); margin-top: 4px;">
+            Cruzamento automatizado entre <strong>Rotina do Servidor + Softwares Homologados + Configuração Licitada</strong> para erradicação de superdimensionamento e compras inadequadas (Art. 18 da Lei Federal nº 14.133/2021).
+          </p>
+        </div>
+
+        <!-- BARRA DE CASOS REAIS PARA O PITCH DO HACKATHON -->
+        <div class="hackathon-demo-bar">
+          <div class="demo-bar-badge">🏆 PITCH HACKATHON • SIMULADOR DE CASOS PARA A BANCA</div>
+          <div class="demo-bar-text">
+            <strong>Demonstração Instantânea:</strong> Clique abaixo para simular os 3 cenários reais de fiscalização descritos no Desafio 3 do TCE/SC:
+          </div>
+          <div class="demo-bar-buttons">
+            <button type="button" class="btn-demo-case danger" onclick="app.simularCasoAuditor(1)" title="Simula escola comprando PCs de R$ 8.200 para digitar textos">
+              🚨 Caso 1: Superdimensionamento Escolar (R$ 317k em Risco)
+            </button>
+            <button type="button" class="btn-demo-case warn" onclick="app.simularCasoAuditor(2)" title="Simula obras comprando PCs básicos de R$ 1.850 para AutoCAD">
+              ⚠️ Caso 2: Risco de Subdimensionamento em Obras
+            </button>
+            <button type="button" class="btn-demo-case success" onclick="app.simularCasoAuditor(3)" title="Simula compra 100% calibrada para postos de saúde">
+              🛡️ Caso 3: Eficiência Máxima na Saúde (Selo Verde)
+            </button>
+          </div>
+        </div>
+
+        <!-- CARD DE IMPACTO SOCIAL & ROI GOVERNAMENTAL -->
+        <div class="roi-impact-card">
+          <div class="roi-metric">
+            <span class="roi-label">DESPERDÍCIO EVITADO EM LAGES</span>
+            <h2 class="roi-val" id="roiTotalEconomia">R$ 542.800,00</h2>
+            <span class="roi-sub">Com blindagem técnica antes da publicação do edital</span>
+          </div>
+          <div class="roi-divider"></div>
+          <div class="roi-metric">
+            <span class="roi-label">IMPACTO CONVERSÍVEL NA EDUCAÇÃO</span>
+            <h3 class="roi-subval">🎓 +293 Computadores Escolares</h3>
+            <span class="roi-sub">Verba preservada suficiente para equipar 15 novos laboratórios de informática em Lages</span>
+          </div>
+          <div class="roi-divider"></div>
+          <div class="roi-metric">
+            <span class="roi-label">TEMPO DE ANÁLISE DO AUDITOR</span>
+            <h3 class="roi-subval">⚡ 3 Segundos</h3>
+            <span class="roi-sub">Redução de 15 dias de perícia técnica manual para triagem preditiva instantânea</span>
+          </div>
+        </div>
+
+        <!-- KPIS DO AUDITOR -->
         <div class="kpi-grid">
           <div class="kpi-box">
-            <span>PROCESSOS</span>
+            <span>PROCESSOS FISCALIZADOS</span>
             <h3 id="kpiTotal">--</h3>
           </div>
           <div class="kpi-box">
-            <span>ECONOMIA TOTAL</span>
+            <span>SOBREPREÇO EVITADO</span>
             <h3 class="neon-text" id="kpiEco">R$ --</h3>
           </div>
           <div class="kpi-box">
-            <span>RISCO MÉDIO</span>
+            <span>MÉDIA DE RISCO (IRS)</span>
             <h3 id="kpiRisco">--%</h3>
           </div>
           <div class="kpi-box">
@@ -563,18 +620,61 @@
           </div>
         </div>
 
+        <!-- GRÁFICOS ANALÍTICOS -->
         <div class="grid-2col" style="margin-top: 20px;">
           <div class="dark-card-box">
-            <h4 class="card-subtitle">Classificação por Risco</h4>
+            <h4 class="card-subtitle">Classificação dos Editais por Nível de Risco (TCE/SC)</h4>
             <div style="height: 220px; position: relative; margin-top: 14px;">
               <canvas id="chartRisco"></canvas>
             </div>
           </div>
           <div class="dark-card-box">
-            <h4 class="card-subtitle">Volume por Secretaria</h4>
+            <h4 class="card-subtitle">Volume Financeiro Licitado por Secretaria Municipal</h4>
             <div style="height: 220px; position: relative; margin-top: 14px;">
               <canvas id="chartOrgaos"></canvas>
             </div>
+          </div>
+        </div>
+
+        <!-- RADAR DE AUDITORIA PREVENTIVA (MATRIZ DE ADEQUAÇÃO TÉCNICA) -->
+        <div class="dark-card-box" style="margin-top: 22px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--dark-text); margin: 0;">
+                Radar de Auditoria Preventiva (Matriz de Adequação Técnica)
+              </h3>
+              <p style="font-size: 0.8rem; color: var(--dark-muted); margin: 2px 0 0 0;">
+                Confronto em tempo real entre Atividades Declaradas pelo Órgão vs Perfil de Hardware Solicitado.
+              </p>
+            </div>
+
+            <!-- FILTRO DE RISCO -->
+            <div style="display: flex; gap: 6px;">
+              <button class="qty-pill active" onclick="app.filtrarRadarAuditor('TODOS', this)">Todos</button>
+              <button class="qty-pill" onclick="app.filtrarRadarAuditor('ALTO', this)" style="color: #F87171;">Alto Risco (Superdimensionado)</button>
+              <button class="qty-pill" onclick="app.filtrarRadarAuditor('MEDIO', this)" style="color: #FBBF24;">Médio</button>
+              <button class="qty-pill" onclick="app.filtrarRadarAuditor('BAIXO', this)" style="color: #34D399;">Conforme</button>
+            </div>
+          </div>
+
+          <!-- TABELA DO RADAR -->
+          <div class="table-responsive">
+            <table class="dark-table">
+              <thead>
+                <tr>
+                  <th>PROTOCOLO</th>
+                  <th>ÓRGÃO / SETOR</th>
+                  <th>ROTINA DECLARADA</th>
+                  <th>HARDWARE LICITADO</th>
+                  <th style="width: 140px;">ÍNDICE RISCO (IRS)</th>
+                  <th>STATUS TCE</th>
+                  <th style="text-align: center;">PARECER TÉCNICO</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyRadarAuditor">
+                <!-- Preenchido via app.renderizarRadarAuditor() -->
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -582,6 +682,37 @@
 
     </main>
 
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- MODAL: PARECER TÉCNICO OFICIAL DO TCE/SC (1 CLIQUE)       -->
+  <!-- ========================================================= -->
+  <div class="modal-overlay" id="modalParecerTce">
+    <div class="modal-content" style="max-width: 820px;">
+      
+      <div class="doc-top-bar no-print">
+        <div>
+          <h3 style="font-size: 1.05rem; font-weight: 800; color: #0F172A;">
+            ⚖️ Parecer Preliminar de Auditoria em TIC (TCE/SC)
+          </h3>
+          <p style="font-size: 0.78rem; color: #64748B;">Instrução Técnica Automática com Base no Art. 18 da Lei Federal nº 14.133/2021</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-primary-neon" style="color: #0A0E14; padding: 6px 16px; font-size: 0.82rem;" onclick="app.imprimirParecerTce()">
+            🖨️ Imprimir Parecer
+          </button>
+          <button type="button" class="btn-ghost" style="color: #0F172A;" onclick="app.fecharModalParecerTce()">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- CORPO DO PARECER TÉCNICO DO AUDITOR -->
+      <div id="corpoParecerTce">
+        <!-- Preenchido via app.gerarParecerTce() -->
+      </div>
+    </div>
   </div>
 
 

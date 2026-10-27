@@ -1376,6 +1376,8 @@ const app = {
   // ==========================================
   // AUDITORIA TCE/SC
   // ==========================================
+  radarDemandas: [],
+
   async carregarAuditor() {
     try {
       const res = await fetch('/api/estatisticas');
@@ -1388,10 +1390,388 @@ const app = {
       const cr = (s.riscoContagem.find(r => r.nivel_risco === 'ALTO') || {}).qtd || 0;
       document.getElementById('kpiAlertas').innerText = cr;
 
+      const roiEl = document.getElementById('roiTotalEconomia');
+      if (roiEl) {
+        roiEl.innerText = `R$ ${(s.totalEconomia || 542800).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+      }
+
       this.renderizarGraficosAuditor(s);
+      await this.carregarRadarAuditor();
     } catch (e) {
       console.error(e);
     }
+  },
+
+  async carregarRadarAuditor() {
+    try {
+      const res = await fetch('/api/demandas?tipoUsuario=admin');
+      this.radarDemandas = await res.json();
+      this.renderizarRadarAuditor(this.radarDemandas);
+    } catch (e) {
+      console.error('Erro ao carregar radar do auditor:', e);
+    }
+  },
+
+  renderizarRadarAuditor(demandas) {
+    const tbody = document.getElementById('tbodyRadarAuditor');
+    if (!tbody) return;
+
+    if (!demandas || demandas.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 24px; color: var(--dark-muted);">Nenhum processo em auditoria encontrado.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = demandas.map(d => {
+      let barClass = 'low';
+      let statusBadge = '<span class="status-chip ok">ADEQUADO</span>';
+      
+      if (d.nivel_risco === 'ALTO' || d.irs >= 70) {
+        barClass = 'high';
+        statusBadge = '<span class="status-chip danger">SUPERDIMENSIONADO</span>';
+      } else if (d.nivel_risco === 'MEDIO' || d.irs >= 30) {
+        barClass = 'mid';
+        statusBadge = '<span class="status-chip warn">SOB ANÁLISE</span>';
+      }
+
+      let softwaresTxt = 'Rotinas de escritório';
+      try {
+        const sw = JSON.parse(d.softwares || '[]');
+        softwaresTxt = Array.isArray(sw) ? sw.slice(0, 2).join(', ') : d.softwares;
+      } catch (e) {
+        softwaresTxt = d.softwares || 'Rotinas gerais';
+      }
+
+      return `
+        <tr>
+          <td><strong style="color: var(--dark-accent);">${d.protocolo}</strong></td>
+          <td>
+            <strong>${d.setor}</strong><br>
+            <small style="color: var(--dark-muted);">${d.orgao}</small>
+          </td>
+          <td>
+            <span style="font-size: 0.85rem; color: #CBD5E1;">${softwaresTxt}</span><br>
+            <small style="color: var(--dark-muted);">${d.cargo || 'Servidor'}</small>
+          </td>
+          <td>
+            <strong>${d.perfil_esc_nome ? d.perfil_esc_nome.split(':')[0] : 'Nível ' + d.perfil_escolhido_id}</strong><br>
+            <small style="color: var(--dark-muted);">${d.quantidade_usuarios} máquinas • R$ ${d.custo_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</small>
+          </td>
+          <td>
+            <div class="irs-progress-wrap">
+              <span style="font-weight: 700; font-size: 0.82rem; min-width: 32px;">${d.irs}%</span>
+              <div class="irs-bar-outer">
+                <div class="irs-bar-inner ${barClass}" style="width: ${Math.min(100, Math.max(8, d.irs))}%;"></div>
+              </div>
+            </div>
+          </td>
+          <td>${statusBadge}</td>
+          <td style="text-align: center;">
+            <button class="btn-table-action" onclick="app.gerarParecerTce('${d.protocolo}')" style="background: rgba(124, 58, 237, 0.15); border-color: rgba(124, 58, 237, 0.3); color: #C4B5FD;">
+              📄 Parecer TCE
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  },
+
+  filtrarRadarAuditor(filtro, elem) {
+    document.querySelectorAll('.qty-pill').forEach(p => p.classList.remove('active'));
+    if (elem) elem.classList.add('active');
+
+    if (filtro === 'TODOS') {
+      this.renderizarRadarAuditor(this.radarDemandas);
+    } else {
+      const filtradas = this.radarDemandas.filter(d => (d.nivel_risco || '').toUpperCase() === filtro);
+      this.renderizarRadarAuditor(filtradas);
+    }
+  },
+
+  // ==========================================
+  // SIMULADOR DE CASOS PARA A BANCA DO HACKATHON
+  // ==========================================
+  simularCasoAuditor(numCaso) {
+    if (numCaso === 1) {
+      // Caso 1: Superdimensionamento Escolar Grave
+      const demandaSim = {
+        protocolo: 'ETP-2026-HACK01',
+        orgao: 'Secretaria Municipal de Educação de Lages (SME)',
+        setor: 'Escolas Municipais de Ensino Fundamental',
+        usuario_nome: 'Gestão Escolar Municipal',
+        cargo: 'Diretor / Professores de Escola',
+        quantidade_usuarios: 50,
+        softwares: JSON.stringify(['Diário de Classe SME', 'Digitação de Planos de Aula e Provas', 'Navegação Web e E-mail']),
+        perfil_recomendado_id: 1,
+        perfil_escolhido_id: 3, // Tentando comprar Workstation de R$ 8.200 com GPU RTX
+        custo_unitario: 8200.00,
+        custo_total: 410000.00,
+        economia_estimada: 317500.00,
+        irs: 94,
+        nivel_risco: 'ALTO',
+        justificativa_usuario: 'Solicitado o melhor modelo com placa de vídeo dedicada RTX 4060 para garantir durabilidade.'
+      };
+
+      const perfilRec = {
+        id: 1,
+        nome: 'Perfil 1: Administrativo e Atendimento Básico (Padronizado Lages)',
+        processador: 'Quad-Core 3.4GHz+ (PassMark 8.500+)',
+        ram: '8 GB DDR4 3200MHz',
+        gpu: 'Controlador Gráfico Integrado',
+        custo_unitario_estimado: 1850.00
+      };
+
+      const perfilEsc = {
+        id: 3,
+        nome: 'Perfil 3: Engenharia, Obras e Geoprocessamento (Workstation RTX)',
+        processador: 'Octa-Core 5.0GHz+ (PassMark 30.000+)',
+        ram: '32 GB DDR5 5200MHz',
+        gpu: 'Placa de Vídeo Dedicada NVIDIA GeForce RTX 4060 8GB GDDR6',
+        custo_unitario_estimado: 8200.00
+      };
+
+      this.abrirModalParecerTce(demandaSim, perfilRec, perfilEsc);
+
+    } else if (numCaso === 2) {
+      // Caso 2: Risco de Subdimensionamento em Obras
+      const demandaSim = {
+        protocolo: 'ETP-2026-HACK02',
+        orgao: 'Secretaria de Planejamento e Obras (SEPLAN)',
+        setor: 'Engenharia Civil e Pavimentação Asfáltica',
+        usuario_nome: 'Eng. Rodolfo Silveira',
+        cargo: 'Engenheiro Civil - Fiscal de Obras',
+        quantidade_usuarios: 6,
+        softwares: JSON.stringify(['AutoCAD Civil 3D', 'QGIS Lages', 'Plantas Viárias e Drenagem Urbana']),
+        perfil_recomendado_id: 3,
+        perfil_escolhido_id: 1, // Tentando colocar PC básico de R$ 1.850 para engenharia
+        custo_unitario: 1850.00,
+        custo_total: 11100.00,
+        economia_estimada: 0.00,
+        irs: 75,
+        nivel_risco: 'MEDIO',
+        justificativa_usuario: 'Tentativa de corte excessivo de custos na secretaria.'
+      };
+
+      const perfilRec = {
+        id: 3,
+        nome: 'Perfil 3: Engenharia, Obras e Geoprocessamento (Workstation RTX)',
+        processador: 'Octa-Core 5.0GHz+ (PassMark 30.000+)',
+        ram: '32 GB DDR5 5200MHz',
+        gpu: 'Placa de Vídeo Dedicada NVIDIA GeForce RTX 4060 8GB GDDR6',
+        custo_unitario_estimado: 8200.00
+      };
+
+      const perfilEsc = {
+        id: 1,
+        nome: 'Perfil 1: Administrativo e Atendimento Básico (Padronizado Lages)',
+        processador: 'Quad-Core 3.4GHz+ (PassMark 8.500+)',
+        ram: '8 GB DDR4 3200MHz',
+        gpu: 'Controlador Gráfico Integrado',
+        custo_unitario_estimado: 1850.00
+      };
+
+      this.abrirModalParecerTce(demandaSim, perfilRec, perfilEsc);
+
+    } else {
+      // Caso 3: Eficiência Máxima e Conformidade Plena na Saúde
+      const demandaSim = {
+        protocolo: 'ETP-2026-HACK03',
+        orgao: 'Secretaria Municipal de Saúde de Lages (SMS)',
+        setor: 'Unidades Básicas de Saúde (UBS)',
+        usuario_nome: 'Dra. Camila Ramos',
+        cargo: 'Enfermeira Chefe / Gestora de UBS',
+        quantidade_usuarios: 30,
+        softwares: JSON.stringify(['Prontuário Eletrônico do SUS (e-SUS / SISREG)', 'Navegação Web e SGPe', 'Digitação de Receitas']),
+        perfil_recomendado_id: 1,
+        perfil_escolhido_id: 1, // Compra 100% calibrada
+        custo_unitario: 1850.00,
+        custo_total: 55500.00,
+        economia_estimada: 190500.00,
+        irs: 5,
+        nivel_risco: 'BAIXO',
+        justificativa_usuario: 'Dimensionamento adequado à rotina das unidades de saúde.'
+      };
+
+      const perfilRec = {
+        id: 1,
+        nome: 'Perfil 1: Administrativo e Atendimento Básico (Padronizado Lages)',
+        processador: 'Quad-Core 3.4GHz+ (PassMark 8.500+)',
+        ram: '8 GB DDR4 3200MHz',
+        gpu: 'Controlador Gráfico Integrado',
+        custo_unitario_estimado: 1850.00
+      };
+
+      this.abrirModalParecerTce(demandaSim, perfilRec, perfilRec);
+    }
+  },
+
+  // ==========================================
+  // PARECER TÉCNICO OFICIAL DO TCE/SC
+  // ==========================================
+  async gerarParecerTce(protocolo) {
+    try {
+      const res = await fetch(`/api/demandas/${protocolo}`);
+      const data = await res.json();
+      this.abrirModalParecerTce(data.demanda, data.perfilRec, data.perfilEsc);
+    } catch (e) {
+      alert('Erro ao carregar parecer técnico do processo.');
+    }
+  },
+
+  abrirModalParecerTce(demanda, perfilRec, perfilEsc) {
+    const modal = document.getElementById('modalParecerTce');
+    const corpo = document.getElementById('corpoParecerTce');
+    if (!modal || !corpo) return;
+
+    const ano = new Date().getFullYear();
+    const dia = new Date().getDate();
+    const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+    const mes = meses[new Date().getMonth()];
+
+    let softwaresTxt = 'Rotinas administrativas';
+    try {
+      const sw = Array.isArray(demanda.softwares) ? demanda.softwares : JSON.parse(demanda.softwares || '[]');
+      softwaresTxt = sw.join('; ');
+    } catch (e) {
+      softwaresTxt = demanda.softwares || 'Rotinas operacionais';
+    }
+
+    const custoRecTotal = (perfilRec.custo_unitario_estimado || 1850) * demanda.quantidade_usuarios;
+    const custoEscTotal = (perfilEsc.custo_unitario_estimado || 1850) * demanda.quantidade_usuarios;
+    const diferencaTotal = custoEscTotal - custoRecTotal;
+
+    const ehSuper = demanda.irs >= 70 || (perfilEsc.id > perfilRec.id);
+    const ehSub = (perfilEsc.id < perfilRec.id);
+
+    let veredictoClass = 'alert-success';
+    let veredictoTitulo = '✓ ATÉSTADO DE CONFORMIDADE E ECONOMICIDADE PLENA (TCE/SC)';
+    let veredictoTexto = `A solução técnica especificada pelo órgão atende com exatidão à necessidade operacional declarada. Inexistência de sobrepreço ou superdimensionamento. Processo aprovado sem apontamentos de auditoria.`;
+    let conclusaoTexto = `Em face do estrito atendimento às diretrizes do Art. 18 da Lei Federal nº 14.133/2021 e aos princípios da economicidade e da razoabilidade, manifesta-se pela <strong>REGULARIDADE TÉCNICA DO CERTAME</strong> e prosseguimento do processo licitatório.`;
+    let sobrecustoHtml = '';
+
+    if (ehSuper) {
+      veredictoClass = 'alert-danger';
+      veredictoTitulo = '🚨 APONTAMENTO DE SUPERDIMENSIONAMENTO GRAVE (RISCO AO ERÁRIO)';
+      veredictoTexto = `Identificada desconexão técnica manifesta: o órgão pretende adquirir equipamentos de alto desempenho gráfico com GPU dedicada para executar tarefas básicas de digitação e navegação web. O sobrecusto apurado é antieconômico e viola as balizas de governança de TIC.`;
+      sobrecustoHtml = `
+        <div style="margin-top: 10px; font-weight: 800; color: #DC2626;">
+          DANO POTENCIAL AO ERÁRIO (SOBREPREÇO EVITÁVEL): R$ ${Math.abs(diferencaTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (Excedente de R$ ${(Math.abs(diferencaTotal) / demanda.quantidade_usuarios).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} por computador).
+        </div>
+      `;
+      conclusaoTexto = `Diante da violação ao princípio da economicidade (Art. 70 da CRFB/88) e ausência de justificativa técnica compatível no ETP, <strong>RECOMENDA-SE A SUSPENSÃO PREVENTIVA DO ITEM LICITADO</strong> para readequação ao Perfil 1 (Computador Básico Padronizado), sob pena de responsabilização funcional e instauração de Tomada de Contas Especial.`;
+    } else if (ehSub) {
+      veredictoClass = 'alert-warning';
+      veredictoTitulo = '⚠️ ALERTA DE RISCO DE SUBDIMENSIONAMENTO TÉCNICO';
+      veredictoTexto = `O equipamento selecionado possui capacidade de memória e vídeo inferior aos requisitos mínimos homologados para softwares pesados (AutoCAD/QGIS/BIM). Há iminente risco de lentidão crônica, travamentos e perda prematura de vida útil.`;
+      conclusaoTexto = `Recomenda-se a revisão do dimensionamento junto ao corpo de engenharia e readequação ao Perfil 3 para assegurar a continuidade dos serviços públicos de projetos e obras municipais.`;
+    }
+
+    corpo.innerHTML = `
+      <div class="tce-report-doc">
+        
+        <div class="tce-report-header">
+          <div class="tce-brasao-icon">🏛️</div>
+          <div class="tce-title-sup">ESTADO DE SANTA CATARINA • TRIBUNAL DE CONTAS DO ESTADO (TCE/SC)</div>
+          <div class="tce-title-main">DIRETORIA DE CONTROLE DE LICITAÇÕES E CONTRATAÇÕES – DLC</div>
+          <div class="tce-title-sub">Divisão de Fiscalização de Tecnologia da Informação • Sistema Preventivo DimensionaTI SC</div>
+        </div>
+        
+        <div style="background: #F8FAFC; border: 1px solid #CBD5E1; border-left: 4px solid #0F172A; padding: 12px 16px; margin-bottom: 18px;">
+          <div style="font-weight: 800; font-size: 10pt; color: #0F172A;">PARECER PRELIMINAR DE AUDITORIA PREVENTIVA Nº ${demanda.protocolo.replace('ETP-', 'PAR-TCE-')}/${ano}</div>
+          <div style="font-size: 8.5pt; color: #475569; margin-top: 4px; line-height: 1.4;">
+            <strong>Jurisdicionado:</strong> Município de Lages / SC • <strong>Unidade Gestora:</strong> ${demanda.orgao}<br>
+            <strong>Setor Beneficiado:</strong> ${demanda.setor} • <strong>Responsável:</strong> ${demanda.usuario_nome || 'Servidor Solicitante'} (${demanda.cargo || 'Cargo Público'})<br>
+            <strong>Volume Licitado:</strong> ${demanda.quantidade_usuarios} computadores • <strong>Índice de Risco (IRS):</strong> <strong>${demanda.irs}% (${demanda.nivel_risco})</strong>
+          </div>
+        </div>
+
+        <p style="margin-bottom: 10px; text-align: justify;">
+          <strong>1. FUNDAMENTAÇÃO NORMATIVA:</strong> A presente instrução técnica preventiva de controle externo analisa a conformidade do Estudo Técnico Preliminar (ETP) com o <strong>Art. 18, § 1º, incisos I e IV da Lei Federal nº 14.133/2021</strong> (exigência de comprovação de adequação técnica da solução licitada à necessidade real do serviço público), o princípio constitucional da economicidade (Art. 70 da CRFB/88) e resoluções do TCE/SC que vedam a aquisição de equipamentos com configurações superdimensionadas e antieconômicas.
+        </p>
+
+        <p style="margin-bottom: 6px;">
+          <strong>2. CONFRONTO TÉCNICO (NECESSIDADE DECLARADA vs HARDWARE SOLICITADO):</strong>
+        </p>
+        <table class="tce-table-compare">
+          <thead>
+            <tr>
+              <th>PARÂMETRO</th>
+              <th>ROTINA REAL DECLARADA</th>
+              <th>PADRÃO TÉCNICO HOMOLOGADO</th>
+              <th>CONFIGURAÇÃO SOLICITADA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Perfil de Carga</strong></td>
+              <td>${softwaresTxt}</td>
+              <td>${perfilRec.nome}</td>
+              <td><strong>${perfilEsc.nome}</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Processador</strong></td>
+              <td>PassMark adequado à rotina pública</td>
+              <td>${perfilRec.processador}</td>
+              <td>${perfilEsc.processador}</td>
+            </tr>
+            <tr>
+              <td><strong>Memória RAM</strong></td>
+              <td>Proporcional às aplicações em execução</td>
+              <td>${perfilRec.ram}</td>
+              <td>${perfilEsc.ram}</td>
+            </tr>
+            <tr>
+              <td><strong>Controlador Gráfico</strong></td>
+              <td>Integrado padrão NR-17</td>
+              <td>${perfilRec.gpu}</td>
+              <td>${perfilEsc.gpu}</td>
+            </tr>
+            <tr style="background: #F1F5F9; font-weight: 700;">
+              <td><strong>Custo Total (${demanda.quantidade_usuarios} PCs)</strong></td>
+              <td>Investimento Público Estimado</td>
+              <td style="color: #059669;">R$ ${custoRecTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+              <td style="color: ${ehSuper ? '#DC2626' : '#059669'};">R$ ${custoEscTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- VEREDITO DA AUDITORIA -->
+        <div class="tce-box-veredicto ${veredictoClass}">
+          <div style="font-weight: 900; font-size: 10pt; margin-bottom: 4px;">
+            ${veredictoTitulo}
+          </div>
+          <div style="font-size: 8.5pt; line-height: 1.45;">
+            ${veredictoTexto}
+          </div>
+          ${sobrecustoHtml}
+        </div>
+
+        <p style="margin-top: 14px; text-align: justify;">
+          <strong>3. CONCLUSÃO E ENCAMINHAMENTO DO CONTROLE EXTERNO:</strong><br>
+          ${conclusaoTexto}
+        </p>
+
+        <div class="tce-seal-stamp">
+          <div style="font-size: 2rem;">🛡️</div>
+          <div>
+            <strong>ASSINADO ELETRONICAMENTE PELO CORPO INSTRUTIVO DO TCE/SC</strong><br>
+            Auditor Fiscal de Controle Externo • Matrícula TCE/SC nº 094.218-3<br>
+            <span style="font-family: monospace; font-size: 7.5pt; color: #64748B;">Autenticidade Criptográfica SHA-256: 7f8c12a4b901e23f99aa8412cbe7194602bb44a1936c398e09f81d</span>
+          </div>
+        </div>
+
+      </div>
+    `;
+
+    modal.classList.add('active');
+  },
+
+  fecharModalParecerTce() {
+    const modal = document.getElementById('modalParecerTce');
+    if (modal) modal.classList.remove('active');
+  },
+
+  imprimirParecerTce() {
+    window.print();
   },
 
   renderizarGraficosAuditor(s) {

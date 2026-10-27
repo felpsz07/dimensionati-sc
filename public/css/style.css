@@ -1333,6 +1333,288 @@ body {
 }
 
 /* ========================================================== */
+/* COMPONENTES EXCLUSIVOS DE AUDITORIA TCE / HACKATHON        */
+/* ========================================================== */
+
+.hackathon-demo-bar {
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.08) 0%, rgba(30, 41, 59, 0.4) 100%);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin-bottom: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.demo-bar-badge {
+  display: inline-block;
+  align-self: flex-start;
+  background: rgba(52, 211, 153, 0.2);
+  color: var(--dark-accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+}
+
+.demo-bar-text {
+  font-size: 0.88rem;
+  color: var(--dark-text);
+}
+
+.demo-bar-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-demo-case {
+  background: var(--dark-surface);
+  border: 1px solid var(--dark-border);
+  color: var(--dark-text);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-demo-case:hover {
+  transform: translateY(-1px);
+}
+
+.btn-demo-case.danger {
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.1);
+  color: #FCA5A5;
+}
+.btn-demo-case.danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #EF4444;
+}
+
+.btn-demo-case.warn {
+  border-color: rgba(245, 158, 11, 0.5);
+  background: rgba(245, 158, 11, 0.1);
+  color: #FCD34D;
+}
+.btn-demo-case.warn:hover {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: #F59E0B;
+}
+
+.btn-demo-case.success {
+  border-color: rgba(52, 211, 153, 0.5);
+  background: rgba(52, 211, 153, 0.1);
+  color: #6EE7B7;
+}
+.btn-demo-case.success:hover {
+  background: rgba(52, 211, 153, 0.2);
+  border-color: #34D399;
+}
+
+/* CARD DE IMPACTO SOCIAL & ROI GOVERNAMENTAL */
+.roi-impact-card {
+  background: var(--dark-card);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  margin-bottom: 22px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .roi-impact-card {
+    grid-template-columns: 1fr;
+  }
+  .roi-divider {
+    display: none;
+  }
+}
+
+.roi-metric {
+  display: flex;
+  flex-direction: column;
+}
+
+.roi-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: var(--dark-muted);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.roi-val {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--dark-accent);
+  line-height: 1.2;
+}
+
+.roi-subval {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1.2;
+}
+
+.roi-sub {
+  font-size: 0.78rem;
+  color: var(--dark-muted);
+  margin-top: 4px;
+}
+
+.roi-divider {
+  width: 1px;
+  height: 50px;
+  background: var(--dark-border);
+}
+
+/* BARRA DE PROGRESSO DO IRS */
+.irs-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.irs-bar-outer {
+  flex: 1;
+  height: 6px;
+  background: var(--dark-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.irs-bar-inner {
+  height: 100%;
+  border-radius: var(--radius-full);
+}
+
+.irs-bar-inner.low {
+  background: #34D399;
+}
+
+.irs-bar-inner.mid {
+  background: #F59E0B;
+}
+
+.irs-bar-inner.high {
+  background: #EF4444;
+}
+
+/* TIMBRADO OFICIAL DO PARECER TÉCNICO TCE/SC */
+.tce-report-doc {
+  background: #FFFFFF;
+  color: #111827;
+  padding: 32px 36px;
+  border-radius: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.5;
+  font-size: 9.5pt;
+}
+
+.tce-report-header {
+  text-align: center;
+  border-bottom: 2px solid #0F172A;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.tce-brasao-icon {
+  font-size: 2.2rem;
+  margin-bottom: 4px;
+}
+
+.tce-title-sup {
+  font-size: 9pt;
+  font-weight: 800;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tce-title-main {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #0F172A;
+  margin: 4px 0;
+  text-transform: uppercase;
+}
+
+.tce-title-sub {
+  font-size: 8.5pt;
+  color: #4B5563;
+}
+
+.tce-box-veredicto {
+  border-radius: 6px;
+  padding: 14px 18px;
+  margin: 18px 0;
+}
+
+.tce-box-veredicto.alert-danger {
+  background: #FEF2F2;
+  border: 1px solid #F87171;
+  color: #991B1B;
+}
+
+.tce-box-veredicto.alert-success {
+  background: #ECFDF5;
+  border: 1px solid #34D399;
+  color: #065F46;
+}
+
+.tce-box-veredicto.alert-warning {
+  background: #FFFBEB;
+  border: 1px solid #FBBF24;
+  color: #92400E;
+}
+
+.tce-table-compare {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+  font-size: 8.5pt;
+}
+
+.tce-table-compare th,
+.tce-table-compare td {
+  border: 1px solid #CBD5E1;
+  padding: 8px 10px;
+}
+
+.tce-table-compare th {
+  background: #F1F5F9;
+  font-weight: 700;
+  color: #0F172A;
+  text-align: left;
+}
+
+.tce-seal-stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-top: 20px;
+  font-size: 8pt;
+  color: #475569;
+}
+
+/* ========================================================== */
 /* IMPRESSÃO A4                                               */
 /* ========================================================== */
 @media print {
@@ -1354,11 +1636,13 @@ body {
     display: none !important;
   }
 
-  #modalEtp, #modalEtp * {
+  #modalEtp, #modalEtp *,
+  #modalParecerTce, #modalParecerTce * {
     visibility: visible !important;
   }
 
-  #modalEtp {
+  #modalEtp,
+  #modalParecerTce {
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
@@ -1371,7 +1655,8 @@ body {
     display: block !important;
   }
 
-  #modalEtp .modal-content {
+  #modalEtp .modal-content,
+  #modalParecerTce .modal-content {
     position: static !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -1380,11 +1665,13 @@ body {
     box-shadow: none !important;
   }
 
-  #corpoDocumentoEtp, #corpoDocumentoEtp * {
+  #corpoDocumentoEtp, #corpoDocumentoEtp *,
+  #corpoParecerTce, #corpoParecerTce * {
     visibility: visible !important;
   }
 
-  .gov-contract-doc {
+  .gov-contract-doc,
+  .tce-report-doc {
     font-size: 9.5pt !important;
   }
 }
