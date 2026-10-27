@@ -246,65 +246,78 @@
     <main class="dark-main-container">
 
       <!-- ============================================================ -->
-      <!-- VISTA 1: LISTAGEM MINIMALISTA DE LICITAÇÕES                  -->
+      <!-- VISTA 1: PAINEL PROFISSIONAL DE REQUISIÇÕES & LICITAÇÕES    -->
       <!-- ============================================================ -->
       <section id="view-licitacoes" class="dark-view active">
 
-        <!-- CABEÇALHO COM BUSCA E BOTÃO + NOVO -->
-        <div class="view-header-bar">
-          <div class="search-wrap">
-            <span class="search-ico">🔍</span>
-            <input type="text" id="inputBusca" class="search-field" placeholder="Buscar por protocolo, órgão ou responsável..." oninput="app.filtrarTabela()">
+        <!-- CABEÇALHO DA SEÇÃO COM HIERARQUIA CORPORATIVA -->
+        <div class="view-header-corporate">
+          <!-- LINHA 1: TÍTULO, SUBTÍTULO E BOTÃO PRINCIPAL -->
+          <div class="header-main-row">
+            <div class="header-title-wrap">
+              <h1 id="tituloSecaoLicitacoes" class="header-page-title">
+                Minhas Requisições de Equipamento
+              </h1>
+              <p id="subtituloSecaoLicitacoes" class="header-page-subtitle">
+                Acompanhe as solicitações de computadores enviadas para a Diretoria de TIC da Prefeitura.
+              </p>
+            </div>
+
+            <button type="button" class="btn-primary-action" onclick="app.abrirWizardNovo()">
+              <span class="btn-action-icon">+</span>
+              <span>Nova Requisição</span>
+            </button>
           </div>
 
-          <button class="btn-primary-neon" onclick="app.abrirWizardNovo()">
-            + Novo
-          </button>
-        </div>
+          <!-- LINHA 2: BARRA INTEGRADA DE PESQUISA, ABAS E STATUS DO USUÁRIO -->
+          <div class="header-controls-row">
+            <!-- BUSCA PROFISSIONAL -->
+            <div class="search-pro-box">
+              <svg class="search-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="inputBusca" class="search-pro-field" placeholder="Buscar por protocolo, órgão ou solicitante..." oninput="app.filtrarTabela()">
+            </div>
 
-        <!-- TÍTULO DA VISÃO E CONTROLE DE PERMISSÃO -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
-          <div>
-            <h3 id="tituloSecaoLicitacoes" style="font-size: 1.05rem; font-weight: 700; color: var(--dark-text); margin: 0;">
-              Minhas Requisições de Equipamento
-            </h3>
-            <p id="subtituloSecaoLicitacoes" style="font-size: 0.8rem; color: var(--dark-muted); margin: 2px 0 0 0;">
-              Acompanhe as solicitações de computadores enviadas para a Diretoria de TIC da Prefeitura.
-            </p>
+            <!-- GRUPO DIREITO: ABAS DE STATUS E IDENTIFICAÇÃO DO PERFIL -->
+            <div class="controls-right-group">
+              <!-- ABAS DE STATUS COM CONTADORES -->
+              <div class="status-tabs-container">
+                <button type="button" class="status-tab-btn active" id="tabStatusTransmitidas" onclick="app.setAbaStatus('transmitidas')">
+                  <span class="tab-label">Transmitidas ao TI</span>
+                  <span class="tab-count-badge" id="badgeQtdTransmitidas">0</span>
+                </button>
+                <button type="button" class="status-tab-btn" id="tabStatusCanceladas" onclick="app.setAbaStatus('canceladas')">
+                  <span class="tab-label">Canceladas</span>
+                  <span class="tab-count-badge badge-cancel" id="badgeQtdCanceladas">0</span>
+                </button>
+                <button type="button" class="status-tab-btn" id="tabStatusTodas" onclick="app.setAbaStatus('todas')">
+                  <span class="tab-label">Todas</span>
+                  <span class="tab-count-badge" id="badgeQtdTodas">0</span>
+                </button>
+              </div>
+
+              <!-- IDENTIFICAÇÃO DO PERFIL DO USUÁRIO -->
+              <span id="badgePapelUsuario" class="user-role-pill">
+                SERVIDOR SOLICITANTE
+              </span>
+            </div>
           </div>
-          <span id="badgePapelUsuario" class="rotina-banner-badge" style="padding: 4px 10px; font-size: 0.75rem;">
-            SERVIDOR SOLICITANTE
-          </span>
         </div>
 
-        <!-- ABAS DE FILTRO POR STATUS (TRANSMITIDAS VS CANCELADAS) -->
-        <div class="status-tabs-container">
-          <button type="button" class="status-tab-btn active" id="tabStatusTransmitidas" onclick="app.setAbaStatus('transmitidas')">
-            <span>🚀 Transmitidas ao TI</span>
-            <span class="tab-count-badge" id="badgeQtdTransmitidas">0</span>
-          </button>
-          <button type="button" class="status-tab-btn" id="tabStatusCanceladas" onclick="app.setAbaStatus('canceladas')">
-            <span>🚫 Canceladas</span>
-            <span class="tab-count-badge badge-cancel" id="badgeQtdCanceladas">0</span>
-          </button>
-          <button type="button" class="status-tab-btn" id="tabStatusTodas" onclick="app.setAbaStatus('todas')">
-            <span>📋 Todas as Requisições</span>
-            <span class="tab-count-badge" id="badgeQtdTodas">0</span>
-          </button>
-        </div>
-
-        <!-- TABELA MINIMALISTA -->
-        <div class="dark-card-box">
+        <!-- CARD DA TABELA DE REQUISIÇÕES (PAINEL SAAS PROFISSIONAL) -->
+        <div class="dark-card-box table-card-panel">
           <div class="table-responsive">
-            <table class="dark-table">
+            <table class="dark-table enterprise-table">
               <thead>
                 <tr>
-                  <th style="width: 130px;">Nº REQUISIÇÃO</th>
-                  <th>ÓRGÃO / SETOR</th>
-                  <th>SOLICITANTE</th>
-                  <th style="width: 50px; text-align: center;">QTD</th>
-                  <th>EQUIPAMENTO SOLICITADO</th>
-                  <th style="width: 140px; text-align: center;">STATUS TI</th>
+                  <th style="width: 140px;">Nº REQUISIÇÃO</th>
+                  <th style="min-width: 180px;">ÓRGÃO / SETOR</th>
+                  <th style="min-width: 160px;">SOLICITANTE</th>
+                  <th style="width: 60px; text-align: center;">QTD</th>
+                  <th style="min-width: 190px;">EQUIPAMENTO SOLICITADO</th>
+                  <th style="width: 145px; text-align: center;">STATUS TI</th>
                   <th style="width: 110px; text-align: right;">AÇÕES</th>
                 </tr>
               </thead>

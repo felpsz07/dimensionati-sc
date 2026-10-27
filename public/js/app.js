@@ -552,12 +552,17 @@ const app = {
   },
 
   filtrarTabela() {
-    const term = (document.getElementById('inputBusca')?.value || '').toLowerCase();
+    const term = (document.getElementById('inputBusca')?.value || '').toLowerCase().trim();
     const todas = this.demandasCarregadas || [];
 
+    const isCancelado = (status) => {
+      const s = String(status || '').toUpperCase().trim();
+      return s === 'CANCELADO' || s === 'CANCELADA';
+    };
+
     // Atualiza contadores das abas
-    const qtdTransmitidas = todas.filter(d => d.status !== 'Cancelado').length;
-    const qtdCanceladas = todas.filter(d => d.status === 'Cancelado').length;
+    const qtdTransmitidas = todas.filter(d => !isCancelado(d.status)).length;
+    const qtdCanceladas = todas.filter(d => isCancelado(d.status)).length;
     const qtdTodas = todas.length;
 
     const bTrans = document.getElementById('badgeQtdTransmitidas');
@@ -579,9 +584,9 @@ const app = {
 
     // Filtra pela aba de status
     if (this.abaStatusAtual === 'transmitidas') {
-      filtradas = filtradas.filter(d => d.status !== 'Cancelado');
+      filtradas = filtradas.filter(d => !isCancelado(d.status));
     } else if (this.abaStatusAtual === 'canceladas') {
-      filtradas = filtradas.filter(d => d.status === 'Cancelado');
+      filtradas = filtradas.filter(d => isCancelado(d.status));
     }
 
     this.renderizarTabela(filtradas);
@@ -592,31 +597,55 @@ const app = {
     if (!tbody) return;
 
     if (!demandas || demandas.length === 0) {
-      let msgVazia = 'Nenhuma requisição encontrada.';
+      let icon = '📋';
+      let title = 'Nenhuma requisição encontrada';
+      let msg = 'Não há registros com os filtros atuais. Clique em <strong>+ Nova Requisição</strong> para emitir um pedido.';
+
       if (this.abaStatusAtual === 'transmitidas') {
-        msgVazia = '🚀 Nenhuma requisição transmitida ativa no momento. Clique em <strong>+ Novo</strong> para emitir uma nova solicitação.';
+        icon = '🚀';
+        title = 'Nenhuma requisição transmitida ativa';
+        msg = 'Todas as solicitações ativas foram concluídas ou canceladas. Clique em <strong>+ Nova Requisição</strong> para iniciar um processo.';
       } else if (this.abaStatusAtual === 'canceladas') {
-        msgVazia = '🚫 Nenhuma requisição cancelada. Todas as suas solicitações continuam ativas e transmitidas ao TI.';
+        icon = '🚫';
+        title = 'Nenhuma requisição cancelada';
+        msg = 'Todas as suas solicitações continuam ativas e em atendimento regular pela Diretoria de TIC.';
       }
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 36px; color: var(--dark-muted); font-size: 0.9rem;">${msgVazia}</td></tr>`;
+
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="table-empty-td">
+            <div class="table-empty-wrap">
+              <div class="empty-icon-circle">${icon}</div>
+              <h4 class="empty-title">${title}</h4>
+              <p class="empty-desc">${msg}</p>
+            </div>
+          </td>
+        </tr>
+      `;
       return;
     }
 
     const totalRows = demandas.length;
 
     tbody.innerHTML = demandas.map((d, index) => {
-      let stClass = 'ok';
-      let stText = '✓ HOMOLOGADO TI';
+      const statusUpper = String(d.status || '').toUpperCase().trim();
+      const ehCancelado = statusUpper === 'CANCELADO' || statusUpper === 'CANCELADA';
 
-      if (d.status === 'Cancelado') {
-        stClass = 'cancelado';
-        stText = '🚫 CANCELADO';
-      } else if (d.status === 'Sob Análise' || d.nivel_risco === 'MEDIO') {
-        stClass = 'warn';
-        stText = '⏳ EM ANÁLISE';
-      } else if (d.status === 'Bloqueado TCE' || d.nivel_risco === 'ALTO') {
-        stClass = 'danger';
-        stText = '⚠️ REVISÃO EXIGIDA';
+      let stClass = 'status-homologado';
+      let stText = 'Homologado TI';
+
+      if (ehCancelado) {
+        stClass = 'status-cancelado';
+        stText = 'Cancelado';
+      } else if (statusUpper.includes('ANÁLISE') || statusUpper.includes('ANALISE') || d.nivel_risco === 'MEDIO') {
+        stClass = 'status-analise';
+        stText = 'Em Análise TI';
+      } else if (statusUpper.includes('BLOQUEADO') || statusUpper.includes('REVIS') || d.nivel_risco === 'ALTO') {
+        stClass = 'status-revisao';
+        stText = 'Revisão Exigida';
+      } else {
+        stClass = 'status-homologado';
+        stText = 'Homologado TI';
       }
 
       let nomeEquip = 'Notebook Corporativo';
@@ -629,54 +658,72 @@ const app = {
         descEquip = 'Nível 3 • Engenharia (SEPLAN)';
       }
 
-      const ehCancelado = d.status === 'Cancelado';
       // Abre para cima quando for penúltima ou última linha para não cortar
       const isDropUp = (index >= totalRows - 2 && totalRows >= 2) || (index === 0 && totalRows === 1);
 
       return `
-        <tr style="${ehCancelado ? 'opacity: 0.75;' : ''}">
-          <td>
-            <div class="td-protocolo">${d.protocolo}</div>
+        <tr class="table-row-item ${ehCancelado ? 'row-canceled' : ''}">
+          <td class="col-protocolo">
+            <span class="badge-protocolo">${d.protocolo}</span>
           </td>
-          <td>
-            <div class="td-main-text">${d.setor || 'Escolas Municipais (SME)'}</div>
-            <div class="td-sub-text">${d.orgao || 'Prefeitura de Lages - SME'}</div>
+          <td class="col-orgao">
+            <div class="text-primary-strong">${d.setor || 'Escolas Municipais (SME)'}</div>
+            <div class="text-secondary-muted">${d.orgao || 'Prefeitura de Lages - SME'}</div>
           </td>
-          <td>
-            <div class="td-main-text">${d.usuario_nome || 'Servidor Solicitante'}</div>
-            <div class="td-sub-text">${d.cargo || 'Diretora de Escola'}</div>
+          <td class="col-solicitante">
+            <div class="text-primary-strong">${d.usuario_nome || 'Servidor Solicitante'}</div>
+            <div class="text-secondary-muted">${d.cargo || 'Diretora de Escola'}</div>
           </td>
-          <td style="text-align: center;">
-            <span class="td-qty-badge">${d.quantidade_usuarios}</span>
+          <td class="col-qtd" style="text-align: center;">
+            <span class="qty-pill-badge">${d.quantidade_usuarios}</span>
           </td>
-          <td>
-            <div class="td-main-text">${nomeEquip}</div>
-            <div class="td-sub-text">${descEquip}</div>
+          <td class="col-equipamento">
+            <div class="text-primary-strong">${nomeEquip}</div>
+            <div class="text-secondary-muted">${descEquip}</div>
           </td>
-          <td style="text-align: center;">
-            <span class="status-chip ${stClass}">${stText}</span>
+          <td class="col-status" style="text-align: center;">
+            <span class="badge-status-chip ${stClass}">
+              <span class="status-dot"></span>
+              <span class="status-label">${stText}</span>
+            </span>
             ${ehCancelado && d.motivo_cancelamento ? `
-              <div style="font-size: 0.72rem; color: #F87171; margin-top: 4px; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${d.motivo_cancelamento}">
+              <div class="canceled-reason-preview" title="${d.motivo_cancelamento}">
                 ${d.motivo_cancelamento}
               </div>
             ` : ''}
           </td>
-          <td style="text-align: right;">
+          <td class="col-acoes" style="text-align: right;">
             <div class="acoes-dropdown-wrap">
-              <button type="button" class="btn-acoes-trigger" onclick="app.toggleMenuAcoes('${d.protocolo}', event)">
-                ⚡ Ações <span style="font-size: 0.65rem; margin-left: 2px;">▼</span>
+              <button type="button" class="btn-acoes-dropdown" onclick="app.toggleMenuAcoes('${d.protocolo}', event)">
+                <span>Ações</span>
+                <svg class="chevron-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
               </button>
               <div class="acoes-menu-dropdown ${isDropUp ? 'drop-up' : ''}" id="menu-acoes-${d.protocolo}">
                 <button type="button" class="acoes-menu-item" onclick="app.abrirMinuta('${d.protocolo}')">
-                  <span>📄</span> Visualizar Ficha / DOD
+                  <span class="item-icon">📄</span>
+                  <div class="item-label">
+                    <strong>Visualizar Ficha Técnica</strong>
+                    <small>DOD oficial para impressão A4</small>
+                  </div>
                 </button>
+                <div class="menu-divider"></div>
                 ${!ehCancelado ? `
-                  <button type="button" class="acoes-menu-item danger" onclick="app.abrirModalCancelar('${d.protocolo}')">
-                    <span>🚫</span> Cancelar Requisição
+                  <button type="button" class="acoes-menu-item item-danger" onclick="app.abrirModalCancelar('${d.protocolo}')">
+                    <span class="item-icon">🚫</span>
+                    <div class="item-label">
+                      <strong>Cancelar Requisição</strong>
+                      <small>Informar motivo e arquivar</small>
+                    </div>
                   </button>
                 ` : `
-                  <button type="button" class="acoes-menu-item muted" onclick="app.verMotivoCancelamento('${d.protocolo}')">
-                    <span>ℹ️</span> Ver Motivo do Cancelamento
+                  <button type="button" class="acoes-menu-item" onclick="app.verMotivoCancelamento('${d.protocolo}')">
+                    <span class="item-icon">ℹ️</span>
+                    <div class="item-label">
+                      <strong>Motivo do Cancelamento</strong>
+                      <small>Ver justificativa registrada</small>
+                    </div>
                   </button>
                 `}
               </div>
