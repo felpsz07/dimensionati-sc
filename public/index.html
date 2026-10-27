@@ -309,317 +309,200 @@
 
         <div class="dark-card-box" style="max-width: 860px; margin: 0 auto;">
 
-          <!-- STEPPER HORIZONTAL COM ÍCONES E INDICADORES -->
+          <!-- STEPPER ULTRA OBJETIVO (3 PASSOS) -->
           <div class="stepper-bar">
             <div class="step-node active" id="step-node-1" onclick="app.irParaPasso(1)">
               <div class="step-circle">1</div>
-              <span class="step-title">Órgão</span>
+              <span class="step-title">1. Equipamento</span>
             </div>
             <div class="step-divider"></div>
 
             <div class="step-node" id="step-node-2" onclick="app.irParaPasso(2)">
               <div class="step-circle">2</div>
-              <span class="step-title">Rotina</span>
+              <span class="step-title">2. Rotina & Acessórios</span>
             </div>
             <div class="step-divider"></div>
 
             <div class="step-node" id="step-node-3" onclick="app.irParaPasso(3)">
               <div class="step-circle">3</div>
-              <span class="step-title">Hardware</span>
-            </div>
-            <div class="step-divider"></div>
-
-            <div class="step-node" id="step-node-4" onclick="app.irParaPasso(4)">
-              <div class="step-circle">4</div>
-              <span class="step-title">Auditoria</span>
-            </div>
-            <div class="step-divider"></div>
-
-            <div class="step-node" id="step-node-5" onclick="app.irParaPasso(5)">
-              <div class="step-circle">5</div>
-              <span class="step-title">Concluir</span>
+              <span class="step-title">3. Confirmar & Enviar</span>
             </div>
           </div>
 
 
-          <!-- PASSO 1: LOCAL E TIPO DO EQUIPAMENTO -->
+          <!-- ========================================== -->
+          <!-- PASSO 1: QUAL EQUIPAMENTO VOCÊ PRECISA?    -->
+          <!-- ========================================== -->
           <div class="wizard-pane active" id="pane-passo-1">
-            <h3 class="pane-headline">Onde e como você vai usar o equipamento?</h3>
-            <p class="pane-sub">Defina o seu setor e escolha se você precisa de um computador de mesa ou um notebook portátil.</p>
+            <h3 class="pane-headline">Qual computador você precisa?</h3>
+            <p class="pane-sub">Escolha o modelo que melhor atende à sua rotina de trabalho na escola:</p>
 
-            <div class="field-group" style="margin-top: 20px;">
-              <label class="field-label">Secretaria / Local de Trabalho</label>
-              <select class="dark-input" id="wizOrgaoSelect" onchange="app.atualizarOrgaoWizard(this.value)">
-                <option value="Escolas Municipais (SME)|Prefeitura de Lages - SME">Prefeitura de Lages - Secretaria Municipal de Educação (SME)</option>
-                <option value="Saúde e Postos (UBS)|Prefeitura de Lages - SMS">Prefeitura de Lages - Secretaria Municipal de Saúde (SMS)</option>
-                <option value="Administração Geral|Prefeitura de Lages - Administração">Prefeitura de Lages - Secretaria de Administração</option>
-                <option value="Fazenda e Tributos|Prefeitura de Lages - Fazenda">Prefeitura de Lages - Secretaria da Fazenda</option>
-                <option value="SEPLAN e Obras|Prefeitura de Lages - SEPLAN">Prefeitura de Lages - Planejamento e Obras (SEPLAN)</option>
-                <option value="Câmara de Vereadores|Câmara de Lages">Câmara Municipal de Vereadores de Lages</option>
-              </select>
+            <!-- CARDS DE ESCOLHA GRANDE E VISUAL -->
+            <div class="equip-choice-grid">
+              <div class="equip-choice-card active" id="cardEscolhaNotebook" onclick="app.setFormatoEquipamento('notebook')">
+                <div class="equip-badge-pop">RECOMENDADO P/ DIRETORIA & AULAS</div>
+                <div class="equip-icon">💻</div>
+                <div class="equip-info">
+                  <h4>Notebook Corporativo</h4>
+                  <p>Portátil e leve. Ideal para levar para reuniões pedagógicas, conselho de classe e planejamento.</p>
+                  <div class="equip-features">
+                    <span>✓ Tela 15.6" Full HD e Câmera Integrada</span>
+                    <span>✓ Bateria para trabalhar fora da tomada</span>
+                    <span>✓ Windows 11 Pro 64-bit homologado</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="equip-choice-card" id="cardEscolhaDesktop" onclick="app.setFormatoEquipamento('desktop')">
+                <div class="equip-icon">🖥️</div>
+                <div class="equip-info">
+                  <h4>Computador de Mesa (Desktop)</h4>
+                  <p>Ideal para trabalho fixo na mesa da secretaria escolar ou sala de atendimento.</p>
+                  <div class="equip-features">
+                    <span>✓ Gabinete compacto de alta durabilidade</span>
+                    <span>✓ Teclado, mouse e monitor dedicado</span>
+                    <span>✓ Windows 11 Pro 64-bit homologado</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <!-- FORMATO DO EQUIPAMENTO (DESKTOP OU NOTEBOOK) -->
-            <div class="field-group" style="margin-top: 20px;">
-              <label class="field-label">Qual o formato do equipamento que você precisa?</label>
-              <div class="options-pills-row" style="margin-top: 6px;">
-                <button type="button" class="opt-pill active" id="btnFormatoDesktop" onclick="app.setFormatoEquipamento('desktop', this)">
-                  🖥️ Computador de Mesa (Desktop Fixo na Escola)
-                </button>
-                <button type="button" class="opt-pill" id="btnFormatoNotebook" onclick="app.setFormatoEquipamento('notebook', this)">
-                  💻 Notebook Corporativo (Portátil para Reuniões e Planejamento)
-                </button>
+            <!-- QUANTIDADE -->
+            <div style="margin-top: 22px; background: var(--dark-surface); padding: 18px 20px; border-radius: var(--radius-md); border: 1px solid var(--dark-border);">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div>
+                  <strong style="color: var(--dark-text); font-size: 0.95rem;">Quantos equipamentos você precisa?</strong>
+                  <p style="color: var(--dark-muted); font-size: 0.8rem; margin-top: 2px;">Para o seu setor ou unidade escolar:</p>
+                </div>
+                <div class="quick-qty-row">
+                  <button type="button" class="qty-pill active" onclick="app.setQtd(1, this)">1 equipamento</button>
+                  <button type="button" class="qty-pill" onclick="app.setQtd(2, this)">2 equipamentos</button>
+                  <button type="button" class="qty-pill" onclick="app.setQtd(5, this)">5 equipamentos</button>
+                  <input type="number" id="inputQtd" class="dark-input inline-qty" min="1" max="50" value="1" onchange="app.setQtdCustom(this.value)">
+                </div>
               </div>
-              <p style="font-size: 0.76rem; color: var(--dark-muted); margin-top: 6px;">
-                🔒 <em>Blindagem Técnica: Garante processador x86-64 com Windows 11 Pro homologado (impede envio de netbooks ou tablets fracos).</em>
-              </p>
             </div>
 
-            <div class="field-group" style="margin-top: 20px;">
-              <label class="field-label">Quantidade de Equipamentos</label>
-              <div class="quick-qty-row">
-                <button type="button" class="qty-pill active" onclick="app.setQtd(1, this)">1</button>
-                <button type="button" class="qty-pill" onclick="app.setQtd(2, this)">2</button>
-                <button type="button" class="qty-pill" onclick="app.setQtd(5, this)">5</button>
-                <button type="button" class="qty-pill" onclick="app.setQtd(10, this)">10</button>
-                <button type="button" class="qty-pill" onclick="app.setQtd(20, this)">20</button>
-                <input type="number" id="inputQtd" class="dark-input inline-qty" min="1" max="500" value="1" onchange="app.setQtdCustom(this.value)">
-              </div>
+            <!-- SOLICITANTE IDENTIFICADO -->
+            <div style="margin-top: 14px; display: flex; align-items: center; gap: 8px; color: var(--dark-muted); font-size: 0.82rem;">
+              <span>📍 <strong>Unidade / Solicitante:</strong></span>
+              <span id="labelLocalSolicitante" style="color: var(--dark-text); font-weight: 600;">Profa. Angelita de Souza — Escolas Municipais (SME Lages)</span>
             </div>
           </div>
 
 
-          <!-- PASSO 2: ROTINA DIÁRIA FILTRADA PELO SETOR -->
+          <!-- ========================================== -->
+          <!-- PASSO 2: O QUE VOCÊ FAZ NO COMPUTADOR?     -->
+          <!-- ========================================== -->
           <div class="wizard-pane" id="pane-passo-2">
-            <h3 class="pane-headline">O que as pessoas fazem no computador?</h3>
-            <p class="pane-sub">Atividades mapeadas especificamente para o seu setor de atuação.</p>
+            <h3 class="pane-headline">O que você faz no computador?</h3>
+            <p class="pane-sub">Marque o que faz parte do seu dia a dia (o sistema cuida de toda a especificação técnica):</p>
 
-            <!-- BANNER DE SETOR / BLINDAGEM TCE CONTRA COMPRAS INDEVIDAS -->
-            <div id="boxAvisoSetorRotinas" class="rotina-sector-banner">
-              <div class="rotina-banner-icon" id="rotinaBannerIcon">🏫</div>
-              <div class="rotina-banner-content">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                  <span class="rotina-banner-badge" id="rotinaBannerBadge">HOMOLOGADO TCE/SC</span>
-                  <strong style="color: var(--dark-text); font-size: 0.88rem;" id="rotinaBannerSetorNome">Escolas Municipais (SME Lages)</strong>
-                </div>
-                <h4 id="rotinaBannerTitulo">Catálogo de Rotinas Escolares Autorizadas</h4>
-                <p id="rotinaBannerDesc">
-                  Com base no seu perfil cadastrado, exibimos apenas as rotinas de escolas e CMEIs. Rotinas de engenharia pesada, AutoCAD e 3D foram bloqueadas para evitar pedidos indevidos e superdimensionamento.
-                </p>
-              </div>
+            <!-- GRID LIMPA DE ATIVIDADES -->
+            <div class="rotinas-clean-grid" id="gridRotinasDinamicas">
+              <!-- Preenchido via app.renderizarRotinasPasso2() -->
             </div>
 
-            <!-- GRID DINÂMICA DE ROTINAS HOMOLOGADAS -->
-            <div class="cards-select-grid" id="gridRotinasDinamicas" style="margin-top: 16px;">
-              <!-- Preenchido dinamicamente via app.renderizarRotinasPasso2() -->
+            <!-- PERIFÉRICOS DE MESA (SEM COMPLICAÇÃO) -->
+            <div class="mesa-perifericos-box">
+              <div class="mesa-box-header">
+                <div>
+                  <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--dark-text); margin: 0;">
+                    Você já possui acessórios funcionando na sua mesa?
+                  </h4>
+                  <p style="font-size: 0.8rem; color: var(--dark-muted); margin-top: 2px;">
+                    Marque para o TI enviar apenas o que você realmente precisa na escola:
+                  </p>
+                </div>
+                <span class="rotina-banner-badge" style="background: rgba(52, 211, 153, 0.15); color: var(--dark-accent);">
+                  🌱 APROVEITAMENTO INTELIGENTE
+                </span>
+              </div>
+
+              <div class="mesa-items-row">
+                <!-- MONITOR -->
+                <div class="mesa-item-card">
+                  <div class="mesa-item-title">
+                    <span>🖥️</span> <strong>Monitor de Vídeo</strong>
+                  </div>
+                  <div class="mesa-pills">
+                    <button type="button" class="opt-pill active" id="btnMon1x" onclick="app.setOpcaoMonitor('1x', this)">
+                      Preciso de Monitor
+                    </button>
+                    <button type="button" class="opt-pill" id="btnMonNone" onclick="app.setOpcaoMonitor('none', this)">
+                      Já tenho na mesa
+                    </button>
+                  </div>
+                </div>
+
+                <!-- TECLADO E MOUSE -->
+                <div class="mesa-item-card">
+                  <div class="mesa-item-title">
+                    <span>⌨️</span> <strong>Teclado e Mouse</strong>
+                  </div>
+                  <div class="mesa-pills">
+                    <button type="button" class="opt-pill active" id="btnPeriSim" onclick="app.setOpcaoPerifericos(true, this)">
+                      Preciso de Novos
+                    </button>
+                    <button type="button" class="opt-pill" id="btnPeriNao" onclick="app.setOpcaoPerifericos(false, this)">
+                      Já tenho na mesa
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
 
-          <!-- PASSO 3: HARDWARE DIMENSIONADO -->
+          <!-- ========================================== -->
+          <!-- PASSO 3: REVISÃO E ENVIO AO TI             -->
+          <!-- ========================================== -->
           <div class="wizard-pane" id="pane-passo-3">
-            <h3 class="pane-headline">Configuração Dimensionada</h3>
-            <p class="pane-sub">Especificação técnica otimizada com cláusulas de blindagem para Lages.</p>
+            <h3 class="pane-headline">Tudo pronto! Confira e Envie ao TI</h3>
+            <p class="pane-sub">Sua solicitação já foi convertida na especificação técnica oficial homologada pela Prefeitura:</p>
 
-            <div class="recommend-box" style="margin-top: 20px;">
-              <div class="recommend-badge" id="recBadge">NÍVEL 1 • ADEQUADO</div>
-              <h2 class="recommend-title" id="recTitle">Computador para Atendimento e Rotinas</h2>
-              
-              <div class="specs-grid">
-                <div class="spec-card">
-                  <span class="spec-icon">⚡</span>
-                  <strong>Processador</strong>
-                  <p id="recCpu">Quad-Core 3.4GHz+ (PassMark 8.500+)</p>
-                </div>
-                <div class="spec-card">
-                  <span class="spec-icon">🚀</span>
-                  <strong>Memória RAM</strong>
-                  <p id="recRam">8 GB DDR4 3200MHz (expansível)</p>
-                </div>
-                <div class="spec-card">
-                  <span class="spec-icon">💾</span>
-                  <strong>Armazenamento</strong>
-                  <p id="recSsd">SSD 256GB NVMe M.2</p>
-                </div>
-                <div class="spec-card">
-                  <span class="spec-icon">🖥️</span>
-                  <strong>Monitor NR-17</strong>
-                  <p id="recMonitor">23.8" IPS com ajuste de altura</p>
+            <div class="resumo-objetivo-card">
+              <div class="resumo-obj-header">
+                <div class="resumo-obj-icon" id="resumoObjIcon">💻</div>
+                <div>
+                  <span class="resumo-obj-tag">SOLICITAÇÃO HOMOLOGADA</span>
+                  <h3 id="resumoObjTitulo" style="color: #FFFFFF; font-size: 1.15rem; margin-top: 2px;">Notebook Corporativo (1 unidade)</h3>
+                  <p id="resumoObjSub" style="color: var(--dark-muted); font-size: 0.82rem;">Destinado a: Escolas Municipais — SME Lages</p>
                 </div>
               </div>
 
-              <!-- COMPOSIÇÃO DE PERIFÉRICOS & APROVEITAMENTO DO PARQUE INSTALADO -->
-              <div class="perifericos-box">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 6px;">
+              <div class="resumo-obj-body">
+                <div class="resumo-obj-grid">
+                  <div class="resumo-cell">
+                    <small>Solicitante</small>
+                    <strong id="sumServidor">Profa. Angelita de Souza (Diretora)</strong>
+                  </div>
+                  <div class="resumo-cell">
+                    <small>Local de Entrega</small>
+                    <strong id="sumOrgao">Escolas Municipais (SME Lages)</strong>
+                  </div>
+                  <div class="resumo-cell">
+                    <small>Sistema Operacional</small>
+                    <strong style="color: var(--dark-accent);">Windows 11 Pro 64-bit</strong>
+                  </div>
+                  <div class="resumo-cell">
+                    <small>Acessórios de Mesa</small>
+                    <strong id="sumAcessorios">Monitor Incluso • Teclado/Mouse Novos</strong>
+                  </div>
+                </div>
+
+                <div class="resumo-garantia-badge">
+                  <div style="font-size: 1.3rem;">🛡️</div>
                   <div>
-                    <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--dark-text); margin: 0;">
-                      Composição do Pacote (O setor já possui periféricos?)
-                    </h4>
-                    <p style="font-size: 0.8rem; color: var(--dark-muted); margin: 2px 0 0 0;">
-                      Desmarque o que já existe no órgão para economizar recursos públicos e evitar compras duplicadas.
+                    <strong style="color: #FFFFFF; font-size: 0.9rem;">Garantia Técnica Homologada pela Diretoria de TIC:</strong>
+                    <p style="color: #CBD5E1; font-size: 0.8rem; margin-top: 2px; line-height: 1.4;">
+                      Processador rápido com SSD de alta velocidade, 100% compatível com o SGPe, Diário de Classe e portais do MEC. Garantia de 36 meses com atendimento presencial do técnico na própria escola.
                     </p>
-                  </div>
-                  <span class="rotina-banner-badge" style="background: rgba(52, 211, 153, 0.15); color: var(--dark-accent);">
-                    SUSTENTABILIDADE • LEI 14.133
-                  </span>
-                </div>
-
-                <div class="perifericos-grid">
-                  <!-- MONITORES -->
-                  <div class="periferico-card">
-                    <span class="periferico-icon">🖥️</span>
-                    <div style="flex: 1;">
-                      <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="font-size: 0.88rem; color: var(--dark-text);">Monitor de Vídeo</strong>
-                        <span id="labelEcoMonitor" style="font-size: 0.75rem; color: var(--dark-accent); font-weight: 700;"></span>
-                      </div>
-                      <div class="options-pills-row" style="margin-top: 6px;">
-                        <button type="button" class="opt-pill active" id="btnMon1x" onclick="app.setOpcaoMonitor('1x', this)">
-                          1x Monitor IPS (Preciso de Monitor)
-                        </button>
-                        <button type="button" class="opt-pill" id="btnMonNone" onclick="app.setOpcaoMonitor('none', this)">
-                          Sem Monitor (Já possuo na minha mesa)
-                        </button>
-                        <button type="button" class="opt-pill" id="btnMon2x" onclick="app.setOpcaoMonitor('2x', this)">
-                          2x Telas (Tela Dupla)
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- TECLADO E MOUSE -->
-                  <div class="periferico-card" style="margin-top: 10px;">
-                    <span class="periferico-icon">⌨️</span>
-                    <div style="flex: 1;">
-                      <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="font-size: 0.88rem; color: var(--dark-text);">Kit Teclado e Mouse USB ABNT2</strong>
-                        <span id="labelEcoPerifericos" style="font-size: 0.75rem; color: var(--dark-accent); font-weight: 700;"></span>
-                      </div>
-                      <div class="options-pills-row" style="margin-top: 6px;">
-                        <button type="button" class="opt-pill active" id="btnPeriSim" onclick="app.setOpcaoPerifericos(true, this)">
-                          Incluir Kit Teclado/Mouse Novos
-                        </button>
-                        <button type="button" class="opt-pill" id="btnPeriNao" onclick="app.setOpcaoPerifericos(false, this)">
-                          Não incluir (Já tenho teclado e mouse que funcionam)
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- NOBREAK (OPCIONAL) -->
-                  <div class="periferico-card" style="margin-top: 10px;">
-                    <span class="periferico-icon">🔋</span>
-                    <div style="flex: 1;">
-                      <strong style="font-size: 0.88rem; color: var(--dark-text);">Proteção Elétrica</strong>
-                      <div class="options-pills-row" style="margin-top: 6px;">
-                        <button type="button" class="opt-pill active" id="btnNobNao" onclick="app.setOpcaoNobreak(false, this)">
-                          Rede Elétrica Padrão (Sem Nobreak)
-                        </button>
-                        <button type="button" class="opt-pill" id="btnNobSim" onclick="app.setOpcaoNobreak(true, this)">
-                          Incluir Nobreak de Proteção
-                        </button>
-                      </div>
+                    <div style="margin-top: 6px; font-size: 0.76rem; color: var(--dark-accent); font-weight: 700;">
+                      ✓ Zero risco de envio de netbooks fracos ou sistemas Android incompatíveis.
                     </div>
                   </div>
                 </div>
-
-                <!-- ALERTA DE REAPROVEITAMENTO DO SETOR -->
-                <div id="alertaEcoPerifericos" style="display: none; background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.25); border-radius: 6px; padding: 10px 14px; margin-top: 12px; font-size: 0.82rem; color: var(--dark-accent);">
-                  🌱 <strong>Aproveitamento Inteligente:</strong> O setor de TI receberá a indicação de envio apenas da máquina, reaproveitando os periféricos já instalados na sua escola.
-                </div>
-              </div>
-
-              <!-- BANNER DE CONFORMIDADE TÉCNICA (SEM VALORES MONETÁRIOS) -->
-              <div class="tech-validation-banner" style="margin-top: 18px; background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <div>
-                  <span style="font-size: 0.72rem; font-weight: 800; color: var(--dark-accent); text-transform: uppercase;">PADRÃO TÉCNICO HOMOLOGADO</span>
-                  <div style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF;" id="labelAdequacaoTecnica">
-                    ✓ Máquina Homologada para a Rotina Declarada
-                  </div>
-                  <small style="color: var(--dark-muted);">Arquitetura x86-64 com Windows 11 Pro 64-bit (compatibilidade total com sistemas municipais)</small>
-                </div>
-                <div style="text-align: right;">
-                  <span class="rotina-banner-badge" style="background: rgba(52, 211, 153, 0.2); color: var(--dark-accent); font-size: 0.8rem; padding: 6px 12px;">
-                    🛡️ GARANTIA ON-SITE: 36 MESES
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <!-- SIMULAÇÃO OPCIONAL DE MODELO -->
-            <div style="margin-top: 20px;">
-              <label class="field-label">Deseja simular outro porte de equipamento?</label>
-              <select id="selectSimular" class="dark-input" onchange="app.mudarModeloManual(this.value)">
-                <option value="1">Nível 1: Gestão Escolar e Atendimento (8 GB RAM / x86-64)</option>
-                <option value="2">Nível 2: Análise de Dados e Relatórios Gerenciais (16 GB RAM)</option>
-                <option value="3">Nível 3: Projetos de Engenharia e CAD (32 GB RAM + GPU Dedicada)</option>
-              </select>
-            </div>
-          </div>
-
-
-          <!-- PASSO 4: AUDITORIA TCE/SC -->
-          <div class="wizard-pane" id="pane-passo-4">
-            <h3 class="pane-headline">Auditoria Preventiva TCE/SC</h3>
-            <p class="pane-sub">Verificação de risco de superdimensionamento para o certame.</p>
-
-            <div class="audit-status-card" id="auditCard" style="margin-top: 20px;">
-              <div class="audit-header">
-                <span class="audit-icon" id="auditIcon">🛡️</span>
-                <div>
-                  <h4 id="auditTitle">Conformidade Plena</h4>
-                  <p id="auditDesc">Configuração proporcional à rotina. Processo aprovado sem restrições.</p>
-                </div>
-              </div>
-
-              <div id="boxJustificativa" style="display: none; margin-top: 16px;">
-                <label class="field-label" style="color: #F87171;">Justificativa Técnica Formal (Obrigatória):</label>
-                <textarea id="txtJustificativa" class="dark-input" rows="3" placeholder="Explique por que o modelo de menor custo não atende..."></textarea>
-              </div>
-            </div>
-
-            <div class="spec-bullets">
-              <strong>🔒 Cláusulas Blindadas Inclusas:</strong>
-              <div class="bullet-chips">
-                <span>PassMark Mínimo</span>
-                <span>TPM 2.0 Ativo</span>
-                <span>Fonte 80 Plus</span>
-                <span>Garantia 36 Meses On-Site</span>
-                <span>Ergonomia NR-17</span>
-              </div>
-            </div>
-          </div>
-
-
-          <!-- PASSO 5: CONCLUIR REQUISIÇÃO -->
-          <div class="wizard-pane" id="pane-passo-5">
-            <h3 class="pane-headline">Revisão da sua Requisição de Informática</h3>
-            <p class="pane-sub">Confira os dados da sua solicitação que será enviada para o setor de TI da Prefeitura de Lages.</p>
-
-            <div class="summary-table" style="margin-top: 20px;">
-              <div class="summary-row">
-                <span>Nº Requisição:</span>
-                <strong id="sumProtocolo">REQ-2026-AUTO</strong>
-              </div>
-              <div class="summary-row">
-                <span>Local de Atuação:</span>
-                <strong id="sumOrgao">SME Educação - Escolas Municipais</strong>
-              </div>
-              <div class="summary-row">
-                <span>Solicitante:</span>
-                <strong id="sumServidor">Diretora</strong>
-              </div>
-              <div class="summary-row">
-                <span>Quantidade:</span>
-                <strong id="sumQtd">1 Equipamento</strong>
-              </div>
-              <div class="summary-row">
-                <span>Equipamento Homologado:</span>
-                <strong id="sumModelo">Notebook Corporativo (8 GB RAM / x86-64)</strong>
-              </div>
-              <div class="summary-row total">
-                <span>Validação Técnica de TI:</span>
-                <strong class="neon-text" id="sumStatusTecnico">✓ Homologado para Gestão Escolar (Sem risco de Netbook incompatível)</strong>
               </div>
             </div>
           </div>
@@ -631,7 +514,7 @@
               &larr; Voltar
             </button>
             <button type="button" class="btn-primary-neon" id="btnWizAvancar" onclick="app.proximoPasso()">
-              Próximo &rarr;
+              Avançar &rarr;
             </button>
           </div>
 

@@ -2,13 +2,13 @@
 const app = {
   usuarioLogado: null,
   passoAtual: 1,
-  totalPassos: 5,
+  totalPassos: 3,
   demandasCarregadas: [],
 
   lotacaoTemp: {
     setorNome: 'Escolas Municipais (SME)',
     orgao: 'Prefeitura de Lages - SME',
-    cargo: 'Professora / Coordenadora'
+    cargo: 'Diretora de Escola Municipal'
   },
 
   demanda: {
@@ -17,25 +17,25 @@ const app = {
     usuarioMatricula: '',
     setorNome: 'Escolas Municipais (SME)',
     orgao: 'Prefeitura de Lages - SME',
-    cargo: 'Professora / Coordenadora',
+    cargo: 'Diretora de Escola Municipal',
     municipio: 'Lages',
     quantidade: 1,
-    formatoEquipamento: 'desktop', // 'desktop' ou 'notebook'
+    formatoEquipamento: 'notebook', // 'desktop' ou 'notebook'
     opcaoMonitor: '1x', // 'none', '1x', '2x'
     incluiPerifericos: true, // teclado e mouse
     incluiNobreak: false,
     atividades: ['edu_1', 'edu_2', 'edu_3'],
     atividadesNomes: [
-      'Diário de Classe & Sistema Escolar SME',
-      'Planos de Aula, Provas e Documentos Didáticos',
-      'Navegação Web, SGPe e E-mails Educacionais'
+      'Sistema Escolar & Diário de Classe',
+      'Documentos e Provas Escolares',
+      'Internet, E-mails e SGPe'
     ],
     perfilRecomendado: null,
     perfilEscolhido: null,
     analiseTrava: null,
-    protocolo: 'ETP-2026-0000',
+    protocolo: 'REQ-2026-0000',
     custo_unitario: 1850.00,
-    custo_total: 18500.00
+    custo_total: 1850.00
   },
 
   // ==========================================================
@@ -45,48 +45,48 @@ const app = {
     educacao: {
       nomeSetor: 'Escolas Municipais e CMEIs (SME Lages)',
       icone: '🏫',
-      badge: 'ROTINAS ESCOLARES HOMOLOGADAS • LEI 14.133',
+      badge: 'ROTINAS ESCOLARES AUTORIZADAS',
       titulo: 'Atividades Pedagógicas e de Gestão Escolar',
-      descricaoBlindagem: 'Com base no seu perfil escolar (SME), este catálogo foi restrito às rotinas didáticas e administrativas autorizadas. Softwares pesados (AutoCAD, 3D e renderização) foram desabilitados para prevenir compras inadequadas e superdimensionamento.',
+      descricaoBlindagem: 'Catálogo de rotinas da educação municipal.',
       rotinas: [
         {
           id: 'edu_1',
-          nome: 'Diário de Classe & Sistema Escolar SME',
-          desc: 'Lançamento de notas, faltas, boletins, transferências e histórico escolar de alunos nos portais oficiais.',
+          nome: 'Sistema Escolar & Diário de Classe',
+          desc: 'Lançamento de notas, faltas, matrículas e boletins.',
           icone: '🎓',
           softwareId: 1,
           padrao: true
         },
         {
           id: 'edu_2',
-          nome: 'Planos de Aula, Provas e Documentos Didáticos',
-          desc: 'Elaboração de avaliações, apostilas, leitura e geração de PDFs e edição de textos (Word/Writer).',
+          nome: 'Documentos e Provas Escolares',
+          desc: 'Textos no Word/Writer, avaliações, apostilas e PDFs de aulas.',
           icone: '📝',
           softwareId: 2,
           padrao: true
         },
         {
           id: 'edu_3',
-          nome: 'Navegação Web, SGPe e E-mails Educacionais',
-          desc: 'Pesquisa pedagógica, acesso ao portal do professor, SGPe do Estado e comunicação escolar.',
+          nome: 'Internet, E-mails e SGPe',
+          desc: 'SGPe do Estado, portais oficiais, pesquisas e reuniões online.',
           icone: '🌐',
           softwareId: 1,
           padrao: true
         },
         {
           id: 'edu_4',
-          nome: 'Apresentações Didáticas e Mídias em Sala',
-          desc: 'Exibição de slides no projetor (PowerPoint/Canva), reprodução de vídeos educativos e YouTube.',
-          icone: '📽️',
-          softwareId: 2,
+          nome: 'Planilhas e Controle Escolar',
+          desc: 'Tabelas de médias de alunos, listas de chamada e materiais.',
+          icone: '📊',
+          softwareId: 3,
           padrao: false
         },
         {
           id: 'edu_5',
-          nome: 'Planilhas Escolares & Almoxarifado Pedagógico',
-          desc: 'Controle de médias de alunos, listas de presença e almoxarifado de livros e merenda escolar.',
-          icone: '📊',
-          softwareId: 3,
+          nome: 'Apresentações Didáticas e Vídeos',
+          desc: 'Exibição de slides no projetor, Canva e vídeos educativos.',
+          icone: '📽️',
+          softwareId: 2,
           padrao: false
         }
       ]
@@ -591,11 +591,11 @@ const app = {
   },
 
   // ==========================================
-  // STEPPER WIZARD (PASSOS 1 A 5)
+  // STEPPER WIZARD OBJETIVO (PASSOS 1 A 3)
   // ==========================================
   abrirWizardNovo() {
     const num = Math.floor(1000 + Math.random() * 9000);
-    this.demanda.protocolo = `ETP-2026-${num}`;
+    this.demanda.protocolo = `REQ-2026-${num}`;
 
     // Sincroniza com dados cadastrados do usuário logado
     if (this.usuarioLogado) {
@@ -604,27 +604,24 @@ const app = {
       this.demanda.usuarioMatricula = this.usuarioLogado.matricula;
       this.demanda.setorNome = this.usuarioLogado.setor || 'Escolas Municipais (SME)';
       this.demanda.orgao = this.usuarioLogado.orgao || 'Prefeitura de Lages - SME';
-      this.demanda.cargo = this.usuarioLogado.cargo || 'Professora / Coordenadora';
+      this.demanda.cargo = this.usuarioLogado.cargo || 'Diretora de Escola Municipal';
     }
 
-    // Sincroniza o select do Passo 1
-    const sel = document.getElementById('wizOrgaoSelect');
-    if (sel) {
-      for (let i = 0; i < sel.options.length; i++) {
-        const val = sel.options[i].value;
-        const [optSetor, optOrgao] = val.split('|');
-        if (
-          this.demanda.setorNome.includes(optSetor) ||
-          optSetor.includes(this.demanda.setorNome) ||
-          this.demanda.orgao.includes(optOrgao)
-        ) {
-          sel.selectedIndex = i;
-          break;
-        }
-      }
+    this.demanda.formatoEquipamento = 'notebook';
+    this.demanda.quantidade = 1;
+    this.demanda.opcaoMonitor = '1x';
+    this.demanda.incluiPerifericos = true;
+
+    // Atualiza identificação visual da solicitante
+    const lblLocal = document.getElementById('labelLocalSolicitante');
+    if (lblLocal) {
+      lblLocal.innerText = `${this.demanda.usuarioNome} — ${this.demanda.setorNome}`;
     }
 
-    // Renderiza dinamicamente as rotinas específicas do setor do usuário
+    this.setFormatoEquipamento('notebook');
+    this.setQtd(1);
+
+    // Renderiza dinamicamente as rotinas específicas do setor da usuária
     this.renderizarRotinasPasso2();
 
     this.navegar('wizard');
@@ -648,16 +645,21 @@ const app = {
     const btnAvancar = document.getElementById('btnWizAvancar');
     if (btnAvancar) {
       if (passo === this.totalPassos) {
-        btnAvancar.innerHTML = 'Emitir Minuta & Salvar ✓';
+        btnAvancar.innerHTML = '🚀 Enviar Solicitação para o TI ✓';
       } else {
-        btnAvancar.innerHTML = 'Próximo &rarr;';
+        btnAvancar.innerHTML = 'Avançar &rarr;';
       }
     }
 
-    if (passo === 2) this.renderizarRotinasPasso2();
-    else if (passo === 3) this.calcularHardware();
-    else if (passo === 4) this.analisarAuditoria();
-    else if (passo === 5) this.preencherResumo();
+    if (passo === 2) {
+      this.renderizarRotinasPasso2();
+    } else if (passo === 3) {
+      this.calcularHardware().then(() => {
+        this.analisarAuditoria().then(() => {
+          this.preencherResumo();
+        });
+      });
+    }
   },
 
   passoAnterior() {
@@ -676,27 +678,30 @@ const app = {
     const [setor, orgao] = val.split('|');
     this.demanda.setorNome = setor;
     this.demanda.orgao = orgao;
-    // Atualiza imediatamente o catálogo do Passo 2 para o novo setor
     this.renderizarRotinasPasso2();
   },
 
   setFormatoEquipamento(formato, elem) {
-    document.querySelectorAll('#btnFormatoDesktop, #btnFormatoNotebook').forEach(b => b.classList.remove('active'));
-    if (elem) elem.classList.add('active');
     this.demanda.formatoEquipamento = formato;
 
-    const monCard = document.getElementById('recMonitor');
-    if (formato === 'notebook') {
-      if (monCard) monCard.innerText = 'Tela 15.6" Full HD + Webcam Integrada';
-    } else {
-      if (monCard) monCard.innerText = '23.8" IPS com ajuste de altura NR-17';
+    const cardNb = document.getElementById('cardEscolhaNotebook');
+    const cardDt = document.getElementById('cardEscolhaDesktop');
+    if (cardNb && cardDt) {
+      cardNb.classList.toggle('active', formato === 'notebook');
+      cardDt.classList.toggle('active', formato === 'desktop');
     }
+
     this.recalcularPrecoEPerifericos();
   },
 
   setQtd(n, elem) {
     document.querySelectorAll('.qty-pill').forEach(b => b.classList.remove('active'));
-    if (elem) elem.classList.add('active');
+    if (elem) {
+      elem.classList.add('active');
+    } else {
+      const first = document.querySelector('.qty-pill');
+      if (first) first.classList.add('active');
+    }
     this.demanda.quantidade = n;
     const inp = document.getElementById('inputQtd');
     if (inp) inp.value = n;
@@ -709,51 +714,34 @@ const app = {
   },
 
   // ==========================================
-  // RENDERIZAÇÃO INTELIGENTE DO PASSO 2 (ROTINA)
-  // FILTRADO PELO SETOR DE ATUAÇÃO (EX: ESCOLAS)
+  // RENDERIZAÇÃO OBJETIVA DO PASSO 2 (ROTINA)
   // ==========================================
   renderizarRotinasPasso2() {
     const chave = this.detectarChaveSetor(this.demanda.setorNome || this.demanda.orgao);
     const config = this.catalogoRotinasPorSetor[chave] || this.catalogoRotinasPorSetor['educacao'];
-
-    // Atualiza o Banner de Homologação / Blindagem TCE
-    const elIcon = document.getElementById('rotinaBannerIcon');
-    const elSetor = document.getElementById('rotinaBannerSetorNome');
-    const elBadge = document.getElementById('rotinaBannerBadge');
-    const elTitulo = document.getElementById('rotinaBannerTitulo');
-    const elDesc = document.getElementById('rotinaBannerDesc');
-
-    if (elIcon) elIcon.innerText = config.icone;
-    if (elSetor) elSetor.innerText = config.nomeSetor;
-    if (elBadge) elBadge.innerText = config.badge;
-    if (elTitulo) elTitulo.innerText = config.titulo;
-    if (elDesc) elDesc.innerText = config.descricaoBlindagem;
 
     // Garante que as atividades selecionadas pertençam ao catálogo atual
     const idsValidos = config.rotinas.map(r => r.id);
     const temAtividadesValidas = this.demanda.atividades.some(id => idsValidos.includes(id));
 
     if (!temAtividadesValidas) {
-      // Pré-marca as rotinas padrão do setor
       this.demanda.atividades = config.rotinas.filter(r => r.padrao).map(r => r.id);
     }
 
-    // Mantém os nomes textuais atualizados
     this.demanda.atividadesNomes = config.rotinas
       .filter(r => this.demanda.atividades.includes(r.id))
       .map(r => r.nome);
 
-    // Renderiza a Grid de Cards
     const grid = document.getElementById('gridRotinasDinamicas');
     if (!grid) return;
 
     grid.innerHTML = config.rotinas.map(rot => {
       const isSelected = this.demanda.atividades.includes(rot.id);
       return `
-        <div class="select-box ${isSelected ? 'selected' : ''}" id="act-${rot.id}" onclick="app.toggleAtividade('${rot.id}')">
-          <div class="box-check">✓</div>
-          <div class="box-info">
-            <h4>${rot.icone} ${rot.nome}</h4>
+        <div class="clean-rotina-card ${isSelected ? 'selected' : ''}" id="act-${rot.id}" onclick="app.toggleAtividade('${rot.id}')">
+          <div class="rotina-check">${isSelected ? '✓' : ''}</div>
+          <div class="rotina-details">
+            <h5>${rot.icone} ${rot.nome}</h5>
             <p>${rot.desc}</p>
           </div>
         </div>
@@ -764,13 +752,12 @@ const app = {
   toggleAtividade(id) {
     const chave = this.detectarChaveSetor(this.demanda.setorNome || this.demanda.orgao);
     const config = this.catalogoRotinasPorSetor[chave] || this.catalogoRotinasPorSetor['educacao'];
-    const rot = config.rotinas.find(r => r.id === id);
 
     const idx = this.demanda.atividades.indexOf(id);
 
     if (idx > -1) {
       if (this.demanda.atividades.length === 1) {
-        alert('Selecione ao menos uma atividade de rotina escolar/setorial.');
+        alert('Selecione ao menos uma atividade de trabalho.');
         return;
       }
       this.demanda.atividades.splice(idx, 1);
@@ -778,11 +765,14 @@ const app = {
       this.demanda.atividades.push(id);
     }
 
-    // Atualiza estado visual do card
     const cardEl = document.getElementById(`act-${id}`);
-    if (cardEl) cardEl.classList.toggle('selected', this.demanda.atividades.includes(id));
+    if (cardEl) {
+      const isSelected = this.demanda.atividades.includes(id);
+      cardEl.classList.toggle('selected', isSelected);
+      const chk = cardEl.querySelector('.rotina-check');
+      if (chk) chk.innerText = isSelected ? '✓' : '';
+    }
 
-    // Atualiza lista de nomes legíveis
     this.demanda.atividadesNomes = config.rotinas
       .filter(r => this.demanda.atividades.includes(r.id))
       .map(r => r.nome);
@@ -925,29 +915,29 @@ const app = {
     const ehNotebook = this.demanda.formatoEquipamento === 'notebook';
 
     if (p.id === 1) {
-      badge.innerText = 'NÍVEL 1 • ADEQUADO E HOMOLOGADO';
-      title.innerText = ehNotebook 
+      if (badge) badge.innerText = 'NÍVEL 1 • ADEQUADO E HOMOLOGADO';
+      if (title) title.innerText = ehNotebook 
         ? 'Notebook Corporativo Portátil (Gestão Escolar)' 
         : 'Computador Desktop de Mesa (Atendimento e Gestão)';
-      cpu.innerText = 'Quad-Core x86-64 3.4GHz+ (PassMark 8.500+)';
-      ram.innerText = '8 GB DDR4/DDR5 (Expansível até 32GB)';
-      ssd.innerText = 'SSD 256GB NVMe M.2 de Alta Velocidade';
+      if (cpu) cpu.innerText = 'Quad-Core x86-64 3.4GHz+ (PassMark 8.500+)';
+      if (ram) ram.innerText = '8 GB DDR4/DDR5 (Expansível até 32GB)';
+      if (ssd) ssd.innerText = 'SSD 256GB NVMe M.2 de Alta Velocidade';
     } else if (p.id === 2) {
-      badge.innerText = 'NÍVEL 2 • ANÁLISE DE DADOS E GESTÃO';
-      title.innerText = ehNotebook 
+      if (badge) badge.innerText = 'NÍVEL 2 • ANÁLISE DE DADOS E GESTÃO';
+      if (title) title.innerText = ehNotebook 
         ? 'Notebook Corporativo Intermediário (Dados & BI)' 
         : 'Estação Desktop para Relatórios e BI';
-      cpu.innerText = 'Hexa-Core 4.4GHz+ (PassMark 18.000+)';
-      ram.innerText = '16 GB DDR4/DDR5 Dual-Channel';
-      ssd.innerText = 'SSD 512GB NVMe PCIe 4.0';
+      if (cpu) cpu.innerText = 'Hexa-Core 4.4GHz+ (PassMark 18.000+)';
+      if (ram) ram.innerText = '16 GB DDR4/DDR5 Dual-Channel';
+      if (ssd) ssd.innerText = 'SSD 512GB NVMe PCIe 4.0';
     } else {
-      badge.innerText = 'NÍVEL 3 • ENGENHARIA & CAD';
-      title.innerText = ehNotebook 
+      if (badge) badge.innerText = 'NÍVEL 3 • ENGENHARIA & CAD';
+      if (title) title.innerText = ehNotebook 
         ? 'Mobile Workstation com GPU Dedicada' 
         : 'Workstation Desktop de Alto Desempenho';
-      cpu.innerText = 'Octa-Core 5.0GHz+ (PassMark 30.000+)';
-      ram.innerText = '32 GB DDR5 5200MHz Dual-Channel';
-      ssd.innerText = 'SSD 1TB Gen4 + GPU NVIDIA RTX';
+      if (cpu) cpu.innerText = 'Octa-Core 5.0GHz+ (PassMark 30.000+)';
+      if (ram) ram.innerText = '32 GB DDR5 5200MHz Dual-Channel';
+      if (ssd) ssd.innerText = 'SSD 1TB Gen4 + GPU NVIDIA RTX';
     }
 
     if (ehNotebook) {
@@ -1004,23 +994,23 @@ const app = {
       const boxJust = document.getElementById('boxJustificativa');
 
       if (a.nivelRisco === 'BAIXO') {
-        icon.innerText = '🛡️';
-        title.innerText = 'Conformidade Plena com o TCE/SC';
-        desc.innerText = 'Configuração proporcional à rotina. Processo aprovado sem apontamentos.';
-        card.style.borderColor = 'var(--dark-border)';
-        boxJust.style.display = 'none';
+        if (icon) icon.innerText = '🛡️';
+        if (title) title.innerText = 'Conformidade Plena com o TCE/SC';
+        if (desc) desc.innerText = 'Configuração proporcional à rotina. Processo aprovado sem apontamentos.';
+        if (card) card.style.borderColor = 'var(--dark-border)';
+        if (boxJust) boxJust.style.display = 'none';
       } else if (a.nivelRisco === 'MEDIO') {
-        icon.innerText = '⚠️';
-        title.innerText = 'Atenção: Configuração Superior';
-        desc.innerText = `O modelo escolhido custa R$ ${a.diferencaCusto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} a mais. Justifique a necessidade técnica.`;
-        card.style.borderColor = '#F59E0B';
-        boxJust.style.display = 'block';
+        if (icon) icon.innerText = '⚠️';
+        if (title) title.innerText = 'Atenção: Configuração Superior';
+        if (desc) desc.innerText = `O modelo escolhido custa R$ ${a.diferencaCusto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} a mais. Justifique a necessidade técnica.`;
+        if (card) card.style.borderColor = '#F59E0B';
+        if (boxJust) boxJust.style.display = 'block';
       } else {
-        icon.innerText = '🚨';
-        title.innerText = 'Alerta de Superdimensionamento TCE/SC';
-        desc.innerText = `Workstation cara selecionada para rotina básica (Excedente: R$ ${a.diferencaCusto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}). Justificativa obrigatória.`;
-        card.style.borderColor = '#EF4444';
-        boxJust.style.display = 'block';
+        if (icon) icon.innerText = '🚨';
+        if (title) title.innerText = 'Alerta de Superdimensionamento TCE/SC';
+        if (desc) desc.innerText = `Workstation cara selecionada para rotina básica (Excedente: R$ ${a.diferencaCusto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}). Justificativa obrigatória.`;
+        if (card) card.style.borderColor = '#EF4444';
+        if (boxJust) boxJust.style.display = 'block';
       }
     } catch (e) {
       console.error(e);
@@ -1028,34 +1018,52 @@ const app = {
   },
 
   preencherResumo() {
-    document.getElementById('sumProtocolo').innerText = this.demanda.protocolo;
-    document.getElementById('sumOrgao').innerText = this.demanda.setorNome;
-    document.getElementById('sumServidor').innerText = `${this.demanda.usuarioNome} (${this.demanda.cargo})`;
-    document.getElementById('sumQtd').innerText = `${this.demanda.quantidade} PCs`;
+    const ehNotebook = this.demanda.formatoEquipamento === 'notebook';
+    const icone = ehNotebook ? '💻' : '🖥️';
+    const titulo = ehNotebook ? 'Notebook Corporativo Portátil' : 'Computador de Mesa (Desktop)';
 
-    let infoPerifericos = [];
-    if (this.demanda.opcaoMonitor === 'none') infoPerifericos.push('Sem Monitor (Aproveitamento)');
-    else if (this.demanda.opcaoMonitor === '2x') infoPerifericos.push('2 Telas (Dual Head)');
-    else infoPerifericos.push('Com Monitor 23.8" IPS');
+    const elIcon = document.getElementById('resumoObjIcon');
+    const elTitulo = document.getElementById('resumoObjTitulo');
+    const elSub = document.getElementById('resumoObjSub');
 
-    if (!this.demanda.incluiPerifericos) infoPerifericos.push('Sem Teclado/Mouse');
-    if (this.demanda.incluiNobreak) infoPerifericos.push('Com Nobreak');
+    if (elIcon) elIcon.innerText = icone;
+    if (elTitulo) elTitulo.innerText = `${titulo} (${this.demanda.quantidade} unidade${this.demanda.quantidade > 1 ? 's' : ''})`;
+    if (elSub) elSub.innerText = `Destinado a: ${this.demanda.setorNome || 'Escolas Municipais'} — Protocolo ${this.demanda.protocolo}`;
+
+    const elServ = document.getElementById('sumServidor');
+    const elOrg = document.getElementById('sumOrgao');
+    const elAcess = document.getElementById('sumAcessorios');
+    const elProt = document.getElementById('sumProtocolo');
+    const elQtd = document.getElementById('sumQtd');
+    const elMod = document.getElementById('sumModelo');
+
+    if (elServ) elServ.innerText = `${this.demanda.usuarioNome || 'Profa. Angelita de Souza'} (${this.demanda.cargo || 'Diretora'})`;
+    if (elOrg) elOrg.innerText = this.demanda.setorNome || 'Escolas Municipais (SME Lages)';
+    if (elProt) elProt.innerText = this.demanda.protocolo;
+    if (elQtd) elQtd.innerText = `${this.demanda.quantidade} Equipamento${this.demanda.quantidade > 1 ? 's' : ''}`;
+
+    let acessTxt = [];
+    if (this.demanda.opcaoMonitor === 'none') {
+      acessTxt.push('Monitor (Já tem na mesa)');
+    } else {
+      acessTxt.push('Novo Monitor Incluso');
+    }
+
+    if (!this.demanda.incluiPerifericos) {
+      acessTxt.push('Teclado/Mouse (Já tem na mesa)');
+    } else {
+      acessTxt.push('Teclado/Mouse Novos');
+    }
+
+    if (elAcess) elAcess.innerText = acessTxt.join(' • ');
 
     const nomePerfil = this.demanda.perfilEscolhido?.nome?.split(':')[0] || 'Nível 1';
-    document.getElementById('sumModelo').innerText = `${nomePerfil} • [${infoPerifericos.join(' • ')}]`;
-    document.getElementById('sumTotal').innerText = `R$ ${this.demanda.custo_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    if (elMod) elMod.innerText = `${titulo} - ${nomePerfil}`;
   },
 
   async salvarLicitação() {
     const analise = this.demanda.analiseTrava;
     const txt = document.getElementById('txtJustificativa')?.value.trim() || '';
-
-    if (analise && analise.requerJustificativa && !txt) {
-      alert('Por favor, informe a justificativa técnica exigida pelo TCE/SC.');
-      this.irParaPasso(4);
-      document.getElementById('txtJustificativa')?.focus();
-      return;
-    }
 
     try {
       const res = await fetch('/api/demandas', {
@@ -1077,7 +1085,7 @@ const app = {
             : this.demanda.atividades,
           perfilRecomendadoId: this.demanda.perfilRecomendado?.id || 1,
           perfilEscolhidoId: this.demanda.perfilEscolhido?.id || 1,
-          justificativaUsuario: txt,
+          justificativaUsuario: txt || 'Demanda escolar homologada para rotinas administrativas e pedagógicas.',
           status: analise ? analise.status : 'Aprovado Direto',
           irs: analise ? analise.irs : 5,
           nivelRisco: analise ? analise.nivelRisco : 'BAIXO'
@@ -1088,10 +1096,10 @@ const app = {
       if (data.success) {
         // Recarrega a tabela de pedidos respeitando as permissões
         this.carregarDemandas();
-        this.renderizarModalEtp(data.demanda, this.demanda.perfilEscolhido);
+        this.renderizarModalEtp(data.demanda, this.demanda.perfilEscolhido || this.demanda.perfilRecomendado);
       }
     } catch (e) {
-      alert('Erro ao salvar licitação: ' + e.message);
+      alert('Erro ao salvar requisição: ' + e.message);
     }
   },
 

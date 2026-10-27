@@ -1674,6 +1674,266 @@ body {
 }
 
 /* ========================================================== */
+/* FLUXO ULTRA OBJETIVO (WIZARD SIMPLIFICADO)                */
+/* ========================================================== */
+.equip-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.equip-choice-card {
+  position: relative;
+  background: var(--dark-surface);
+  border: 2px solid var(--dark-border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.equip-choice-card:hover {
+  border-color: #475569;
+  transform: translateY(-2px);
+}
+
+.equip-choice-card.active {
+  border-color: var(--dark-accent);
+  background: rgba(52, 211, 153, 0.06);
+  box-shadow: 0 0 20px rgba(52, 211, 153, 0.15);
+}
+
+.equip-badge-pop {
+  position: absolute;
+  top: -10px;
+  right: 16px;
+  background: var(--dark-accent);
+  color: #0A0E14;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.5px;
+}
+
+.equip-icon {
+  font-size: 2.8rem;
+  line-height: 1;
+}
+
+.equip-info h4 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--dark-text);
+  margin-bottom: 6px;
+}
+
+.equip-info p {
+  font-size: 0.85rem;
+  color: var(--dark-muted);
+  line-height: 1.45;
+  margin-bottom: 12px;
+}
+
+.equip-features {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.equip-features span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--dark-accent);
+}
+
+/* ROTINAS LIMPAS */
+.rotinas-clean-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.clean-rotina-card {
+  background: var(--dark-surface);
+  border: 2px solid var(--dark-border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.clean-rotina-card:hover {
+  border-color: #475569;
+}
+
+.clean-rotina-card.selected {
+  border-color: var(--dark-accent);
+  background: rgba(52, 211, 153, 0.08);
+}
+
+.clean-rotina-card .rotina-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid var(--dark-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #0A0E14;
+  margin-top: 2px;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.clean-rotina-card.selected .rotina-check {
+  background: var(--dark-accent);
+  border-color: var(--dark-accent);
+}
+
+.clean-rotina-card .rotina-details h5 {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--dark-text);
+  margin-bottom: 3px;
+}
+
+.clean-rotina-card .rotina-details p {
+  font-size: 0.78rem;
+  color: var(--dark-muted);
+  line-height: 1.35;
+}
+
+/* PERIFÉRICOS DE MESA */
+.mesa-perifericos-box {
+  margin-top: 22px;
+  background: var(--dark-surface);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+}
+
+.mesa-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.mesa-items-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.mesa-item-card {
+  background: var(--dark-card);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mesa-item-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: var(--dark-text);
+}
+
+.mesa-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* RESUMO OBJETIVO */
+.resumo-objetivo-card {
+  margin-top: 20px;
+  background: var(--dark-surface);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.resumo-obj-header {
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.12) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border-bottom: 1px solid var(--dark-border);
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.resumo-obj-icon {
+  font-size: 2.8rem;
+  line-height: 1;
+}
+
+.resumo-obj-tag {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--dark-accent);
+}
+
+.resumo-obj-body {
+  padding: 24px;
+}
+
+.resumo-obj-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.resumo-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.resumo-cell small {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--dark-muted);
+  font-weight: 700;
+}
+
+.resumo-cell strong {
+  font-size: 0.92rem;
+  color: var(--dark-text);
+}
+
+.resumo-garantia-badge {
+  background: rgba(52, 211, 153, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* ========================================================== */
 /* IMPRESSÃO A4 PROFISSIONAL (SEM SCROLLBAR / MULTIPÁGINAS)   */
 /* ========================================================== */
 @media print {
