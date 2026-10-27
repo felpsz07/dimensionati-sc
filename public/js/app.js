@@ -2,7 +2,7 @@
 const app = {
   usuarioLogado: null,
   passoAtual: 1,
-  totalPassos: 3,
+  totalPassos: 5,
   demandasCarregadas: [],
   abaStatusAtual: 'transmitidas',
 
@@ -851,10 +851,28 @@ const app = {
       this.demanda.cargo = this.usuarioLogado.cargo || 'Diretora de Escola Municipal';
     }
 
+    // Estado do novo fluxo baseado em necessidade
+    this.demanda.tipoNecessidade = 'computador';
+    this.demanda.precisaMobilidade = true;
     this.demanda.formatoEquipamento = 'notebook';
+    this.demanda.programasUtilizados = [
+      'Diário de Classe & Notas',
+      'Word / Textos & Provas',
+      'Planilhas & Médias',
+      'Internet & SGPe',
+      'Reuniões Online (Meet/Teams)'
+    ];
+    this.demanda.multitarefa = true;
+    this.demanda.situacaoAtual = 'estragou';
     this.demanda.quantidade = 1;
-    this.demanda.opcaoMonitor = '1x';
-    this.demanda.incluiPerifericos = true;
+
+    // Recursos existentes na mesa
+    this.demanda.opcaoMonitor = 'none'; // 'none' = já tem monitor, '1x' = precisa
+    this.demanda.temTeclado = true;
+    this.demanda.temMouse = true;
+    this.demanda.temWebcam = true;
+    this.demanda.segundoMonitor = false;
+    this.demanda.incluiPerifericos = false;
 
     // Atualiza identificação visual da solicitante
     const lblLocal = document.getElementById('labelLocalSolicitante');
@@ -862,9 +880,8 @@ const app = {
       lblLocal.innerText = `${this.demanda.usuarioNome} — ${this.demanda.setorNome}`;
     }
 
-    this.setFormatoEquipamento('notebook');
-    this.setQtd(1);
     this.setPerfilNivel(1);
+    this.setQtd(1);
 
     this.navegar('wizard');
     this.irParaPasso(1);
@@ -887,7 +904,7 @@ const app = {
     const btnAvancar = document.getElementById('btnWizAvancar');
     if (btnAvancar) {
       if (passo === this.totalPassos) {
-        btnAvancar.innerHTML = '🚀 Enviar Solicitação para o TI ✓';
+        btnAvancar.innerHTML = '🚀 Enviar Solicitação para Análise do TI ✓';
       } else {
         btnAvancar.innerHTML = 'Avançar &rarr;';
       }
@@ -895,10 +912,14 @@ const app = {
 
     if (passo === 2) {
       this.setPerfilNivel(this.demanda.perfilEscolhidoId || 1);
-    } else if (passo === 3) {
+    } else if (passo === 4) {
+      this.calcularHardware().then(() => {
+        this.gerarDiagnosticoERecomendacao();
+      });
+    } else if (passo === 5) {
       this.calcularHardware().then(() => {
         this.analisarAuditoria().then(() => {
-          this.preencherResumo();
+          this.preencherResumoCompleto();
         });
       });
     }
@@ -916,23 +937,138 @@ const app = {
     }
   },
 
+  // ==========================================
+  // ETAPA 1: DO QUE VOCÊ PRECISA?
+  // ==========================================
+  setTipoNecessidade(tipo, elem) {
+    this.demanda.tipoNecessidade = tipo;
+    document.querySelectorAll('.necessidade-card').forEach(c => c.classList.remove('active'));
+    if (elem) elem.classList.add('active');
+
+    const boxAviso = document.getElementById('boxAvisoOutraNecessidade');
+    const txtAviso = document.getElementById('txtAvisoOutraNecessidade');
+
+    if (tipo === 'computador') {
+      if (boxAviso) boxAviso.style.display = 'none';
+    } else {
+      if (boxAviso) boxAviso.style.display = 'flex';
+      if (txtAviso) {
+        if (tipo === 'manutencao') {
+          txtAviso.innerHTML = 'Caso seu computador tenha estragado ou queimado, você pode solicitar a substituição por um novo equipamento dimensionado aqui mesmo no sistema, ou um reparo técnico avulso.';
+        } else if (tipo === 'monitor') {
+          txtAviso.innerHTML = 'O sistema permite solicitar telas dedicadas ou periféricos avulsos para complementar sua mesa de trabalho. Avançaremos para registrar os dados do setor.';
+        } else {
+          txtAviso.innerHTML = 'Esta contratação é prioritariamente voltada a computadores de trabalho. Vamos continuar para registrar sua necessidade e encaminhá-la para avaliação da Diretoria de TIC.';
+        }
+      }
+    }
+  },
+
+  // ==========================================
+  // ETAPA 2 & 3: ROTINA & PERGUNTAS COMPLEMENTARES
+  // ==========================================
+  setMobilidade(precisa, elem) {
+    this.demanda.precisaMobilidade = precisa;
+    this.demanda.formatoEquipamento = precisa ? 'notebook' : 'desktop';
+
+    const cardSim = document.getElementById('cardMobSim');
+    const cardNao = document.getElementById('cardMobNao');
+    if (cardSim) cardSim.classList.toggle('active', precisa);
+    if (cardNao) cardNao.classList.toggle('active', !precisa);
+  },
+
+  toggleSoftwareChip(nome, elem) {
+    if (!this.demanda.programasUtilizados) this.demanda.programasUtilizados = [];
+    const idx = this.demanda.programasUtilizados.indexOf(nome);
+    if (idx > -1) {
+      this.demanda.programasUtilizados.splice(idx, 1);
+      elem?.classList.remove('active');
+    } else {
+      this.demanda.programasUtilizados.push(nome);
+      elem?.classList.add('active');
+    }
+  },
+
+  setMultitarefa(sim, elem) {
+    this.demanda.multitarefa = sim;
+    const btnSim = document.getElementById('btnMultiSim');
+    const btnNao = document.getElementById('btnMultiNao');
+    if (btnSim) btnSim.classList.toggle('active', sim);
+    if (btnNao) btnNao.classList.toggle('active', !sim);
+  },
+
+  setSituacaoAtual(sit, elem) {
+    this.demanda.situacaoAtual = sit;
+    document.querySelectorAll('#cardSitEstragou, #cardSitLento, #cardSitNovo').forEach(c => c.classList.remove('active'));
+    if (elem) elem.classList.add('active');
+  },
+
+  // ==========================================
+  // ETAPA 3: RECURSOS QUE JÁ POSSUI NA MESA
+  // ==========================================
+  setOpcaoMonitor(opcao, elem) {
+    this.demanda.opcaoMonitor = opcao;
+    const btnNone = document.getElementById('btnMonNone');
+    const btn1x = document.getElementById('btnMon1x');
+    if (btnNone) btnNone.classList.toggle('active', opcao === 'none');
+    if (btn1x) btn1x.classList.toggle('active', opcao === '1x');
+    this.recalcularPrecoEPerifericos();
+  },
+
+  setOpcaoTeclado(tem, elem) {
+    this.demanda.temTeclado = tem;
+    const btnSim = document.getElementById('btnTecladoSim');
+    const btnNao = document.getElementById('btnTecladoNao');
+    if (btnSim) btnSim.classList.toggle('active', tem);
+    if (btnNao) btnNao.classList.toggle('active', !tem);
+    this.recalcularPrecoEPerifericos();
+  },
+
+  setOpcaoMouse(tem, elem) {
+    this.demanda.temMouse = tem;
+    const btnSim = document.getElementById('btnMouseSim');
+    const btnNao = document.getElementById('btnMouseNao');
+    if (btnSim) btnSim.classList.toggle('active', tem);
+    if (btnNao) btnNao.classList.toggle('active', !tem);
+    this.recalcularPrecoEPerifericos();
+  },
+
+  setOpcaoWebcam(tem, elem) {
+    this.demanda.temWebcam = tem;
+    const btnSim = document.getElementById('btnWebcamSim');
+    const btnNao = document.getElementById('btnWebcamNao');
+    if (btnSim) btnSim.classList.toggle('active', tem);
+    if (btnNao) btnNao.classList.toggle('active', !tem);
+    this.recalcularPrecoEPerifericos();
+  },
+
+  setSegundoMonitor(precisa, elem) {
+    this.demanda.segundoMonitor = precisa;
+    const btnNao = document.getElementById('btnMon2xNao');
+    const btnSim = document.getElementById('btnMon2xSim');
+    if (btnNao) btnNao.classList.toggle('active', !precisa);
+    if (btnSim) btnSim.classList.toggle('active', precisa);
+    this.recalcularPrecoEPerifericos();
+  },
+
+  setOpcaoPerifericos(incluir, elem) {
+    this.demanda.incluiPerifericos = incluir;
+    this.recalcularPrecoEPerifericos();
+  },
+
+  setOpcaoNobreak(incluir, elem) {
+    this.demanda.incluiNobreak = incluir;
+    this.recalcularPrecoEPerifericos();
+  },
+
   atualizarOrgaoWizard(val) {
     const [setor, orgao] = val.split('|');
     this.demanda.setorNome = setor;
     this.demanda.orgao = orgao;
-    this.renderizarRotinasPasso2();
   },
 
   setFormatoEquipamento(formato, elem) {
     this.demanda.formatoEquipamento = formato;
-
-    const cardNb = document.getElementById('cardEscolhaNotebook');
-    const cardDt = document.getElementById('cardEscolhaDesktop');
-    if (cardNb && cardDt) {
-      cardNb.classList.toggle('active', formato === 'notebook');
-      cardDt.classList.toggle('active', formato === 'desktop');
-    }
-
     this.recalcularPrecoEPerifericos();
   },
 
@@ -947,12 +1083,14 @@ const app = {
     this.demanda.quantidade = n;
     const inp = document.getElementById('inputQtd');
     if (inp) inp.value = n;
+    this.recalcularPrecoEPerifericos();
   },
 
   setQtdCustom(v) {
     const n = Math.max(1, Math.min(500, parseInt(v) || 1));
     this.demanda.quantidade = n;
     document.querySelectorAll('.qty-pill').forEach(b => b.classList.remove('active'));
+    this.recalcularPrecoEPerifericos();
   },
 
   // ==========================================
@@ -971,7 +1109,6 @@ const app = {
                                 (this.demanda.setorNome || '').toLowerCase().includes('educa') ||
                                 (this.demanda.orgao || '').toLowerCase().includes('educa');
 
-    // Se for da escola e tentar marcar nível 3 (CAD/Engenharia), exibe o alerta do TCE/SC
     if (nivel === 3 && ehSetorEscolaOuAdmin) {
       if (card) card.classList.add('alerta-ativo');
     }
@@ -1012,44 +1149,15 @@ const app = {
       const data = await res.json();
       this.demanda.perfilRecomendado = data.perfil;
       this.demanda.perfilEscolhido = data.perfil;
-
-      this.renderizarHardware(data.perfil);
-
-      const sel = document.getElementById('selectSimular');
-      if (sel) sel.value = data.perfil.id.toString();
+      this.recalcularPrecoEPerifericos();
     } catch (e) {
       console.error(e);
     }
   },
 
-  setOpcaoMonitor(opcao, elem) {
-    document.querySelectorAll('#btnMon1x, #btnMonNone, #btnMon2x').forEach(b => b.classList.remove('active'));
-    if (elem) elem.classList.add('active');
-    this.demanda.opcaoMonitor = opcao;
-    this.recalcularPrecoEPerifericos();
-  },
-
-  setOpcaoPerifericos(incluir, elem) {
-    document.querySelectorAll('#btnPeriSim, #btnPeriNao').forEach(b => b.classList.remove('active'));
-    if (elem) elem.classList.add('active');
-    this.demanda.incluiPerifericos = incluir;
-    this.recalcularPrecoEPerifericos();
-  },
-
-  setOpcaoNobreak(incluir, elem) {
-    document.querySelectorAll('#btnNobSim, #btnNobNao').forEach(b => b.classList.remove('active'));
-    if (elem) elem.classList.add('active');
-    this.demanda.incluiNobreak = incluir;
-    this.recalcularPrecoEPerifericos();
-  },
-
   recalcularPrecoEPerifericos() {
     const p = this.demanda.perfilEscolhido || this.demanda.perfilRecomendado || { id: 1 };
     
-    // Custos base de gabinete/CPU desmembrada:
-    // Perfil 1: R$ 1.110 CPU + R$ 650 Mon + R$ 90 Kit Peri = R$ 1.850
-    // Perfil 2: R$ 2.210 CPU + R$ 1.300 Mon (2x) + R$ 90 Kit Peri = R$ 3.600
-    // Perfil 3: R$ 5.960 CPU + R$ 2.150 Mon (2x 27") + R$ 90 Kit Peri = R$ 8.200
     let precoCpu = 1110.00;
     let custoMonPadrao = 650.00;
     if (p.id === 2) {
@@ -1061,117 +1169,190 @@ const app = {
     }
 
     let adicionalMonitor = 0;
-    const monCard = document.getElementById('recMonitor');
-    const labelEcoMon = document.getElementById('labelEcoMonitor');
-
-    if (this.demanda.opcaoMonitor === 'none') {
-      adicionalMonitor = 0;
-      if (monCard) monCard.innerHTML = '<span style="color: var(--dark-accent); font-weight: 700;">NÃO INCLUSO</span> (Aproveitamento do setor)';
-      if (labelEcoMon) labelEcoMon.innerText = `✂️ Economia de R$ ${(custoMonPadrao * this.demanda.quantidade).toLocaleString('pt-BR')} no lote!`;
-    } else if (this.demanda.opcaoMonitor === '2x') {
-      adicionalMonitor = custoMonPadrao * 2;
-      if (monCard) monCard.innerText = p.id === 3 ? '2x Monitores 27" QHD Alta Precisão' : '2x Monitores 23.8" IPS Dual-Head';
-      if (labelEcoMon) labelEcoMon.innerText = '';
-    } else {
+    if (this.demanda.opcaoMonitor === '1x') {
       adicionalMonitor = custoMonPadrao;
-      if (monCard) monCard.innerText = p.id === 3 ? '1x Monitor 27" QHD Alta Precisão' : '23.8" IPS com ajuste de altura NR-17';
-      if (labelEcoMon) labelEcoMon.innerText = '';
+    }
+    if (this.demanda.segundoMonitor) {
+      adicionalMonitor += custoMonPadrao;
     }
 
-    const adicionalPerifericos = this.demanda.incluiPerifericos ? 90.00 : 0.00;
-    const labelEcoPeri = document.getElementById('labelEcoPerifericos');
-    if (labelEcoPeri) {
-      labelEcoPeri.innerText = !this.demanda.incluiPerifericos ? `✂️ Economia de R$ ${(90 * this.demanda.quantidade).toLocaleString('pt-BR')} no lote!` : '';
-    }
-
-    const adicionalNobreak = this.demanda.incluiNobreak ? 450.00 : 0.00;
-
-    const unit = precoCpu + adicionalMonitor + adicionalPerifericos + adicionalNobreak;
+    const adicionalPerifericos = (!this.demanda.temTeclado || !this.demanda.temMouse) ? 90.00 : 0.00;
+    const unit = precoCpu + adicionalMonitor + adicionalPerifericos;
     const total = unit * this.demanda.quantidade;
-    const pior = 8200 * this.demanda.quantidade;
-    const econ = Math.max(0, pior - total);
 
     this.demanda.custo_unitario = unit;
     this.demanda.custo_total = total;
-
-    // Alerta de economia de periféricos
-    const boxEco = document.getElementById('alertaEcoPerifericos');
-    if (boxEco) {
-      const poupou = (this.demanda.opcaoMonitor === 'none') || (!this.demanda.incluiPerifericos);
-      boxEco.style.display = poupou ? 'block' : 'none';
-    }
-
-    // Atualiza na tela
-    const elTot = document.getElementById('recPrecoTotal');
-    const elUni = document.getElementById('recPrecoUnit');
-    const elEco = document.getElementById('recEconomia');
-    if (elTot) elTot.innerText = `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-    if (elUni) elUni.innerText = `(R$ ${unit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} por máquina)`;
-    if (elEco) elEco.innerText = `R$ ${econ.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
   },
 
-  renderizarHardware(p) {
-    const badge = document.getElementById('recBadge');
-    const title = document.getElementById('recTitle');
-    const cpu = document.getElementById('recCpu');
-    const ram = document.getElementById('recRam');
-    const ssd = document.getElementById('recSsd');
-    const mon = document.getElementById('recMonitor');
+  // ==========================================
+  // ETAPAS 5, 6 E 7: DIAGNÓSTICO & RECOMENDAÇÃO
+  // ==========================================
+  gerarDiagnosticoERecomendacao() {
+    const nivel = this.demanda.perfilEscolhidoId || 1;
+    const mobilidade = this.demanda.precisaMobilidade;
+    const situacao = this.demanda.situacaoAtual || 'estragou';
+    const progs = this.demanda.programasUtilizados || ['Sistemas Escolares & Documentos'];
 
-    const ehNotebook = this.demanda.formatoEquipamento === 'notebook';
+    let titNecessidade = 'Computador para Rotina Escolar e Administrativa';
+    let descNecessidade = 'Com base nas informações fornecidas, identificamos uma necessidade de uso corporativo para sistemas escolares, elaboração de documentos, planilhas, internet e reuniões online pedagógicas.';
+    if (nivel === 2) {
+      titNecessidade = 'Computador para Análise de Dados e Relatórios Gerenciais';
+      descNecessidade = 'Identificamos uma necessidade de processamento intermediário para cruzamento de grandes bases fiscais, conciliação e relatórios no Power BI.';
+    } else if (nivel === 3) {
+      titNecessidade = 'Estação Gráfica para Engenharia e Modelagem CAD';
+      descNecessidade = 'Identificamos necessidade de alto processamento com GPU dedicada para projetos de obras, plantas e AutoCAD 3D.';
+    }
 
-    if (p.id === 1) {
-      if (badge) badge.innerText = 'NÍVEL 1 • ADEQUADO E HOMOLOGADO';
-      if (title) title.innerText = ehNotebook 
-        ? 'Notebook Corporativo Portátil (Gestão Escolar)' 
-        : 'Computador Desktop de Mesa (Atendimento e Gestão)';
-      if (cpu) cpu.innerText = 'Quad-Core x86-64 3.4GHz+ (PassMark 8.500+)';
-      if (ram) ram.innerText = '8 GB DDR4/DDR5 (Expansível até 32GB)';
-      if (ssd) ssd.innerText = 'SSD 256GB NVMe M.2 de Alta Velocidade';
-    } else if (p.id === 2) {
-      if (badge) badge.innerText = 'NÍVEL 2 • ANÁLISE DE DADOS E GESTÃO';
-      if (title) title.innerText = ehNotebook 
-        ? 'Notebook Corporativo Intermediário (Dados & BI)' 
-        : 'Estação Desktop para Relatórios e BI';
-      if (cpu) cpu.innerText = 'Hexa-Core 4.4GHz+ (PassMark 18.000+)';
-      if (ram) ram.innerText = '16 GB DDR4/DDR5 Dual-Channel';
-      if (ssd) ssd.innerText = 'SSD 512GB NVMe PCIe 4.0';
+    const elNecTit = document.getElementById('txtDiagNecessidadeTitulo');
+    const elNecDesc = document.getElementById('txtDiagNecessidadeDesc');
+    if (elNecTit) elNecTit.innerText = titNecessidade;
+    if (elNecDesc) elNecDesc.innerText = descNecessidade;
+
+    // Bullets explicativos de "Por que identificamos essa necessidade?"
+    const listaMotivos = document.getElementById('listaMotivosNecessidade');
+    if (listaMotivos) {
+      let bulletsHtml = `
+        <div class="bullet-item"><span class="bullet-check">✓</span> <span>Utiliza ferramentas e sistemas: <strong>${progs.slice(0, 4).join(', ')}</strong></span></div>
+        <div class="bullet-item"><span class="bullet-check">✓</span> <span>${mobilidade ? 'Necessita de mobilidade para transporte entre reuniões e salas de aula' : 'Uso predominantemente fixo na mesa de atendimento/secretaria'}</span></div>
+        <div class="bullet-item"><span class="bullet-check">✓</span> <span>${situacao === 'estragou' ? 'Substituição de computador anterior que apresentou defeito/queimou' : situacao === 'lento' ? 'Substituição por lentidão extrema e travamento do equipamento antigo' : 'Atendimento a novo posto de trabalho na unidade'}</span></div>
+        <div class="bullet-item"><span class="bullet-check">✓</span> <span>${nivel === 1 ? 'Não utiliza softwares 3D pesados, evitando gastos desnecessários aos cofres públicos' : 'Uso compatível com a carga de trabalho técnica do setor'}</span></div>
+      `;
+      listaMotivos.innerHTML = bulletsHtml;
+    }
+
+    // Perfil Recomendado Preliminar
+    const ehNotebook = mobilidade;
+    const iconRec = ehNotebook ? '💻' : '🖥️';
+    let nomeRec = ehNotebook ? 'Notebook Corporativo Portátil' : 'Computador de Mesa (Desktop)';
+    let subRec = ehNotebook ? 'Indicado para sua rotina de trabalho e necessidade de mobilidade escolar.' : 'Indicado para trabalho fixo contínuo na mesa da secretaria escolar.';
+
+    if (nivel === 2) {
+      nomeRec = ehNotebook ? 'Notebook Corporativo Intermediário (Dados & BI)' : 'Estação Desktop para Relatórios e BI';
+      subRec = 'Indicado para manipulação de grandes volumes de dados e planilhas.';
+    } else if (nivel === 3) {
+      nomeRec = ehNotebook ? 'Mobile Workstation com GPU Dedicada' : 'Workstation Desktop de Alto Desempenho';
+      subRec = 'Indicado para softwares de engenharia, plantas e renderização 3D.';
+    }
+
+    const elIcon = document.getElementById('recDestaqueIcon');
+    const elTit = document.getElementById('recDestaqueTitulo');
+    const elSub = document.getElementById('recDestaqueSub');
+    if (elIcon) elIcon.innerText = iconRec;
+    if (elTit) elTit.innerText = nomeRec;
+    if (elSub) elSub.innerText = subRec;
+
+    // "Por que recomendamos isso?"
+    const elPorQue = document.getElementById('txtPorQueRecomendamos');
+    if (elPorQue) {
+      if (ehNotebook) {
+        elPorQue.innerText = `Você informou que realiza atividades de ${nivel === 1 ? 'gestão escolar e redação de documentos' : 'rotina gerencial'} e que precisa transportar o equipamento entre ambientes e conselhos de classe. Por isso, a recomendação preliminar é um ${nomeRec} com tela Full HD, bateria de longa duração e webcam integrada, eliminando o risco de receber aparelhos incompatíveis ou lentos.`;
+      } else {
+        elPorQue.innerText = `Você informou que trabalha fixo na sua mesa do setor e necessita de estabilidade para operação diária. Por isso, a recomendação preliminar é um ${nomeRec} com gabinete resistente, alta durabilidade e conexão direta aos seus acessórios de mesa.`;
+      }
+    }
+
+    // Especificação Técnica Sugerida para o TI
+    const sSo = document.getElementById('specTiSo');
+    const sCpu = document.getElementById('specTiCpu');
+    const sRam = document.getElementById('specTiRam');
+    const sSsd = document.getElementById('specTiSsd');
+    const sTela = document.getElementById('specTiTela');
+    const sGarantia = document.getElementById('specTiGarantia');
+
+    if (sSo) sSo.innerText = 'Windows 11 Pro 64-bit homologado';
+    if (nivel === 1) {
+      if (sCpu) sCpu.innerText = 'Quad-Core x86-64 moderno (PassMark 8.500+)';
+      if (sRam) sRam.innerText = '8 GB DDR4/DDR5 Alta Frequência';
+      if (sSsd) sSsd.innerText = 'SSD 256GB NVMe M.2 Rápido';
+      if (sTela) sTela.innerText = ehNotebook ? 'Tela 15.6" Full HD + Webcam HD Integrada' : 'Saídas HDMI/DP para Monitor';
+    } else if (nivel === 2) {
+      if (sCpu) sCpu.innerText = 'Hexa-Core x86-64 (PassMark 18.000+)';
+      if (sRam) sRam.innerText = '16 GB DDR4/DDR5 Dual-Channel';
+      if (sSsd) sSsd.innerText = 'SSD 512GB NVMe PCIe 4.0';
+      if (sTela) sTela.innerText = ehNotebook ? 'Tela 15.6" Full HD IPS + Câmera HD' : 'Suporte a Monitores Múltiplos';
     } else {
-      if (badge) badge.innerText = 'NÍVEL 3 • ENGENHARIA & CAD';
-      if (title) title.innerText = ehNotebook 
-        ? 'Mobile Workstation com GPU Dedicada' 
-        : 'Workstation Desktop de Alto Desempenho';
-      if (cpu) cpu.innerText = 'Octa-Core 5.0GHz+ (PassMark 30.000+)';
-      if (ram) ram.innerText = '32 GB DDR5 5200MHz Dual-Channel';
-      if (ssd) ssd.innerText = 'SSD 1TB Gen4 + GPU NVIDIA RTX';
+      if (sCpu) sCpu.innerText = 'Octa-Core 5.0GHz+ (PassMark 30.000+)';
+      if (sRam) sRam.innerText = '32 GB DDR5 + GPU NVIDIA RTX Dedicada';
+      if (sSsd) sSsd.innerText = 'SSD 1TB Gen4 NVMe';
+      if (sTela) sTela.innerText = 'Telas de Alta Resolução / Calibração de Cores';
     }
-
-    if (ehNotebook) {
-      if (mon) mon.innerText = 'Tela 15.6" Full HD Anti-reflexo + Webcam HD';
-    }
-
-    this.recalcularPrecoEPerifericos();
+    if (sGarantia) sGarantia.innerText = '36 meses com atendimento no local (on-site na escola)';
   },
 
-  async mudarModeloManual(val) {
-    const id = parseInt(val);
-    try {
-      const res = await fetch('/api/analisar-trava', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          perfilRecomendadoId: this.demanda.perfilRecomendado?.id || 1,
-          perfilEscolhidoId: id,
-          quantidadeUsuarios: this.demanda.quantidade
-        })
-      });
+  // ==========================================
+  // ETAPA 8: RESUMO ANTES DO ENVIO AO TI
+  // ==========================================
+  preencherResumoCompleto() {
+    const nivel = this.demanda.perfilEscolhidoId || 1;
+    const ehNotebook = this.demanda.precisaMobilidade;
+    const nomeEquip = ehNotebook ? 'Notebook Corporativo Portátil' : 'Computador de Mesa (Desktop)';
 
-      const data = await res.json();
-      this.demanda.analiseTrava = data;
-      this.demanda.perfilEscolhido = data.perfilEsc;
-      this.renderizarHardware(data.perfilEsc);
-    } catch (e) {
-      console.error(e);
+    const elSol = document.getElementById('resumoSolicitante');
+    const elCar = document.getElementById('resumoCargo');
+    const elUni = document.getElementById('resumoUnidade');
+    const elNecTit = document.getElementById('resumoNecTitulo');
+    const elNecDesc = document.getElementById('resumoNecDesc');
+    const elPerf = document.getElementById('resumoPerfilNome');
+    const elQtd = document.getElementById('resumoQtdText');
+    const elRecExist = document.getElementById('resumoRecursosExistentes');
+    const elRecSol = document.getElementById('resumoRecursosSolicitados');
+    const elSpecs = document.getElementById('resumoSpecsTexto');
+
+    if (elSol) elSol.innerText = this.demanda.usuarioNome || 'Profa. Angelita de Souza';
+    if (elCar) elCar.innerText = this.demanda.cargo || 'Diretora de Escola Municipal';
+    if (elUni) elUni.innerText = this.demanda.setorNome || 'Escolas Municipais (SME Lages)';
+
+    if (elNecTit) {
+      elNecTit.innerText = nivel === 1 
+        ? 'Computador para Rotina Escolar e Administrativa'
+        : nivel === 2 
+          ? 'Computador para Análise de Dados e Relatórios' 
+          : 'Estação Gráfica para Engenharia e CAD';
+    }
+    if (elNecDesc) {
+      elNecDesc.innerText = ehNotebook 
+        ? 'Uso corporativo pedagógico com necessidade de mobilidade'
+        : 'Uso corporativo contínuo com posto de trabalho fixo';
+    }
+
+    if (elPerf) elPerf.innerText = `${nomeEquip} (Nível ${nivel})`;
+    if (elQtd) elQtd.innerText = `${this.demanda.quantidade} equipamento${this.demanda.quantidade > 1 ? 's solicitados' : ' solicitado'}`;
+
+    // Recursos existentes
+    let jaPossui = [];
+    if (this.demanda.opcaoMonitor === 'none') jaPossui.push('Monitor');
+    if (this.demanda.temTeclado) jaPossui.push('Teclado');
+    if (this.demanda.temMouse) jaPossui.push('Mouse');
+    if (this.demanda.temWebcam) jaPossui.push('Webcam');
+    if (elRecExist) elRecExist.innerText = jaPossui.length > 0 ? jaPossui.join(' • ') : 'Nenhum (mesa vazia)';
+
+    // Recursos solicitados
+    let solicitados = [`${this.demanda.quantidade}x ${nomeEquip}`];
+    if (this.demanda.opcaoMonitor === '1x') solicitados.push('1x Monitor de Vídeo');
+    if (!this.demanda.temTeclado) solicitados.push('Teclado Novo');
+    if (!this.demanda.temMouse) solicitados.push('Mouse Novo');
+    if (!this.demanda.temWebcam && !ehNotebook) solicitados.push('Webcam USB');
+    if (this.demanda.segundoMonitor) solicitados.push('2º Monitor de Apoio');
+    if (elRecSol) elRecSol.innerText = solicitados.join(' • ');
+
+    if (elSpecs) {
+      elSpecs.innerText = `Windows 11 Pro 64-bit • Processador PassMark compatível • SSD NVMe M.2 • Memória dimensionada • Garantia de 36 meses on-site.`;
+    }
+
+    // Justificativa gerada automaticamente
+    const txtJust = document.getElementById('txtJustificativa');
+    if (txtJust) {
+      const sitTxt = this.demanda.situacaoAtual === 'estragou' 
+        ? 'visando a substituição de equipamento anterior avariado/inoperante'
+        : this.demanda.situacaoAtual === 'lento'
+          ? 'visando a substituição de equipamento obsoleto com travamentos frequentes'
+          : 'visando o atendimento a novo posto de trabalho';
+
+      const mobTxt = ehNotebook 
+        ? 'com necessidade comprovada de mobilidade para conselho de classe e reuniões pedagógicas' 
+        : 'para trabalho administrativo fixo na secretaria da unidade';
+
+      txtJust.value = `Solicitação de ${this.demanda.quantidade} ${nomeEquip} para atendimento da servidora ${this.demanda.usuarioNome || 'Profa. Angelita de Souza'} (${this.demanda.cargo || 'Diretora'}) na unidade ${this.demanda.setorNome || 'Escolas Municipais'}, ${sitTxt} ${mobTxt}. A configuração recomendada atende rigorosamente aos critérios de dimensionamento técnico e economicidade previstos no Art. 18 da Lei Federal nº 14.133/2021, evitando aquisição de hardware superdimensionado e prevenindo o fornecimento de equipamentos inadequados à rotina escolar.`;
     }
   },
 
@@ -1192,84 +1373,13 @@ const app = {
 
       const a = await res.json();
       this.demanda.analiseTrava = a;
-
-      const card = document.getElementById('auditCard');
-      const icon = document.getElementById('auditIcon');
-      const title = document.getElementById('auditTitle');
-      const desc = document.getElementById('auditDesc');
-      const boxJust = document.getElementById('boxJustificativa');
-
-      if (a.nivelRisco === 'BAIXO') {
-        if (icon) icon.innerText = '🛡️';
-        if (title) title.innerText = 'Conformidade Plena com o TCE/SC';
-        if (desc) desc.innerText = 'Configuração proporcional à rotina. Processo aprovado sem apontamentos.';
-        if (card) card.style.borderColor = 'var(--dark-border)';
-        if (boxJust) boxJust.style.display = 'none';
-      } else if (a.nivelRisco === 'MEDIO') {
-        if (icon) icon.innerText = '⚠️';
-        if (title) title.innerText = 'Atenção: Configuração Superior';
-        if (desc) desc.innerText = `O modelo escolhido custa R$ ${a.diferencaCusto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} a mais. Justifique a necessidade técnica.`;
-        if (card) card.style.borderColor = '#F59E0B';
-        if (boxJust) boxJust.style.display = 'block';
-      } else {
-        if (icon) icon.innerText = '🚨';
-        if (title) title.innerText = 'Alerta de Superdimensionamento TCE/SC';
-        if (desc) desc.innerText = `Workstation cara selecionada para rotina básica (Excedente: R$ ${a.diferencaCusto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}). Justificativa obrigatória.`;
-        if (card) card.style.borderColor = '#EF4444';
-        if (boxJust) boxJust.style.display = 'block';
-      }
     } catch (e) {
       console.error(e);
     }
   },
 
-  preencherResumo() {
-    const ehNotebook = this.demanda.formatoEquipamento === 'notebook';
-    const icone = ehNotebook ? '💻' : '🖥️';
-    const titulo = ehNotebook ? 'Notebook Corporativo Portátil' : 'Computador de Mesa (Desktop)';
-
-    const elIcon = document.getElementById('resumoObjIcon');
-    const elTitulo = document.getElementById('resumoObjTitulo');
-    const elSub = document.getElementById('resumoObjSub');
-
-    if (elIcon) elIcon.innerText = icone;
-    if (elTitulo) elTitulo.innerText = `${titulo} (${this.demanda.quantidade} unidade${this.demanda.quantidade > 1 ? 's' : ''})`;
-    if (elSub) elSub.innerText = `Destinado a: ${this.demanda.setorNome || 'Escolas Municipais'} — Protocolo ${this.demanda.protocolo}`;
-
-    const elServ = document.getElementById('sumServidor');
-    const elOrg = document.getElementById('sumOrgao');
-    const elAcess = document.getElementById('sumAcessorios');
-    const elProt = document.getElementById('sumProtocolo');
-    const elQtd = document.getElementById('sumQtd');
-    const elMod = document.getElementById('sumModelo');
-
-    if (elServ) elServ.innerText = `${this.demanda.usuarioNome || 'Profa. Angelita de Souza'} (${this.demanda.cargo || 'Diretora'})`;
-    if (elOrg) elOrg.innerText = this.demanda.setorNome || 'Escolas Municipais (SME Lages)';
-    if (elProt) elProt.innerText = this.demanda.protocolo;
-    if (elQtd) elQtd.innerText = `${this.demanda.quantidade} Equipamento${this.demanda.quantidade > 1 ? 's' : ''}`;
-
-    let acessTxt = [];
-    if (this.demanda.opcaoMonitor === 'none') {
-      acessTxt.push('Monitor (Já tem na mesa)');
-    } else {
-      acessTxt.push('Novo Monitor Incluso');
-    }
-
-    if (!this.demanda.incluiPerifericos) {
-      acessTxt.push('Teclado/Mouse (Já tem na mesa)');
-    } else {
-      acessTxt.push('Teclado/Mouse Novos');
-    }
-
-    if (elAcess) elAcess.innerText = acessTxt.join(' • ');
-
-    const nomePerfil = this.demanda.perfilEscolhido?.nome?.split(':')[0] || 'Nível 1';
-    if (elMod) elMod.innerText = `${titulo} - ${nomePerfil}`;
-  },
-
   async salvarLicitação() {
-    const analise = this.demanda.analiseTrava;
-    const txt = document.getElementById('txtJustificativa')?.value.trim() || '';
+    const txtJust = document.getElementById('txtJustificativa')?.value.trim() || '';
 
     try {
       const res = await fetch('/api/demandas', {
@@ -1284,28 +1394,29 @@ const app = {
           setor: this.demanda.setorNome,
           cargo: this.demanda.cargo,
           quantidadeUsuarios: this.demanda.quantidade,
-          custoUnitario: this.demanda.custo_unitario,
-          custoTotal: this.demanda.custo_total,
-          softwares: (this.demanda.atividadesNomes && this.demanda.atividadesNomes.length > 0)
-            ? this.demanda.atividadesNomes 
-            : this.demanda.atividades,
-          perfilRecomendadoId: this.demanda.perfilRecomendado?.id || 1,
-          perfilEscolhidoId: this.demanda.perfilEscolhido?.id || 1,
-          justificativaUsuario: txt || 'Demanda escolar homologada para rotinas administrativas e pedagógicas.',
-          status: analise ? analise.status : 'Aprovado Direto',
-          irs: analise ? analise.irs : 5,
-          nivelRisco: analise ? analise.nivelRisco : 'BAIXO'
+          custoUnitario: this.demanda.custo_unitario || 1850.00,
+          custoTotal: this.demanda.custo_total || (1850.00 * this.demanda.quantidade),
+          softwares: (this.demanda.programasUtilizados && this.demanda.programasUtilizados.length > 0)
+            ? this.demanda.programasUtilizados 
+            : ['Gestão Escolar & Rotina Administrativa'],
+          perfilRecomendadoId: this.demanda.perfilEscolhidoId || 1,
+          perfilEscolhidoId: this.demanda.perfilEscolhidoId || 1,
+          justificativaUsuario: txtJust || 'Solicitação escolar encaminhada para análise e validação técnica da Diretoria de TIC.',
+          status: 'Sob Análise',
+          irs: 5,
+          nivelRisco: 'BAIXO'
         })
       });
 
       const data = await res.json();
       if (data.success) {
-        // Recarrega a tabela de pedidos respeitando as permissões
-        this.carregarDemandas();
+        // Recarrega a tabela de pedidos
+        await this.carregarDemandas();
+        // Abre a minuta técnica oficial (DOD) para visualização/impressão
         this.renderizarModalEtp(data.demanda, this.demanda.perfilEscolhido || this.demanda.perfilRecomendado);
       }
     } catch (e) {
-      alert('Erro ao salvar requisição: ' + e.message);
+      alert('Erro ao enviar solicitação para análise do TI: ' + e.message);
     }
   },
 

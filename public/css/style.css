@@ -2650,6 +2650,586 @@ body {
 }
 
 /* ========================================================== */
+/* NOVO FLUXO DE SOLICITAÇÃO BASEADO NA NECESSIDADE DO USUÁRIO */
+/* ========================================================== */
+
+/* ETAPA 1: GRADE DE NECESSIDADE BÁSICA */
+.necessidade-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.necessidade-card {
+  background: var(--dark-surface);
+  border: 2px solid var(--dark-border);
+  border-radius: var(--radius-md);
+  padding: 18px 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.necessidade-card:hover {
+  border-color: #475569;
+  transform: translateY(-2px);
+  background: #172332;
+}
+
+.necessidade-card.active {
+  border-color: var(--dark-accent);
+  background: rgba(52, 211, 153, 0.08);
+  box-shadow: 0 4px 20px rgba(52, 211, 153, 0.15);
+}
+
+.nec-badge-top {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(52, 211, 153, 0.18);
+  color: var(--dark-accent);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.nec-icon {
+  font-size: 2rem;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.nec-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--dark-text);
+  line-height: 1.25;
+}
+
+.nec-desc {
+  font-size: 0.78rem;
+  color: var(--dark-muted);
+  line-height: 1.4;
+}
+
+.necessidade-card.active .nec-title {
+  color: #FFFFFF;
+}
+
+.aviso-outra-necessidade {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  margin-top: 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.aviso-outra-necessidade p {
+  font-size: 0.82rem;
+  color: #CBD5E1;
+  line-height: 1.45;
+}
+
+/* ETAPA 2 & 3: PERGUNTAS COMPLEMENTARES PROGRESSIVAS */
+.perguntas-complementares-box {
+  margin-top: 24px;
+  background: var(--dark-surface);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-md);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.perguntas-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--dark-border);
+  padding-bottom: 12px;
+}
+
+.perguntas-header-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--dark-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pergunta-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pergunta-titulo {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #F1F5F9;
+  line-height: 1.35;
+}
+
+.pergunta-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.pergunta-card-opt {
+  background: var(--dark-card);
+  border: 1.5px solid var(--dark-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.pergunta-card-opt:hover {
+  border-color: #475569;
+  background: #151F2C;
+}
+
+.pergunta-card-opt.active {
+  border-color: var(--dark-accent);
+  background: rgba(52, 211, 153, 0.08);
+}
+
+.opt-radio-circle {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--dark-muted);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pergunta-card-opt.active .opt-radio-circle {
+  border-color: var(--dark-accent);
+}
+
+.pergunta-card-opt.active .opt-radio-circle::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dark-accent);
+}
+
+.opt-text-wrap strong {
+  display: block;
+  font-size: 0.84rem;
+  color: var(--dark-text);
+  line-height: 1.25;
+}
+
+.opt-text-wrap small {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--dark-muted);
+  margin-top: 2px;
+}
+
+/* CHIPS INTERATIVOS DE SELEÇÃO DE SISTEMAS */
+.chips-softwares-grid {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip-sistema-btn {
+  background: var(--dark-card);
+  border: 1px solid var(--dark-border);
+  color: var(--dark-muted);
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.chip-sistema-btn:hover {
+  color: var(--dark-text);
+  border-color: #475569;
+}
+
+.chip-sistema-btn.active {
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--dark-accent);
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+/* ETAPA 4: RECURSOS EXISTENTES ("O QUE VOCÊ JÁ POSSUI?") */
+.recursos-mesa-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.recurso-card {
+  background: var(--dark-surface);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recurso-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--dark-text);
+}
+
+.recurso-pills-row {
+  display: flex;
+  gap: 6px;
+}
+
+.recurso-pill-btn {
+  flex: 1;
+  background: var(--dark-card);
+  border: 1px solid var(--dark-border);
+  color: var(--dark-muted);
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.recurso-pill-btn:hover {
+  color: var(--dark-text);
+  border-color: #475569;
+}
+
+.recurso-pill-btn.active {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--dark-accent);
+  border-color: var(--dark-accent);
+}
+
+/* ETAPAS 5, 6 E 7: DIAGNÓSTICO, NECESSIDADE IDENTIFICADA E RECOMENDAÇÃO */
+.diagnostico-container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.card-bloco-diagnostico {
+  background: var(--dark-surface);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-md);
+  padding: 20px 22px;
+}
+
+.diagnostico-tag-topo {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--dark-accent);
+  margin-bottom: 6px;
+  display: inline-block;
+}
+
+.diagnostico-titulo {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-bottom: 6px;
+}
+
+.diagnostico-desc-principal {
+  font-size: 0.85rem;
+  color: #CBD5E1;
+  line-height: 1.5;
+}
+
+.bullets-motivos-box {
+  margin-top: 14px;
+  background: var(--dark-card);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+}
+
+.bullets-motivos-box h5 {
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--dark-muted);
+  letter-spacing: 0.6px;
+  margin-bottom: 8px;
+}
+
+.bullets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bullet-item {
+  font-size: 0.8rem;
+  color: #E2E8F0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bullet-item .bullet-check {
+  color: var(--dark-accent);
+  font-weight: 900;
+}
+
+/* CARD DE RECOMENDAÇÃO TÉCNICA SUGERIDA */
+.card-recomendacao-destaque {
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.08) 0%, rgba(17, 24, 34, 0.95) 100%);
+  border: 1.5px solid rgba(52, 211, 153, 0.35);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.rec-destaque-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.rec-destaque-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-sm);
+  background: rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.rec-destaque-titulo {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.rec-destaque-sub {
+  font-size: 0.84rem;
+  color: var(--dark-accent);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.por-que-recomendamos-box {
+  background: rgba(10, 14, 20, 0.6);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-top: 14px;
+}
+
+.por-que-recomendamos-box strong {
+  font-size: 0.78rem;
+  color: #F1F5F9;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.por-que-recomendamos-box p {
+  font-size: 0.8rem;
+  color: var(--dark-muted);
+  line-height: 1.45;
+}
+
+/* ESPECIFICAÇÃO TÉCNICA SUGERIDA SEPARADA PARA O TI */
+.box-specs-tecnicas-ti {
+  margin-top: 18px;
+  background: #0C121B;
+  border: 1px dashed #2B3D52;
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+}
+
+.specs-ti-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.specs-ti-header h4 {
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: #94A3B8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.specs-ti-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(59, 130, 246, 0.15);
+  color: #60A5FA;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.specs-ti-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.spec-ti-item {
+  background: var(--dark-card);
+  border: 1px solid #1A2433;
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.spec-ti-item small {
+  font-size: 0.68rem;
+  color: var(--dark-muted);
+  text-transform: uppercase;
+  font-weight: 700;
+  display: block;
+}
+
+.spec-ti-item strong {
+  font-size: 0.8rem;
+  color: #F1F5F9;
+  display: block;
+  margin-top: 2px;
+}
+
+.alerta-validacao-ti {
+  margin-top: 14px;
+  font-size: 0.76rem;
+  color: #94A3B8;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ETAPA 8: RESUMO COMPLETO ANTES DO ENVIO */
+.resumo-executivo-box {
+  background: var(--dark-surface);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.resumo-section-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.resumo-card-info {
+  background: var(--dark-card);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+
+.resumo-card-info small {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--dark-muted);
+  letter-spacing: 0.6px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.resumo-card-info strong {
+  font-size: 0.86rem;
+  color: #FFFFFF;
+  line-height: 1.3;
+  display: block;
+}
+
+.resumo-card-info p {
+  font-size: 0.76rem;
+  color: #CBD5E1;
+  margin-top: 3px;
+  line-height: 1.35;
+}
+
+.justificativa-gerada-box {
+  background: #0E1520;
+  border: 1px solid #243447;
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+}
+
+.justificativa-gerada-box label {
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--dark-accent);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.justificativa-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #F1F5F9;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+}
+
+/* ========================================================== */
 /* IMPRESSÃO A4 PROFISSIONAL (SEM SCROLLBAR / MULTIPÁGINAS)   */
 /* ========================================================== */
 @media print {
