@@ -30,9 +30,10 @@ app.post('/api/login', (req, res) => {
     if (!usuario) {
       // Se não existir, cadastra automaticamente para o usuário não ficar travado no Hackathon!
       const nomeSugerido = emailLimpo.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase());
+      const tipoUsuario = emailLimpo.includes('admin') ? 'admin' : 'padrao';
       const insertNovo = db.prepare(`
-        INSERT INTO usuarios (nome, email, senha, cargo, orgao, setor, municipio, matricula, perfil_padrao_id, atividades_padrao, avatar)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO usuarios (nome, email, senha, cargo, orgao, setor, municipio, matricula, perfil_padrao_id, atividades_padrao, avatar, tipo_usuario)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
       const matriculaGerada = `MAT-${Math.floor(10000 + Math.random() * 90000)}/PML`;
@@ -40,14 +41,15 @@ app.post('/api/login', (req, res) => {
         nomeSugerido,
         emailLimpo,
         senha,
-        'Servidor Público',
+        tipoUsuario === 'admin' ? 'Diretor de TIC e Licitações' : 'Servidor Público',
         'Prefeitura do Município de Lages',
-        'Secretaria Municipal de Administração',
+        tipoUsuario === 'admin' ? 'Diretoria Geral de TIC' : 'Secretaria Municipal de Administração',
         'Lages',
         matriculaGerada,
-        1,
+        tipoUsuario === 'admin' ? 2 : 1,
         JSON.stringify([1, 2]),
-        '👤'
+        tipoUsuario === 'admin' ? '👑' : '👤',
+        tipoUsuario
       );
 
       usuario = db.prepare('SELECT * FROM usuarios WHERE LOWER(email) = ?').get(emailLimpo);
@@ -60,6 +62,7 @@ app.post('/api/login', (req, res) => {
 
     const { senha: _, ...usuarioSemSenha } = usuario;
     usuarioSemSenha.atividades_padrao = JSON.parse(usuario.atividades_padrao || '[1, 2]');
+    usuarioSemSenha.tipo_usuario = usuario.tipo_usuario || (emailLimpo.includes('admin') ? 'admin' : 'padrao');
 
     res.json({
       success: true,
@@ -291,10 +294,10 @@ app.post('/api/demandas', (req, res) => {
   }
 });
 
-// 7. Listar demandas
+// 7. Listar demandas (Separado por Perfil de Usuário / Admin)
 app.get('/api/demandas', (req, res) => {
   try {
-    const { risco, search } = req.query;
+    const { risco, search, usuarioId, tipoUsuario } = req.query;
     let query = `
       SELECT d.*, 
              pe.nome as perfil_esc_nome
@@ -303,6 +306,12 @@ app.get('/api/demandas', (req, res) => {
       WHERE 1=1
     `;
     const params = [];
+
+    // Se NÃO for admin, filtra estritamente apenas os pedidos emitidos por este usuário!
+    if (tipoUsuario !== 'admin' && usuarioId) {
+      query += ' AND d.usuario_id = ?';
+      params.push(usuarioId);
+    }
 
     if (risco) {
       query += ' AND d.nivel_risco = ?';

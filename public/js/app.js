@@ -20,7 +20,12 @@ const app = {
     cargo: 'Professora / Coordenadora',
     municipio: 'Lages',
     quantidade: 10,
-    atividades: [1, 2],
+    atividades: ['edu_1', 'edu_2', 'edu_3'],
+    atividadesNomes: [
+      'Diário de Classe & Sistema Escolar SME',
+      'Planos de Aula, Provas e Documentos Didáticos',
+      'Navegação Web, SGPe e E-mails Educacionais'
+    ],
     perfilRecomendado: null,
     perfilEscolhido: null,
     analiseTrava: null,
@@ -28,9 +33,261 @@ const app = {
     custo_total: 18500.00
   },
 
+  // ==========================================================
+  // CATÁLOGO DE ROTINAS INTELIGENTES POR SETOR / ÁREA DE ATUAÇÃO
+  // ==========================================================
+  catalogoRotinasPorSetor: {
+    educacao: {
+      nomeSetor: 'Escolas Municipais e CMEIs (SME Lages)',
+      icone: '🏫',
+      badge: 'ROTINAS ESCOLARES HOMOLOGADAS • LEI 14.133',
+      titulo: 'Atividades Pedagógicas e de Gestão Escolar',
+      descricaoBlindagem: 'Com base no seu perfil escolar (SME), este catálogo foi restrito às rotinas didáticas e administrativas autorizadas. Softwares pesados (AutoCAD, 3D e renderização) foram desabilitados para prevenir compras inadequadas e superdimensionamento.',
+      rotinas: [
+        {
+          id: 'edu_1',
+          nome: 'Diário de Classe & Sistema Escolar SME',
+          desc: 'Lançamento de notas, faltas, boletins, transferências e histórico escolar de alunos nos portais oficiais.',
+          icone: '🎓',
+          softwareId: 1,
+          padrao: true
+        },
+        {
+          id: 'edu_2',
+          nome: 'Planos de Aula, Provas e Documentos Didáticos',
+          desc: 'Elaboração de avaliações, apostilas, leitura e geração de PDFs e edição de textos (Word/Writer).',
+          icone: '📝',
+          softwareId: 2,
+          padrao: true
+        },
+        {
+          id: 'edu_3',
+          nome: 'Navegação Web, SGPe e E-mails Educacionais',
+          desc: 'Pesquisa pedagógica, acesso ao portal do professor, SGPe do Estado e comunicação escolar.',
+          icone: '🌐',
+          softwareId: 1,
+          padrao: true
+        },
+        {
+          id: 'edu_4',
+          nome: 'Apresentações Didáticas e Mídias em Sala',
+          desc: 'Exibição de slides no projetor (PowerPoint/Canva), reprodução de vídeos educativos e YouTube.',
+          icone: '📽️',
+          softwareId: 2,
+          padrao: false
+        },
+        {
+          id: 'edu_5',
+          nome: 'Planilhas Escolares & Almoxarifado Pedagógico',
+          desc: 'Controle de médias de alunos, listas de presença e almoxarifado de livros e merenda escolar.',
+          icone: '📊',
+          softwareId: 3,
+          padrao: false
+        }
+      ]
+    },
+    saude: {
+      nomeSetor: 'Saúde e Unidades Básicas (UBS / SMS Lages)',
+      icone: '🏥',
+      badge: 'ROTINAS DE SAÚDE HOMOLOGADAS • SUS',
+      titulo: 'Atendimento Clínico e Triagem na UBS',
+      descricaoBlindagem: 'Catálogo homologado para atendimento e prontuário do SUS em Lages. Evita equipamentos fora do padrão sanitário.',
+      rotinas: [
+        {
+          id: 'sau_1',
+          nome: 'Prontuário Eletrônico do SUS (e-SUS / SISREG)',
+          desc: 'Acolhimento de pacientes, triagem, agendamento de consultas e emissão de receitas.',
+          icone: '🩺',
+          softwareId: 1,
+          padrao: true
+        },
+        {
+          id: 'sau_2',
+          nome: 'Navegação Web, SGPe e Sistemas do Ministério da Saúde',
+          desc: 'Acesso aos portais do Ministério da Saúde, notificações epidemiológicas e SGPe.',
+          icone: '🌐',
+          softwareId: 1,
+          padrao: true
+        },
+        {
+          id: 'sau_3',
+          nome: 'Digitação de Laudos, Atestados e Encaminhamentos',
+          desc: 'Emissão de atestados, laudos médicos, ofícios da UBS e comunicação interna.',
+          icone: '📄',
+          softwareId: 2,
+          padrao: true
+        },
+        {
+          id: 'sau_4',
+          nome: 'Dispensação de Medicamentos & Controle Vacinal',
+          desc: 'Controle de estoque de farmácia básica e registro do livro de vacinação do município.',
+          icone: '💊',
+          softwareId: 3,
+          padrao: false
+        }
+      ]
+    },
+    obras: {
+      nomeSetor: 'Planejamento e Obras (SEPLAN Lages)',
+      icone: '🚧',
+      badge: 'ROTINAS DE ENGENHARIA & FISCALIZAÇÃO',
+      titulo: 'Projetos Técnicos, Topografia e Geoprocessamento',
+      descricaoBlindagem: 'Ambiente com autorização para estações de alto poder de cálculo e placas de vídeo dedicadas homologadas.',
+      rotinas: [
+        {
+          id: 'obr_1',
+          nome: 'AutoCAD Civil 3D e Projetos de Pavimentação',
+          desc: 'Desenho de vias públicas de Lages, drenagem pluvial, loteamentos e plantas viárias.',
+          icone: '📐',
+          softwareId: 5,
+          padrao: true
+        },
+        {
+          id: 'obr_2',
+          nome: 'Geoprocessamento, QGIS e Cartografia Municipal',
+          desc: 'Análise de ortofotos aéreas, curvas de nível, dados geoespaciais e plano diretor.',
+          icone: '🗺️',
+          softwareId: 5,
+          padrao: true
+        },
+        {
+          id: 'obr_3',
+          nome: 'Modelagem 3D, Renderização e BIM de Obras',
+          desc: 'Revit, SketchUp e maquetes virtuais de reformas e novos prédios públicos de Lages.',
+          icone: '🏗️',
+          softwareId: 6,
+          padrao: false
+        },
+        {
+          id: 'obr_4',
+          nome: 'Orçamentos de Obras, Medições e Tabela Sinapi',
+          desc: 'Planilhas orçamentárias de certames, cronograma físico-financeiro e fiscalização de medição.',
+          icone: '📋',
+          softwareId: 3,
+          padrao: true
+        },
+        {
+          id: 'obr_5',
+          nome: 'Processos Digitais SGPe e Relatórios Fotográficos',
+          desc: 'Instrução processual de licitações de obras e vistorias técnicas com fotos.',
+          icone: '🌐',
+          softwareId: 1,
+          padrao: false
+        }
+      ]
+    },
+    fazenda: {
+      nomeSetor: 'Secretaria da Fazenda e Tributos de Lages',
+      icone: '📊',
+      badge: 'ROTINAS DE AUDITORIA FISCAL E ARRECADAÇÃO',
+      titulo: 'Cruzamento Tributário e Painéis Analíticos',
+      descricaoBlindagem: 'Especificação para análise intensiva de bases de dados fiscais e relatórios gerenciais.',
+      rotinas: [
+        {
+          id: 'faz_1',
+          nome: 'Análise de Grandes Bases Fiscais e Cruzamento',
+          desc: 'Confrontação de notas fiscais eletrônicas, declarações de contribuintes e auditoria em lote.',
+          icone: '📈',
+          softwareId: 4,
+          padrao: true
+        },
+        {
+          id: 'faz_2',
+          nome: 'Painéis de Arrecadação e Power BI Municipal',
+          desc: 'Acompanhamento em tempo real de receitas, IPTU, ISS e repasses constitucionais.',
+          icone: '📊',
+          softwareId: 4,
+          padrao: true
+        },
+        {
+          id: 'faz_3',
+          nome: 'Processos de Execução Fiscal e SGPe',
+          desc: 'Cobrança judicial de dívida ativa, certidões negativas e despachos fiscais.',
+          icone: '📑',
+          softwareId: 2,
+          padrao: true
+        },
+        {
+          id: 'faz_4',
+          nome: 'Consultas Cadastrais e Atendimento ao Contribuinte',
+          desc: 'Portal do cidadão, parcelamentos tributários e esclarecimento de dúvidas fiscais.',
+          icone: '💻',
+          softwareId: 1,
+          padrao: false
+        }
+      ]
+    },
+    administracao: {
+      nomeSetor: 'Administração Geral e Atendimento',
+      icone: '🏢',
+      badge: 'ROTINAS ADMINISTRATIVAS PADRONIZADAS',
+      titulo: 'Atendimento ao Cidadão e Gestão Interna',
+      descricaoBlindagem: 'Configuração padronizada para atividades de apoio, fluxo processual e protocolo municipal.',
+      rotinas: [
+        {
+          id: 'adm_1',
+          nome: 'Protocolo Central, Atendimento ao Cidadão e SGPe',
+          desc: 'Abertura de chamados, tramitação de processos digitais e requisições públicas.',
+          icone: '🌐',
+          softwareId: 1,
+          padrao: true
+        },
+        {
+          id: 'adm_2',
+          nome: 'Redação de Ofícios, Portarias e Editais Oficiais',
+          desc: 'Editor de texto, publicação em diário oficial e leitura de termos de referência em PDF.',
+          icone: '📄',
+          softwareId: 2,
+          padrao: true
+        },
+        {
+          id: 'adm_3',
+          nome: 'Controle de Almoxarifado, Patrimônio e Compras',
+          desc: 'Planilhas de entrada/saída de materiais, tombamento de bens e controle de suprimentos.',
+          icone: '📦',
+          softwareId: 3,
+          padrao: true
+        },
+        {
+          id: 'adm_4',
+          nome: 'Gestão de Recursos Humanos e Folha de Ponto',
+          desc: 'Sistemas de RH, atestados de servidores e lançamento de frequência funcional.',
+          icone: '👥',
+          softwareId: 1,
+          padrao: false
+        }
+      ]
+    }
+  },
+
+  // Identifica a chave correspondente da área
+  detectarChaveSetor(setorOuOrgao) {
+    const s = (setorOuOrgao || '').toLowerCase();
+    if (s.includes('escola') || s.includes('educa') || s.includes('sme') || s.includes('cmei') || s.includes('profess')) {
+      return 'educacao';
+    }
+    if (s.includes('saude') || s.includes('saúde') || s.includes('ubs') || s.includes('sms') || s.includes('enferm') || s.includes('medic')) {
+      return 'saude';
+    }
+    if (s.includes('obra') || s.includes('seplan') || s.includes('engenhar') || s.includes('planeja')) {
+      return 'obras';
+    }
+    if (s.includes('fazen') || s.includes('tribut') || s.includes('fiscal') || s.includes('receita') || s.includes('auditor')) {
+      return 'fazenda';
+    }
+    return 'administracao';
+  },
+
   perfisDisponiveis: [],
   chartRiscoInst: null,
   chartOrgaosInst: null,
+
+  preencherLogin(email, senha) {
+    const elE = document.getElementById('loginEmail');
+    const elS = document.getElementById('loginSenha');
+    if (elE) elE.value = email;
+    if (elS) elS.value = senha;
+  },
 
   async init() {
     await this.carregarPerfis();
@@ -178,14 +435,42 @@ const app = {
 
   aplicarUsuario(u) {
     // Avatar iniciais
-    const p = u.nome.trim().split(' ');
+    const p = (u.nome || 'Servidor').trim().split(' ');
     let ini = 'ME';
     if (p.length >= 2) ini = (p[0][0] + p[p.length - 1][0]).toUpperCase();
     else if (p.length === 1) ini = p[0].substring(0, 2).toUpperCase();
 
     document.getElementById('navAvatar').innerText = ini;
-    document.getElementById('navNome').innerText = u.nome.split(' ')[0];
+    document.getElementById('navNome').innerText = (u.nome || 'Servidor').split(' ')[0];
     document.getElementById('navSetor').innerText = u.setor || 'Lages';
+
+    const ehAdmin = u.tipo_usuario === 'admin' || (u.email && u.email.includes('admin'));
+
+    // Atualiza cabeçalho da visão de licitações
+    const tituloSecao = document.getElementById('tituloSecaoLicitacoes');
+    const subSecao = document.getElementById('subtituloSecaoLicitacoes');
+    const badgePapel = document.getElementById('badgePapelUsuario');
+    const btnAuditor = document.getElementById('btnNavAuditor');
+
+    if (ehAdmin) {
+      if (tituloSecao) tituloSecao.innerText = 'Todos os Processos Licitatórios (Todas as Secretarias - Visão Admin)';
+      if (subSecao) subSecao.innerText = 'Painel Global de Auditoria e Governança de TIC de Lages / SC';
+      if (badgePapel) {
+        badgePapel.innerText = 'ADMINISTRADOR GERAL (TCE)';
+        badgePapel.style.background = 'rgba(124, 58, 237, 0.2)';
+        badgePapel.style.color = '#A78BFA';
+      }
+      if (btnAuditor) btnAuditor.style.display = 'inline-block';
+    } else {
+      if (tituloSecao) tituloSecao.innerText = 'Meus Pedidos de Licitação';
+      if (subSecao) subSecao.innerText = `Processos emitidos por ${u.nome.split(' ')[0]} para ${u.setor || 'Lages'}`;
+      if (badgePapel) {
+        badgePapel.innerText = 'SERVIDOR SOLICITANTE';
+        badgePapel.style.background = 'rgba(52, 211, 153, 0.15)';
+        badgePapel.style.color = 'var(--dark-accent)';
+      }
+      if (btnAuditor) btnAuditor.style.display = 'none'; // Acesso restrito ao auditor geral
+    }
 
     // Demanda local
     this.demanda.usuarioId = u.id;
@@ -222,11 +507,17 @@ const app = {
   },
 
   // ==========================================
-  // LISTAGEM DE LICITAÇÕES
+  // LISTAGEM DE LICITAÇÕES (FILTRADA POR USUÁRIO)
   // ==========================================
   async carregarDemandas() {
     try {
-      const res = await fetch('/api/demandas');
+      const u = this.usuarioLogado;
+      const ehAdmin = u && (u.tipo_usuario === 'admin' || (u.email && u.email.includes('admin')));
+      const url = ehAdmin 
+        ? '/api/demandas?tipoUsuario=admin' 
+        : `/api/demandas?tipoUsuario=padrao&usuarioId=${u?.id || ''}`;
+
+      const res = await fetch(url);
       this.demandasCarregadas = await res.json();
       this.renderizarTabela(this.demandasCarregadas);
     } catch (e) {
@@ -239,7 +530,7 @@ const app = {
     if (!tbody) return;
 
     if (!demandas || demandas.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 28px; color: var(--dark-muted);">Nenhuma licitação encontrada.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 28px; color: var(--dark-muted);">Nenhuma licitação encontrada para este usuário.</td></tr>`;
       return;
     }
 
@@ -300,6 +591,36 @@ const app = {
     const num = Math.floor(1000 + Math.random() * 9000);
     this.demanda.protocolo = `ETP-2026-${num}`;
 
+    // Sincroniza com dados cadastrados do usuário logado
+    if (this.usuarioLogado) {
+      this.demanda.usuarioId = this.usuarioLogado.id;
+      this.demanda.usuarioNome = this.usuarioLogado.nome;
+      this.demanda.usuarioMatricula = this.usuarioLogado.matricula;
+      this.demanda.setorNome = this.usuarioLogado.setor || 'Escolas Municipais (SME)';
+      this.demanda.orgao = this.usuarioLogado.orgao || 'Prefeitura de Lages - SME';
+      this.demanda.cargo = this.usuarioLogado.cargo || 'Professora / Coordenadora';
+    }
+
+    // Sincroniza o select do Passo 1
+    const sel = document.getElementById('wizOrgaoSelect');
+    if (sel) {
+      for (let i = 0; i < sel.options.length; i++) {
+        const val = sel.options[i].value;
+        const [optSetor, optOrgao] = val.split('|');
+        if (
+          this.demanda.setorNome.includes(optSetor) ||
+          optSetor.includes(this.demanda.setorNome) ||
+          this.demanda.orgao.includes(optOrgao)
+        ) {
+          sel.selectedIndex = i;
+          break;
+        }
+      }
+    }
+
+    // Renderiza dinamicamente as rotinas específicas do setor do usuário
+    this.renderizarRotinasPasso2();
+
     this.navegar('wizard');
     this.irParaPasso(1);
   },
@@ -327,7 +648,8 @@ const app = {
       }
     }
 
-    if (passo === 3) this.calcularHardware();
+    if (passo === 2) this.renderizarRotinasPasso2();
+    else if (passo === 3) this.calcularHardware();
     else if (passo === 4) this.analisarAuditoria();
     else if (passo === 5) this.preencherResumo();
   },
@@ -348,6 +670,8 @@ const app = {
     const [setor, orgao] = val.split('|');
     this.demanda.setorNome = setor;
     this.demanda.orgao = orgao;
+    // Atualiza imediatamente o catálogo do Passo 2 para o novo setor
+    this.renderizarRotinasPasso2();
   },
 
   setQtd(n, elem) {
@@ -364,39 +688,103 @@ const app = {
     document.querySelectorAll('.qty-pill').forEach(b => b.classList.remove('active'));
   },
 
+  // ==========================================
+  // RENDERIZAÇÃO INTELIGENTE DO PASSO 2 (ROTINA)
+  // FILTRADO PELO SETOR DE ATUAÇÃO (EX: ESCOLAS)
+  // ==========================================
+  renderizarRotinasPasso2() {
+    const chave = this.detectarChaveSetor(this.demanda.setorNome || this.demanda.orgao);
+    const config = this.catalogoRotinasPorSetor[chave] || this.catalogoRotinasPorSetor['educacao'];
+
+    // Atualiza o Banner de Homologação / Blindagem TCE
+    const elIcon = document.getElementById('rotinaBannerIcon');
+    const elSetor = document.getElementById('rotinaBannerSetorNome');
+    const elBadge = document.getElementById('rotinaBannerBadge');
+    const elTitulo = document.getElementById('rotinaBannerTitulo');
+    const elDesc = document.getElementById('rotinaBannerDesc');
+
+    if (elIcon) elIcon.innerText = config.icone;
+    if (elSetor) elSetor.innerText = config.nomeSetor;
+    if (elBadge) elBadge.innerText = config.badge;
+    if (elTitulo) elTitulo.innerText = config.titulo;
+    if (elDesc) elDesc.innerText = config.descricaoBlindagem;
+
+    // Garante que as atividades selecionadas pertençam ao catálogo atual
+    const idsValidos = config.rotinas.map(r => r.id);
+    const temAtividadesValidas = this.demanda.atividades.some(id => idsValidos.includes(id));
+
+    if (!temAtividadesValidas) {
+      // Pré-marca as rotinas padrão do setor
+      this.demanda.atividades = config.rotinas.filter(r => r.padrao).map(r => r.id);
+    }
+
+    // Mantém os nomes textuais atualizados
+    this.demanda.atividadesNomes = config.rotinas
+      .filter(r => this.demanda.atividades.includes(r.id))
+      .map(r => r.nome);
+
+    // Renderiza a Grid de Cards
+    const grid = document.getElementById('gridRotinasDinamicas');
+    if (!grid) return;
+
+    grid.innerHTML = config.rotinas.map(rot => {
+      const isSelected = this.demanda.atividades.includes(rot.id);
+      return `
+        <div class="select-box ${isSelected ? 'selected' : ''}" id="act-${rot.id}" onclick="app.toggleAtividade('${rot.id}')">
+          <div class="box-check">✓</div>
+          <div class="box-info">
+            <h4>${rot.icone} ${rot.nome}</h4>
+            <p>${rot.desc}</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+  },
+
   toggleAtividade(id) {
-    const box = document.getElementById(`act-${id}`);
+    const chave = this.detectarChaveSetor(this.demanda.setorNome || this.demanda.orgao);
+    const config = this.catalogoRotinasPorSetor[chave] || this.catalogoRotinasPorSetor['educacao'];
+    const rot = config.rotinas.find(r => r.id === id);
+
     const idx = this.demanda.atividades.indexOf(id);
 
     if (idx > -1) {
       if (this.demanda.atividades.length === 1) {
-        alert('Selecione ao menos uma atividade.');
+        alert('Selecione ao menos uma atividade de rotina escolar/setorial.');
         return;
       }
       this.demanda.atividades.splice(idx, 1);
-      box?.classList.remove('selected');
     } else {
       this.demanda.atividades.push(id);
-      box?.classList.add('selected');
     }
+
+    // Atualiza estado visual do card
+    const cardEl = document.getElementById(`act-${id}`);
+    if (cardEl) cardEl.classList.toggle('selected', this.demanda.atividades.includes(id));
+
+    // Atualiza lista de nomes legíveis
+    this.demanda.atividadesNomes = config.rotinas
+      .filter(r => this.demanda.atividades.includes(r.id))
+      .map(r => r.nome);
   },
 
   // ==========================================
   // CÁLCULOS DO HARDWARE
   // ==========================================
   async calcularHardware() {
-    // Mapeamento justo e econômico para cada tipo de rotina pública:
-    // 1 (Internet/SGPe) -> 8GB RAM
-    // 2 (Textos/Ofícios/PDFs) -> 8GB RAM
-    // 3 (Planilhas administrativas comuns) -> 8GB RAM
-    // 4 (Power BI / Análise Pesada de Dados) -> 16GB RAM
-    // 5 (Plantas CAD / QGIS) -> 32GB RAM + GPU
-    // 6 (Edição 3D / Vídeos) -> 32GB RAM + GPU
-    const map = { 1: [1], 2: [2], 3: [3], 4: [4], 5: [5], 6: [6] };
+    const chave = this.detectarChaveSetor(this.demanda.setorNome || this.demanda.orgao);
+    const config = this.catalogoRotinasPorSetor[chave] || this.catalogoRotinasPorSetor['educacao'];
+
+    // Mapeia os softwareIds exigidos pelas rotinas selecionadas
     let sw = [];
     this.demanda.atividades.forEach(id => {
-      if (map[id]) sw = sw.concat(map[id]);
+      const rot = config.rotinas.find(r => r.id === id);
+      if (rot && rot.softwareId) {
+        sw.push(rot.softwareId);
+      }
     });
+
+    if (sw.length === 0) sw = [1];
 
     try {
       const res = await fetch('/api/calcular-perfil', {
@@ -564,7 +952,9 @@ const app = {
           setor: this.demanda.setorNome,
           cargo: this.demanda.cargo,
           quantidadeUsuarios: this.demanda.quantidade,
-          softwares: this.demanda.atividades.map(i => `Atividade #${i}`),
+          softwares: (this.demanda.atividadesNomes && this.demanda.atividadesNomes.length > 0)
+            ? this.demanda.atividadesNomes 
+            : this.demanda.atividades,
           perfilRecomendadoId: this.demanda.perfilRecomendado?.id || 1,
           perfilEscolhidoId: this.demanda.perfilEscolhido?.id || 1,
           justificativaUsuario: txt,
@@ -576,6 +966,8 @@ const app = {
 
       const data = await res.json();
       if (data.success) {
+        // Recarrega a tabela de pedidos respeitando as permissões
+        this.carregarDemandas();
         this.renderizarModalEtp(data.demanda, this.demanda.perfilEscolhido);
       }
     } catch (e) {
@@ -645,6 +1037,14 @@ const app = {
     const orgaoServ = (demanda.orgao || 'Prefeitura do Município de Lages - Secretaria Municipal de Educação').toUpperCase();
     const setorServ = demanda.setor || 'Escolas Municipais (SME)';
 
+    let rotinasFormatadas = '';
+    try {
+      const parsed = Array.isArray(demanda.softwares) ? demanda.softwares : JSON.parse(demanda.softwares || '[]');
+      rotinasFormatadas = parsed.join('; ');
+    } catch (e) {
+      rotinasFormatadas = demanda.softwares || '';
+    }
+
     corpo.innerHTML = `
       <div class="gov-contract-doc">
 
@@ -683,6 +1083,9 @@ const app = {
           <div class="gov-clause-title">1. CLÁUSULA PRIMEIRA – OBJETO</div>
           <p class="gov-clause-p">
             1.1. O objeto do presente instrumento é a contratação de solução de tecnologia da informação e comunicação consistente no fornecimento de equipamentos de microinformática padronizados para o atendimento das demandas operacionais do setor de <strong>${setorServ}</strong>, nas condições estabelecidas no Termo de Referência.
+          </p>
+          <p class="gov-clause-p">
+            1.1.1. As configurações foram dimensionadas estritamente para as rotinas homologadas do setor solicitante: <em>${rotinasFormatadas || 'Rotinas pedagógicas e administrativas municipais'}</em>, em observância ao princípio da economicidade e da eficiência pública (Art. 5º da Lei Federal nº 14.133/2021).
           </p>
           <p class="gov-clause-p">
             1.2. Objeto da contratação:

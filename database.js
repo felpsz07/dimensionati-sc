@@ -27,6 +27,7 @@ function initDatabase() {
       perfil_padrao_id INTEGER NOT NULL DEFAULT 1,
       atividades_padrao TEXT NOT NULL, -- JSON array de IDs de atividades
       avatar TEXT,
+      tipo_usuario TEXT NOT NULL DEFAULT 'padrao',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -377,6 +378,34 @@ function initDatabase() {
 
   // Atualização garantida dos valores de mercado e 8GB de RAM para o Perfil 1
   try {
+    try {
+      db.exec(`ALTER TABLE usuarios ADD COLUMN tipo_usuario TEXT DEFAULT 'padrao';`);
+    } catch (e) {}
+
+    // Garante que o usuário Admin exista
+    const adminExiste = db.prepare('SELECT id FROM usuarios WHERE email = ?').get('admin@lages.sc.gov.br');
+    if (!adminExiste) {
+      db.prepare(`
+        INSERT INTO usuarios (nome, email, senha, cargo, orgao, setor, municipio, matricula, perfil_padrao_id, atividades_padrao, avatar, tipo_usuario)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        'Administrador Geral de TIC',
+        'admin@lages.sc.gov.br',
+        '123456',
+        'Diretor de TIC e Licitações',
+        'Prefeitura do Município de Lages - Diretoria de TIC',
+        'Diretoria Geral de Tecnologia e Governança',
+        'Lages',
+        'MAT-00001/PML',
+        2,
+        JSON.stringify([1, 2, 4]),
+        '👑',
+        'admin'
+      );
+    } else {
+      db.prepare(`UPDATE usuarios SET tipo_usuario = 'admin' WHERE email = 'admin@lages.sc.gov.br'`).run();
+    }
+
     db.exec(`
       UPDATE perfis_hardware SET
         processador = 'Quad-Core x86-64 3.4GHz+ (PassMark 8.500+)',

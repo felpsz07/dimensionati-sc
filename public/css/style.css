@@ -1248,6 +1248,90 @@ body {
   }
 }
 
+/* BANNER DE SETOR NO PASSO 2 (ROTINA) */
+.rotina-sector-banner {
+  background: rgba(52, 211, 153, 0.05);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin-top: 18px;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.rotina-banner-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  background: var(--dark-surface);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  flex-shrink: 0;
+}
+
+.rotina-banner-content {
+  flex: 1;
+}
+
+.rotina-banner-content h4 {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--dark-accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.rotina-banner-content p {
+  font-size: 0.85rem;
+  color: var(--dark-muted);
+  line-height: 1.45;
+}
+
+.rotina-banner-badge {
+  display: inline-block;
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--dark-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.demo-credentials-box {
+  margin-top: 18px;
+  padding: 12px 14px;
+  background: var(--dark-surface);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  color: var(--dark-muted);
+}
+.demo-credentials-box strong {
+  color: var(--dark-text);
+}
+.demo-pill-btn {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--dark-border);
+  color: var(--dark-text);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  margin: 2px 0;
+  font-size: 0.75rem;
+  transition: all 0.15s ease;
+}
+.demo-pill-btn:hover {
+  border-color: var(--dark-accent);
+  color: var(--dark-accent);
+}
+
 /* ========================================================== */
 /* IMPRESSÃO A4                                               */
 /* ========================================================== */
