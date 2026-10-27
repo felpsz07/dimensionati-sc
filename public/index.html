@@ -277,19 +277,35 @@
           </span>
         </div>
 
+        <!-- ABAS DE FILTRO POR STATUS (TRANSMITIDAS VS CANCELADAS) -->
+        <div class="status-tabs-container">
+          <button type="button" class="status-tab-btn active" id="tabStatusTransmitidas" onclick="app.setAbaStatus('transmitidas')">
+            <span>🚀 Transmitidas ao TI</span>
+            <span class="tab-count-badge" id="badgeQtdTransmitidas">0</span>
+          </button>
+          <button type="button" class="status-tab-btn" id="tabStatusCanceladas" onclick="app.setAbaStatus('canceladas')">
+            <span>🚫 Canceladas</span>
+            <span class="tab-count-badge badge-cancel" id="badgeQtdCanceladas">0</span>
+          </button>
+          <button type="button" class="status-tab-btn" id="tabStatusTodas" onclick="app.setAbaStatus('todas')">
+            <span>📋 Todas as Requisições</span>
+            <span class="tab-count-badge" id="badgeQtdTodas">0</span>
+          </button>
+        </div>
+
         <!-- TABELA MINIMALISTA -->
         <div class="dark-card-box">
           <div class="table-responsive">
             <table class="dark-table">
               <thead>
                 <tr>
-                  <th style="width: 140px;">Nº REQUISIÇÃO</th>
-                  <th style="min-width: 190px;">ÓRGÃO / SETOR</th>
-                  <th style="min-width: 170px;">SOLICITANTE</th>
-                  <th style="width: 60px; text-align: center;">QTD</th>
-                  <th style="min-width: 200px;">EQUIPAMENTO SOLICITADO</th>
+                  <th style="width: 130px;">Nº REQUISIÇÃO</th>
+                  <th>ÓRGÃO / SETOR</th>
+                  <th>SOLICITANTE</th>
+                  <th style="width: 50px; text-align: center;">QTD</th>
+                  <th>EQUIPAMENTO SOLICITADO</th>
                   <th style="width: 140px; text-align: center;">STATUS TI</th>
-                  <th style="width: 120px; text-align: right;">AÇÕES</th>
+                  <th style="width: 110px; text-align: right;">AÇÕES</th>
                 </tr>
               </thead>
               <tbody id="tbodyLicitacoes">

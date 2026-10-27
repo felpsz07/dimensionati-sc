@@ -630,21 +630,101 @@ body {
   color: var(--dark-muted);
 }
 
+/* ========================================================== */
+/* ABAS DE STATUS (TRANSMITIDAS VS CANCELADAS)                */
+/* ========================================================== */
+.status-tabs-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.status-tab-btn {
+  background: var(--dark-surface);
+  border: 1px solid var(--dark-border);
+  color: var(--dark-muted);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.status-tab-btn:hover {
+  background: #1C2736;
+  color: var(--dark-text);
+  border-color: #3B4D5C;
+}
+
+.status-tab-btn.active {
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--dark-accent);
+  border-color: var(--dark-accent);
+}
+
+.status-tab-btn.active#tabStatusCanceladas {
+  background: rgba(239, 68, 68, 0.12);
+  color: #F87171;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.tab-count-badge {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--dark-text);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.status-tab-btn.active .tab-count-badge {
+  background: var(--dark-accent);
+  color: #0A0E14;
+}
+
+.status-tab-btn.active#tabStatusCanceladas .tab-count-badge {
+  background: #EF4444;
+  color: #FFFFFF;
+}
+
 .table-responsive {
   overflow-x: auto;
   border-radius: var(--radius-md);
+  min-height: 180px;
+}
+
+.table-responsive::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: var(--dark-card);
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #253342;
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: var(--dark-accent);
 }
 
 .dark-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 0.86rem;
+  font-size: 0.85rem;
   text-align: left;
 }
 
 .dark-table th {
-  padding: 14px 16px;
+  padding: 12px 14px;
   color: var(--dark-muted);
   font-weight: 700;
   font-size: 0.72rem;
@@ -656,7 +736,7 @@ body {
 }
 
 .dark-table td {
-  padding: 16px;
+  padding: 14px;
   border-bottom: 1px solid var(--dark-border);
   vertical-align: middle;
   line-height: 1.4;
@@ -780,15 +860,20 @@ body {
   position: absolute;
   right: 0;
   top: calc(100% + 4px);
-  background: #131B26;
-  border: 1px solid var(--dark-border);
+  background: #141E2A !important;
+  border: 1px solid #2B3D52;
   border-radius: var(--radius-md);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65);
-  z-index: 1000;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.9);
+  z-index: 9999;
   min-width: 220px;
   display: none;
   flex-direction: column;
   padding: 6px;
+}
+
+.acoes-menu-dropdown.drop-up {
+  top: auto;
+  bottom: calc(100% + 4px);
 }
 
 .acoes-menu-dropdown.active {

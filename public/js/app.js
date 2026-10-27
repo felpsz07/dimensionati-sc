@@ -4,6 +4,7 @@ const app = {
   passoAtual: 1,
   totalPassos: 3,
   demandasCarregadas: [],
+  abaStatusAtual: 'transmitidas',
 
   lotacaoTemp: {
     setorNome: 'Escolas Municipais (SME)',
@@ -527,7 +528,7 @@ const app = {
 
       const res = await fetch(url);
       this.demandasCarregadas = await res.json();
-      this.renderizarTabela(this.demandasCarregadas);
+      this.filtrarTabela();
     } catch (e) {
       console.error(e);
     }
@@ -535,16 +536,75 @@ const app = {
 
   protocoloParaCancelar: null,
 
+  setAbaStatus(aba) {
+    this.abaStatusAtual = aba;
+    document.querySelectorAll('.status-tab-btn').forEach(btn => btn.classList.remove('active'));
+
+    if (aba === 'transmitidas') {
+      document.getElementById('tabStatusTransmitidas')?.classList.add('active');
+    } else if (aba === 'canceladas') {
+      document.getElementById('tabStatusCanceladas')?.classList.add('active');
+    } else {
+      document.getElementById('tabStatusTodas')?.classList.add('active');
+    }
+
+    this.filtrarTabela();
+  },
+
+  filtrarTabela() {
+    const term = (document.getElementById('inputBusca')?.value || '').toLowerCase();
+    const todas = this.demandasCarregadas || [];
+
+    // Atualiza contadores das abas
+    const qtdTransmitidas = todas.filter(d => d.status !== 'Cancelado').length;
+    const qtdCanceladas = todas.filter(d => d.status === 'Cancelado').length;
+    const qtdTodas = todas.length;
+
+    const bTrans = document.getElementById('badgeQtdTransmitidas');
+    const bCanc = document.getElementById('badgeQtdCanceladas');
+    const bTodas = document.getElementById('badgeQtdTodas');
+
+    if (bTrans) bTrans.innerText = qtdTransmitidas;
+    if (bCanc) bCanc.innerText = qtdCanceladas;
+    if (bTodas) bTodas.innerText = qtdTodas;
+
+    // Filtra pelo termo de busca
+    let filtradas = todas.filter(d => 
+      !term ||
+      (d.protocolo || '').toLowerCase().includes(term) ||
+      (d.setor || '').toLowerCase().includes(term) ||
+      (d.orgao || '').toLowerCase().includes(term) ||
+      (d.usuario_nome || '').toLowerCase().includes(term)
+    );
+
+    // Filtra pela aba de status
+    if (this.abaStatusAtual === 'transmitidas') {
+      filtradas = filtradas.filter(d => d.status !== 'Cancelado');
+    } else if (this.abaStatusAtual === 'canceladas') {
+      filtradas = filtradas.filter(d => d.status === 'Cancelado');
+    }
+
+    this.renderizarTabela(filtradas);
+  },
+
   renderizarTabela(demandas) {
     const tbody = document.getElementById('tbodyLicitacoes');
     if (!tbody) return;
 
     if (!demandas || demandas.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 36px; color: var(--dark-muted); font-size: 0.9rem;">Nenhuma requisição encontrada. Clique em <strong>+ Novo</strong> para emitir uma nova solicitação.</td></tr>`;
+      let msgVazia = 'Nenhuma requisição encontrada.';
+      if (this.abaStatusAtual === 'transmitidas') {
+        msgVazia = '🚀 Nenhuma requisição transmitida ativa no momento. Clique em <strong>+ Novo</strong> para emitir uma nova solicitação.';
+      } else if (this.abaStatusAtual === 'canceladas') {
+        msgVazia = '🚫 Nenhuma requisição cancelada. Todas as suas solicitações continuam ativas e transmitidas ao TI.';
+      }
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 36px; color: var(--dark-muted); font-size: 0.9rem;">${msgVazia}</td></tr>`;
       return;
     }
 
-    tbody.innerHTML = demandas.map(d => {
+    const totalRows = demandas.length;
+
+    tbody.innerHTML = demandas.map((d, index) => {
       let stClass = 'ok';
       let stText = '✓ HOMOLOGADO TI';
 
@@ -570,9 +630,11 @@ const app = {
       }
 
       const ehCancelado = d.status === 'Cancelado';
+      // Abre para cima quando for penúltima ou última linha para não cortar
+      const isDropUp = (index >= totalRows - 2 && totalRows >= 2) || (index === 0 && totalRows === 1);
 
       return `
-        <tr style="${ehCancelado ? 'opacity: 0.65;' : ''}">
+        <tr style="${ehCancelado ? 'opacity: 0.75;' : ''}">
           <td>
             <div class="td-protocolo">${d.protocolo}</div>
           </td>
@@ -593,13 +655,18 @@ const app = {
           </td>
           <td style="text-align: center;">
             <span class="status-chip ${stClass}">${stText}</span>
+            ${ehCancelado && d.motivo_cancelamento ? `
+              <div style="font-size: 0.72rem; color: #F87171; margin-top: 4px; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${d.motivo_cancelamento}">
+                ${d.motivo_cancelamento}
+              </div>
+            ` : ''}
           </td>
           <td style="text-align: right;">
             <div class="acoes-dropdown-wrap">
               <button type="button" class="btn-acoes-trigger" onclick="app.toggleMenuAcoes('${d.protocolo}', event)">
                 ⚡ Ações <span style="font-size: 0.65rem; margin-left: 2px;">▼</span>
               </button>
-              <div class="acoes-menu-dropdown" id="menu-acoes-${d.protocolo}">
+              <div class="acoes-menu-dropdown ${isDropUp ? 'drop-up' : ''}" id="menu-acoes-${d.protocolo}">
                 <button type="button" class="acoes-menu-item" onclick="app.abrirMinuta('${d.protocolo}')">
                   <span>📄</span> Visualizar Ficha / DOD
                 </button>
@@ -684,7 +751,9 @@ const app = {
       const data = await res.json();
       if (data.success) {
         this.fecharModalCancelar();
+        // Recarrega as demandas e move para a aba de cancelados
         await this.carregarDemandas();
+        this.setAbaStatus('canceladas');
       } else {
         alert(data.error || 'Erro ao cancelar processo.');
       }
@@ -707,18 +776,6 @@ const app = {
   fecharModalVerCancelamento() {
     const modal = document.getElementById('modalVerCancelamento');
     if (modal) modal.classList.remove('active');
-  },
-
-  filtrarTabela() {
-    const term = (document.getElementById('inputBusca')?.value || '').toLowerCase();
-    const filtradas = this.demandasCarregadas.filter(d => 
-      !term ||
-      (d.protocolo || '').toLowerCase().includes(term) ||
-      (d.setor || '').toLowerCase().includes(term) ||
-      (d.orgao || '').toLowerCase().includes(term) ||
-      (d.usuario_nome || '').toLowerCase().includes(term)
-    );
-    this.renderizarTabela(filtradas);
   },
 
   // ==========================================
