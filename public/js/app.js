@@ -19,7 +19,8 @@ const app = {
     orgao: 'Prefeitura de Lages - SME',
     cargo: 'Professora / Coordenadora',
     municipio: 'Lages',
-    quantidade: 10,
+    quantidade: 1,
+    formatoEquipamento: 'desktop', // 'desktop' ou 'notebook'
     opcaoMonitor: '1x', // 'none', '1x', '2x'
     incluiPerifericos: true, // teclado e mouse
     incluiNobreak: false,
@@ -534,20 +535,20 @@ const app = {
     if (!tbody) return;
 
     if (!demandas || demandas.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 28px; color: var(--dark-muted);">Nenhuma licitação encontrada para este usuário.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 28px; color: var(--dark-muted);">Nenhuma requisição encontrada para este usuário.</td></tr>`;
       return;
     }
 
     tbody.innerHTML = demandas.map(d => {
       let stClass = 'ok';
-      let stText = 'AUTORIZADA';
+      let stText = 'HOMOLOGADA PELO TI';
 
       if (d.status === 'Sob Análise' || d.nivel_risco === 'MEDIO') {
         stClass = 'warn';
-        stText = 'SOB ANÁLISE';
+        stText = 'EM ANÁLISE DE TI';
       } else if (d.status === 'Bloqueado TCE' || d.nivel_risco === 'ALTO') {
         stClass = 'danger';
-        stText = 'CANCELADA';
+        stText = 'REVISÃO EXIGIDA';
       }
 
       return `
@@ -562,13 +563,14 @@ const app = {
             <small style="color: var(--dark-muted);">${d.cargo || ''}</small>
           </td>
           <td><strong>${d.quantidade_usuarios}</strong></td>
-          <td><span class="status-chip ${stClass}">${stText}</span></td>
-          <td style="text-align: right; font-weight: 700;">
-            R$ ${d.custo_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          <td>
+            <strong>${d.perfil_esc_nome ? d.perfil_esc_nome.split(':')[0] : 'Nível 1 (Básico)'}</strong><br>
+            <small style="color: var(--dark-muted);">${d.perfil_escolhido_id === 3 ? 'Estação Gráfica / CAD' : 'Desktop / Notebook Corporativo'}</small>
           </td>
+          <td><span class="status-chip ${stClass}">${stText}</span></td>
           <td style="text-align: center;">
             <button class="btn-table-action" onclick="app.abrirMinuta('${d.protocolo}')">
-              Ver
+              📄 Ficha / DOD
             </button>
           </td>
         </tr>
@@ -676,6 +678,20 @@ const app = {
     this.demanda.orgao = orgao;
     // Atualiza imediatamente o catálogo do Passo 2 para o novo setor
     this.renderizarRotinasPasso2();
+  },
+
+  setFormatoEquipamento(formato, elem) {
+    document.querySelectorAll('#btnFormatoDesktop, #btnFormatoNotebook').forEach(b => b.classList.remove('active'));
+    if (elem) elem.classList.add('active');
+    this.demanda.formatoEquipamento = formato;
+
+    const monCard = document.getElementById('recMonitor');
+    if (formato === 'notebook') {
+      if (monCard) monCard.innerText = 'Tela 15.6" Full HD + Webcam Integrada';
+    } else {
+      if (monCard) monCard.innerText = '23.8" IPS com ajuste de altura NR-17';
+    }
+    this.recalcularPrecoEPerifericos();
   },
 
   setQtd(n, elem) {
@@ -904,25 +920,38 @@ const app = {
     const cpu = document.getElementById('recCpu');
     const ram = document.getElementById('recRam');
     const ssd = document.getElementById('recSsd');
+    const mon = document.getElementById('recMonitor');
+
+    const ehNotebook = this.demanda.formatoEquipamento === 'notebook';
 
     if (p.id === 1) {
-      badge.innerText = 'NÍVEL 1 • ADEQUADO E ECONÔMICO';
-      title.innerText = 'Computador para Atendimento e Navegação';
-      cpu.innerText = 'Quad-Core 3.4GHz+ (PassMark 8.500+)';
-      ram.innerText = '8 GB DDR4 3200MHz (expansível)';
-      ssd.innerText = 'SSD 256GB NVMe M.2';
+      badge.innerText = 'NÍVEL 1 • ADEQUADO E HOMOLOGADO';
+      title.innerText = ehNotebook 
+        ? 'Notebook Corporativo Portátil (Gestão Escolar)' 
+        : 'Computador Desktop de Mesa (Atendimento e Gestão)';
+      cpu.innerText = 'Quad-Core x86-64 3.4GHz+ (PassMark 8.500+)';
+      ram.innerText = '8 GB DDR4/DDR5 (Expansível até 32GB)';
+      ssd.innerText = 'SSD 256GB NVMe M.2 de Alta Velocidade';
     } else if (p.id === 2) {
-      badge.innerText = 'NÍVEL 2 • ANÁLISE DE DADOS E BI';
-      title.innerText = 'Estação para Relatórios e Análise de Dados';
+      badge.innerText = 'NÍVEL 2 • ANÁLISE DE DADOS E GESTÃO';
+      title.innerText = ehNotebook 
+        ? 'Notebook Corporativo Intermediário (Dados & BI)' 
+        : 'Estação Desktop para Relatórios e BI';
       cpu.innerText = 'Hexa-Core 4.4GHz+ (PassMark 18.000+)';
       ram.innerText = '16 GB DDR4/DDR5 Dual-Channel';
       ssd.innerText = 'SSD 512GB NVMe PCIe 4.0';
     } else {
       badge.innerText = 'NÍVEL 3 • ENGENHARIA & CAD';
-      title.innerText = 'Workstation de Alto Desempenho Gráfico';
+      title.innerText = ehNotebook 
+        ? 'Mobile Workstation com GPU Dedicada' 
+        : 'Workstation Desktop de Alto Desempenho';
       cpu.innerText = 'Octa-Core 5.0GHz+ (PassMark 30.000+)';
       ram.innerText = '32 GB DDR5 5200MHz Dual-Channel';
       ssd.innerText = 'SSD 1TB Gen4 + GPU NVIDIA RTX';
+    }
+
+    if (ehNotebook) {
+      if (mon) mon.innerText = 'Tela 15.6" Full HD Anti-reflexo + Webcam HD';
     }
 
     this.recalcularPrecoEPerifericos();
@@ -1136,105 +1165,131 @@ const app = {
       rotinasFormatadas = demanda.softwares || '';
     }
 
-    let monitorTxt = '1x Monitor 23.8" IPS Full HD ergonômico NR-17';
-    if (this.demanda.opcaoMonitor === 'none') {
-      monitorTxt = '<strong style="color: #047857;">DISPENSADO DO LOTE:</strong> Reaproveitamento integral de monitores em perfeito estado já existentes no setor de ' + setorServ + ' (Art. 11 da Lei 14.133/2021).';
-    } else if (this.demanda.opcaoMonitor === '2x') {
+    const ehNotebook = (this.demanda.formatoEquipamento === 'notebook');
+    const nomeEquipamentoFormatado = ehNotebook 
+      ? 'Notebook Corporativo Portátil com Tela 15.6" Full HD' 
+      : 'Microcomputador Desktop Corporativo (Gabinete de Mesa)';
+
+    let monitorTxt = ehNotebook 
+      ? 'Tela 15.6" Full HD (1920x1080) WVA anti-reflexo com webcam HD e microfone digital integrados'
+      : '1x Monitor 23.8" IPS Full HD ergonômico NR-17 com ajuste de altura';
+
+    if (!ehNotebook && this.demanda.opcaoMonitor === 'none') {
+      monitorTxt = '<strong style="color: #047857;">DISPENSADO DO FORNECIMENTO:</strong> Reaproveitamento integral de monitores em perfeito estado já existentes no setor de ' + setorServ + ' (Art. 11 da Lei 14.133/2021).';
+    } else if (!ehNotebook && this.demanda.opcaoMonitor === '2x') {
       monitorTxt = '2x Monitores IPS Full HD com suporte articulado a pistão (Dual-Head)';
     }
 
-    let periTxt = 'Kit Teclado e Mouse USB ABNT2 padrão corporativo';
-    if (this.demanda.incluiPerifericos === false) {
-      periTxt = '<strong style="color: #047857;">DISPENSADO DO LOTE:</strong> Reaproveitamento de kits de teclado e mouse existentes no órgão.';
+    let periTxt = ehNotebook
+      ? 'Teclado ABNT2 com teclado numérico integrado, touchpad multitoque, fonte/carregador bivolt original e trava Kensington'
+      : 'Kit Teclado e Mouse USB ABNT2 padrão corporativo com fio';
+
+    if (!ehNotebook && this.demanda.incluiPerifericos === false) {
+      periTxt = '<strong style="color: #047857;">DISPENSADO DO FORNECIMENTO:</strong> Reaproveitamento de kits de teclado e mouse já existentes na escola/órgão.';
     }
 
     if (this.demanda.incluiNobreak) {
-      periTxt += ' • Nobreak Senoidal 1000VA com regulação automática';
+      periTxt += ' • Nobreak Senoidal com regulação automática de voltagem';
     }
 
     corpo.innerHTML = `
       <div class="gov-contract-doc">
 
-        <!-- CABEÇALHO SUPERIOR OFICIAL AGU / SGD -->
+        <!-- CABEÇALHO SUPERIOR OFICIAL PML / TIC -->
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; font-size: 8pt; color: #4B5563;">
-          <div>ESTADO DE SANTA CATARINA • MUNICÍPIO DE LAGES</div>
-          <div style="font-weight: 800; color: #111827;">TERMO DE CONTRATO ADMINISTRATIVO Nº ${numContrato}</div>
+          <div>MUNICÍPIO DE LAGES • ESTADO DE SANTA CATARINA</div>
+          <div style="font-weight: 800; color: #111827;">REQUISIÇÃO TÉCNICA DE TIC Nº ${demanda.protocolo.replace('ETP-', 'REQ-TIC-')}/${ano}</div>
         </div>
 
         <div class="gov-contract-header">
           <h2 style="font-size: 1.15rem; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; color: #000000; margin-bottom: 2px;">
-            MODELO DE TERMO DE CONTRATO
+            DOCUMENTO DE OFICIALIZAÇÃO DA DEMANDA (DOD)
           </h2>
           <div style="font-weight: 700; font-size: 9.5pt; color: #1F2937;">
-            Lei nº 14.133, de 1º de abril de 2021<br>
-            TECNOLOGIAS DA INFORMAÇÃO E COMUNICAÇÃO - TIC<br>
-            AQUISIÇÕES – LICITAÇÃO E CONTRATAÇÃO DIRETA
+            REQUISIÇÃO E ESPECIFICAÇÃO TÉCNICA PADRONIZADA DE INFORMÁTICA<br>
+            Lei Federal nº 14.133, de 1º de abril de 2021 (Art. 18, § 1º)<br>
+            Diretoria Geral de Tecnologia da Informação e Comunicações (TIC)
           </div>
 
           <div style="margin-top: 14px; padding: 10px; background: #F8FAFC; border: 1px solid #CBD5E1; text-align: center;">
             <div style="font-weight: 900; font-size: 10pt; color: #0F172A;">${orgaoServ}</div>
-            <div style="font-size: 8.5pt; color: #475569; margin-top: 2px;">(${processoAdm})</div>
+            <div style="font-size: 8.5pt; color: #475569; margin-top: 2px;">Setor Solicitante: <strong>${setorServ}</strong> • (${processoAdm})</div>
             <div style="font-size: 8.5pt; font-weight: 700; color: #0F172A; margin-top: 6px;">
-              CONTRATO ADMINISTRATIVO Nº ${numContrato}, QUE FAZEM ENTRE SI O MUNICÍPIO DE LAGES, POR INTERMÉDIO DO(A) ${orgaoServ} E A EMPRESA VENCEDORA DO CERTAME
+              SOLICITAÇÃO DE FORNECIMENTO DE EQUIPAMENTO DE INFORMÁTICA HOMOLOGADO PARA GESTÃO OPERACIONAL
             </div>
           </div>
         </div>
 
-        <!-- PREÂMBULO -->
+        <!-- IDENTIFICAÇÃO DO SOLICITANTE -->
         <p class="gov-clause-p">
-          O <strong>MUNICÍPIO DE LAGES</strong>, pessoa jurídica de direito público interno, por intermédio do(a) <strong>${orgaoServ}</strong>, com sede na Rua Benjamin Constant, 13, Centro, Lages/SC, inscrito no CNPJ sob o nº 82.777.301/0001-90, neste ato representado(a) pelo(a) <strong>${cargoServ}</strong>, Sr(a). <strong>${nomeServ}</strong>, portador(a) da Matrícula Funcional nº <strong>${matServ}</strong>, doravante denominado <strong>CONTRATANTE</strong>, e o(a) <strong>CONTRATADO(A)</strong> vencedor(a) do certame, pessoa jurídica inscrita no CNPJ sob o nº 00.000.000/0001-00, doravante designada <strong>CONTRATADA</strong>, tendo em vista o que consta no <strong>${processoAdm}</strong> e em observância às disposições da <strong>Lei nº 14.133, de 1º de abril de 2021</strong> e legislação correlata, resolvem celebrar o presente Termo de Contrato, decorrente do <strong>${pregaoNum}</strong>, mediante as cláusulas e condições a seguir enunciadas:
+          Por meio deste instrumento, a servidora responsável <strong>${nomeServ}</strong>, ocupante do cargo de <strong>${cargoServ}</strong>, matrícula funcional nº <strong>${matServ}</strong>, lotada no(a) <strong>${setorServ}</strong>, formaliza perante a Diretoria de Tecnologia da Informação da Prefeitura de Lages a requisição de equipamento de informática em substituição/atendimento de posto de trabalho, de acordo com as especificações técnicas delimitadas a seguir:
         </p>
 
-        <!-- 1. CLÁUSULA PRIMEIRA – OBJETO -->
+        <!-- 1. OBJETO E ESPECIFICAÇÃO TÉCNICA -->
         <div class="gov-clause">
-          <div class="gov-clause-title">1. CLÁUSULA PRIMEIRA – OBJETO</div>
+          <div class="gov-clause-title">1. OBJETO E ESPECIFICAÇÃO TÉCNICA (FICHA PARA O SETOR DE TI)</div>
           <p class="gov-clause-p">
-            1.1. O objeto do presente instrumento é a contratação de solução de tecnologia da informação e comunicação consistente no fornecimento de equipamentos de microinformática padronizados para o atendimento das demandas operacionais do setor de <strong>${setorServ}</strong>, nas condições estabelecidas no Termo de Referência.
+            1.1. Fornecimento de equipamento computacional padronizado, dimensionado com base no levantamento das rotinas reais de trabalho: <em>${rotinasFormatadas || 'Gestão escolar, diário de classe, Google Sala de Aula, SGPe e documentos pedagógicos'}</em>.
           </p>
           <p class="gov-clause-p">
-            1.1.1. As configurações foram dimensionadas estritamente para as rotinas homologadas do setor solicitante: <em>${rotinasFormatadas || 'Rotinas pedagógicas e administrativas municipais'}</em>, em observância ao princípio da economicidade e da eficiência pública (Art. 5º da Lei Federal nº 14.133/2021).
-          </p>
-          <p class="gov-clause-p">
-            1.2. Objeto da contratação:
+            1.2. <strong>Cláusula Anti-Subdimensionamento (Proteção ao Usuário):</strong> O equipamento deve possuir estritamente arquitetura computacional x86-64 bits com sistema operacional corporativo Windows 11 Pro 64-bit homologado pela rede municipal. É expressamente vedado o fornecimento de netbooks de baixa potência, aparelhos móveis do tipo tablet ou dispositivos com sistema operacional Android/ChromeOS, por serem comprovadamente incompatíveis com as aplicações de gestão da Prefeitura e da Secretaria Municipal de Educação.
           </p>
 
           <table class="gov-table">
             <thead>
               <tr>
-                <th style="width: 5%; text-align: center;">ITEM</th>
-                <th style="width: 48%;">ESPECIFICAÇÃO PADRONIZADA (LICITAÇÃO BLINDADA)</th>
-                <th style="width: 13%; text-align: center;">CATMAT</th>
-                <th style="width: 8%; text-align: center;">UNID.</th>
-                <th style="width: 6%; text-align: center;">QTD.</th>
-                <th style="width: 10%; text-align: right;">VALOR UNIT.</th>
-                <th style="width: 10%; text-align: right;">VALOR TOTAL</th>
+                <th style="width: 6%; text-align: center;">ITEM</th>
+                <th style="width: 50%;">ESPECIFICAÇÃO PADRONIZADA PARA ATENDIMENTO (TIC)</th>
+                <th style="width: 14%; text-align: center;">CATMAT</th>
+                <th style="width: 10%; text-align: center;">FORMATO</th>
+                <th style="width: 8%; text-align: center;">QTD.</th>
+                <th style="width: 12%; text-align: center;">SISTEMA OPERACIONAL</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td style="text-align: center;"><strong>1</strong></td>
                 <td>
-                  <strong>${perfil.nome}</strong><br>
+                  <strong>${nomeEquipamentoFormatado} - ${perfil.nome.split(':')[0]}</strong><br>
                   <small>
                     • <strong>Processador:</strong> ${perfil.processador}<br>
                     • <strong>Memória RAM:</strong> ${perfil.ram}<br>
                     • <strong>Armazenamento:</strong> ${perfil.armazenamento}<br>
                     • <strong>Controlador Gráfico:</strong> ${perfil.gpu}<br>
-                    • <strong>Monitor:</strong> ${monitorTxt}<br>
-                    • <strong>Periféricos e Ergonomia:</strong> ${periTxt}
+                    • <strong>Tela / Monitor:</strong> ${monitorTxt}<br>
+                    • <strong>Periféricos e Conectividade:</strong> ${periTxt}
                   </small>
                 </td>
                 <td style="text-align: center;">
                   <strong>${catmat}</strong><br>
                   <span style="font-size: 7pt; color: #4B5563;">${catmatNome}</span>
                 </td>
-                <td style="text-align: center;">Unidade</td>
+                <td style="text-align: center;"><strong>${ehNotebook ? 'Notebook' : 'Desktop'}</strong></td>
                 <td style="text-align: center;"><strong>${demanda.quantidade_usuarios}</strong></td>
-                <td style="text-align: right;">R$ ${valUnit}</td>
-                <td style="text-align: right;"><strong>R$ ${valTot}</strong></td>
+                <td style="text-align: center; font-weight: 700; color: #047857;">Windows 11 Pro (x86-64)</td>
               </tr>
             </tbody>
           </table>
+
+          <!-- REQUISITOS OBRIGATÓRIOS DO FORNECIMENTO -->
+          <div class="tech-spec-box">
+            <strong>REQUISITOS MÍNIMOS OBRIGATÓRIOS PARA HOMOLOGAÇÃO PELO TI:</strong><br>
+            • <strong>Desempenho Homologado:</strong> Processador compatível com índice PassMark mínimo de 8.500 pontos, garantindo agilidade na abertura simultânea de abas do SGPe e relatórios em PDF sem travamentos.<br>
+            • <strong>Segurança em Hardware:</strong> Chip TPM 2.0 ativo de fábrica com suporte a inicialização segura (UEFI Secure Boot).<br>
+            • <strong>Garantia Técnica no Local:</strong> Garantia integral de <strong>36 (trinta e seis) meses on-site</strong> com atendimento e suporte técnico presencial na unidade de ensino em Lages/SC.
+          </div>
+        </div>
+
+        <!-- 2. DESPACHO DA DIRETORIA DE TECNOLOGIA DA INFORMAÇÃO -->
+        <div class="gov-clause">
+          <div class="gov-clause-title">2. PARECER E ENCAMINHAMENTO DA DIRETORIA DE TI</div>
+          <p class="gov-clause-p">
+            2.1. A presente demanda foi verificada e compatibilizada com o Catálogo Municipal de TIC de Lages/SC. Constatou-se conformidade técnica plena entre a rotina de trabalho informada pela servidora e o equipamento dimensionado, restando afastados tanto o superdimensionamento (gastos excessivos) quanto o subdimensionamento (entrega de máquinas inadequadas).
+          </p>
+          <p class="gov-clause-p">
+            2.2. Encaminhe-se ao Almoxarifado Central / Setor de Compras para providências de entrega e instalação do equipamento no local de trabalho da solicitante.
+          </p>
+        </div>
 
           <!-- REQUISITOS TÉCNICOS DETALHADOS ANTI-ENTREGA DE PRODUTO INFERIOR -->
           <div class="tech-spec-box">

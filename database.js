@@ -406,6 +406,28 @@ function initDatabase() {
       db.prepare(`UPDATE usuarios SET tipo_usuario = 'admin' WHERE email = 'admin@lages.sc.gov.br'`).run();
     }
 
+    // Garante a Diretora Angelita como conta de demonstração
+    const angelitaExiste = db.prepare('SELECT id FROM usuarios WHERE email = ?').get('angelita.escola@lages.sc.gov.br');
+    if (!angelitaExiste) {
+      db.prepare(`
+        INSERT INTO usuarios (nome, email, senha, cargo, orgao, setor, municipio, matricula, perfil_padrao_id, atividades_padrao, avatar, tipo_usuario)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        'Profa. Angelita de Souza',
+        'angelita.escola@lages.sc.gov.br',
+        '123456',
+        'Diretora de Escola Municipal',
+        'Prefeitura do Município de Lages - Secretaria Municipal de Educação',
+        'Escolas Municipais (SME Lages)',
+        'Lages',
+        'MAT-48920/PML',
+        1,
+        JSON.stringify([1, 2, 3]),
+        '👩‍💼',
+        'padrao'
+      );
+    }
+
     db.exec(`
       UPDATE perfis_hardware SET
         processador = 'Quad-Core x86-64 3.4GHz+ (PassMark 8.500+)',

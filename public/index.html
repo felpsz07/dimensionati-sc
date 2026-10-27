@@ -36,7 +36,7 @@
         <form id="formLogin" onsubmit="app.fazerLogin(event)">
           <div class="field-group">
             <label class="field-label">E-mail</label>
-            <input type="email" id="loginEmail" class="dark-input" placeholder="nome@exemplo.com" value="maria.prof@lages.sc.gov.br" required autocomplete="email">
+            <input type="email" id="loginEmail" class="dark-input" placeholder="nome@exemplo.com" value="angelita.escola@lages.sc.gov.br" required autocomplete="email">
           </div>
 
           <div class="field-group">
@@ -61,8 +61,8 @@
           <div style="font-weight: 700; color: var(--dark-text); margin-bottom: 6px;">⚡ Contas de Acesso Rápido:</div>
           <div style="display: flex; flex-direction: column; gap: 4px;">
             <div>
-              <span class="demo-pill-btn" onclick="app.preencherLogin('maria.prof@lages.sc.gov.br', '123456')">
-                🏫 <strong>Educação / Escolas:</strong> maria.prof@lages.sc.gov.br
+              <span class="demo-pill-btn" onclick="app.preencherLogin('angelita.escola@lages.sc.gov.br', '123456')">
+                👩‍💼 <strong>Diretora Angelita (Escola):</strong> angelita.escola@lages.sc.gov.br
               </span>
             </div>
             <div>
@@ -72,7 +72,7 @@
             </div>
             <div>
               <span class="demo-pill-btn" onclick="app.preencherLogin('admin@lages.sc.gov.br', '123456')">
-                🛡️ <strong>Admin Geral (TCE):</strong> admin@lages.sc.gov.br
+                🛡️ <strong>Responsável de TIC (Admin/TCE):</strong> admin@lages.sc.gov.br
               </span>
             </div>
           </div>
@@ -266,10 +266,10 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
           <div>
             <h3 id="tituloSecaoLicitacoes" style="font-size: 1.05rem; font-weight: 700; color: var(--dark-text); margin: 0;">
-              Meus Pedidos de Licitação
+              Minhas Requisições de Equipamento
             </h3>
             <p id="subtituloSecaoLicitacoes" style="font-size: 0.8rem; color: var(--dark-muted); margin: 2px 0 0 0;">
-              Processos abertos pelo seu usuário no município de Lages.
+              Acompanhe as solicitações de computadores enviadas para a Diretoria de TIC da Prefeitura.
             </p>
           </div>
           <span id="badgePapelUsuario" class="rotina-banner-badge" style="padding: 4px 10px; font-size: 0.75rem;">
@@ -283,13 +283,13 @@
             <table class="dark-table">
               <thead>
                 <tr>
-                  <th>Nº PROCESSO</th>
+                  <th>Nº REQUISIÇÃO</th>
                   <th>ÓRGÃO / SETOR</th>
-                  <th>RESPONSÁVEL</th>
+                  <th>SOLICITANTE</th>
                   <th>QTD</th>
-                  <th>STATUS</th>
-                  <th style="text-align: right;">VALOR ESTIMADO</th>
-                  <th style="text-align: center;">MINUTA</th>
+                  <th>EQUIPAMENTO SOLICITADO</th>
+                  <th>STATUS TI</th>
+                  <th style="text-align: center;">FICHA TÉCNICA</th>
                 </tr>
               </thead>
               <tbody id="tbodyLicitacoes">
@@ -342,13 +342,13 @@
           </div>
 
 
-          <!-- PASSO 1: ÓRGÃO E QUANTIDADE -->
+          <!-- PASSO 1: LOCAL E TIPO DO EQUIPAMENTO -->
           <div class="wizard-pane active" id="pane-passo-1">
-            <h3 class="pane-headline">Onde serão instaladas as máquinas?</h3>
-            <p class="pane-sub">Defina o setor beneficiado e a quantidade necessária para o certame.</p>
+            <h3 class="pane-headline">Onde e como você vai usar o equipamento?</h3>
+            <p class="pane-sub">Defina o seu setor e escolha se você precisa de um computador de mesa ou um notebook portátil.</p>
 
             <div class="field-group" style="margin-top: 20px;">
-              <label class="field-label">Secretaria / Destino</label>
+              <label class="field-label">Secretaria / Local de Trabalho</label>
               <select class="dark-input" id="wizOrgaoSelect" onchange="app.atualizarOrgaoWizard(this.value)">
                 <option value="Escolas Municipais (SME)|Prefeitura de Lages - SME">Prefeitura de Lages - Secretaria Municipal de Educação (SME)</option>
                 <option value="Saúde e Postos (UBS)|Prefeitura de Lages - SMS">Prefeitura de Lages - Secretaria Municipal de Saúde (SMS)</option>
@@ -359,15 +359,31 @@
               </select>
             </div>
 
+            <!-- FORMATO DO EQUIPAMENTO (DESKTOP OU NOTEBOOK) -->
             <div class="field-group" style="margin-top: 20px;">
-              <label class="field-label">Quantidade de Computadores</label>
+              <label class="field-label">Qual o formato do equipamento que você precisa?</label>
+              <div class="options-pills-row" style="margin-top: 6px;">
+                <button type="button" class="opt-pill active" id="btnFormatoDesktop" onclick="app.setFormatoEquipamento('desktop', this)">
+                  🖥️ Computador de Mesa (Desktop Fixo na Escola)
+                </button>
+                <button type="button" class="opt-pill" id="btnFormatoNotebook" onclick="app.setFormatoEquipamento('notebook', this)">
+                  💻 Notebook Corporativo (Portátil para Reuniões e Planejamento)
+                </button>
+              </div>
+              <p style="font-size: 0.76rem; color: var(--dark-muted); margin-top: 6px;">
+                🔒 <em>Blindagem Técnica: Garante processador x86-64 com Windows 11 Pro homologado (impede envio de netbooks ou tablets fracos).</em>
+              </p>
+            </div>
+
+            <div class="field-group" style="margin-top: 20px;">
+              <label class="field-label">Quantidade de Equipamentos</label>
               <div class="quick-qty-row">
-                <button type="button" class="qty-pill" onclick="app.setQtd(1, this)">1</button>
+                <button type="button" class="qty-pill active" onclick="app.setQtd(1, this)">1</button>
+                <button type="button" class="qty-pill" onclick="app.setQtd(2, this)">2</button>
                 <button type="button" class="qty-pill" onclick="app.setQtd(5, this)">5</button>
-                <button type="button" class="qty-pill active" onclick="app.setQtd(10, this)">10</button>
-                <button type="button" class="qty-pill" onclick="app.setQtd(25, this)">25</button>
-                <button type="button" class="qty-pill" onclick="app.setQtd(50, this)">50</button>
-                <input type="number" id="inputQtd" class="dark-input inline-qty" min="1" max="500" value="10" onchange="app.setQtdCustom(this.value)">
+                <button type="button" class="qty-pill" onclick="app.setQtd(10, this)">10</button>
+                <button type="button" class="qty-pill" onclick="app.setQtd(20, this)">20</button>
+                <input type="number" id="inputQtd" class="dark-input inline-qty" min="1" max="500" value="1" onchange="app.setQtdCustom(this.value)">
               </div>
             </div>
           </div>
@@ -459,13 +475,13 @@
                       </div>
                       <div class="options-pills-row" style="margin-top: 6px;">
                         <button type="button" class="opt-pill active" id="btnMon1x" onclick="app.setOpcaoMonitor('1x', this)">
-                          1x Monitor IPS (Padrão)
+                          1x Monitor IPS (Preciso de Monitor)
                         </button>
                         <button type="button" class="opt-pill" id="btnMonNone" onclick="app.setOpcaoMonitor('none', this)">
-                          Sem Monitor (Aproveitar Existentes) ✂️ -R$650
+                          Sem Monitor (Já possuo na minha mesa)
                         </button>
                         <button type="button" class="opt-pill" id="btnMon2x" onclick="app.setOpcaoMonitor('2x', this)">
-                          2x Telas (Dual Head)
+                          2x Telas (Tela Dupla)
                         </button>
                       </div>
                     </div>
@@ -481,10 +497,10 @@
                       </div>
                       <div class="options-pills-row" style="margin-top: 6px;">
                         <button type="button" class="opt-pill active" id="btnPeriSim" onclick="app.setOpcaoPerifericos(true, this)">
-                          Incluir Kit Teclado/Mouse (+R$90)
+                          Incluir Kit Teclado/Mouse Novos
                         </button>
                         <button type="button" class="opt-pill" id="btnPeriNao" onclick="app.setOpcaoPerifericos(false, this)">
-                          Não incluir (Aproveitar do Setor) ✂️ -R$90
+                          Não incluir (Já tenho teclado e mouse que funcionam)
                         </button>
                       </div>
                     </div>
@@ -494,45 +510,49 @@
                   <div class="periferico-card" style="margin-top: 10px;">
                     <span class="periferico-icon">🔋</span>
                     <div style="flex: 1;">
-                      <strong style="font-size: 0.88rem; color: var(--dark-text);">Nobreak Senoidal (Proteção Elétrica)</strong>
+                      <strong style="font-size: 0.88rem; color: var(--dark-text);">Proteção Elétrica</strong>
                       <div class="options-pills-row" style="margin-top: 6px;">
                         <button type="button" class="opt-pill active" id="btnNobNao" onclick="app.setOpcaoNobreak(false, this)">
-                          Sem Nobreak (Rede Padrão)
+                          Rede Elétrica Padrão (Sem Nobreak)
                         </button>
                         <button type="button" class="opt-pill" id="btnNobSim" onclick="app.setOpcaoNobreak(true, this)">
-                          Incluir Nobreak Senoidal (+R$450)
+                          Incluir Nobreak de Proteção
                         </button>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <!-- ALERTA DE ECONOMIA DE PERIFÉRICOS -->
+                <!-- ALERTA DE REAPROVEITAMENTO DO SETOR -->
                 <div id="alertaEcoPerifericos" style="display: none; background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.25); border-radius: 6px; padding: 10px 14px; margin-top: 12px; font-size: 0.82rem; color: var(--dark-accent);">
-                  🌱 <strong>Economia por Aproveitamento de Parque:</strong> Você está poupando recursos do erário reutilizando monitores/periféricos existentes no órgão!
+                  🌱 <strong>Aproveitamento Inteligente:</strong> O setor de TI receberá a indicação de envio apenas da máquina, reaproveitando os periféricos já instalados na sua escola.
                 </div>
               </div>
 
-              <div class="price-banner" style="margin-top: 18px;">
+              <!-- BANNER DE CONFORMIDADE TÉCNICA (SEM VALORES MONETÁRIOS) -->
+              <div class="tech-validation-banner" style="margin-top: 18px; background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <div>
-                  <span style="font-size: 0.78rem; color: var(--dark-muted);">INVESTIMENTO ESTIMADO</span>
-                  <div class="price-val" id="recPrecoTotal">R$ 18.500,00</div>
-                  <small id="recPrecoUnit" style="color: var(--dark-muted);">(R$ 1.850,00 por máquina)</small>
+                  <span style="font-size: 0.72rem; font-weight: 800; color: var(--dark-accent); text-transform: uppercase;">PADRÃO TÉCNICO HOMOLOGADO</span>
+                  <div style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF;" id="labelAdequacaoTecnica">
+                    ✓ Máquina Homologada para a Rotina Declarada
+                  </div>
+                  <small style="color: var(--dark-muted);">Arquitetura x86-64 com Windows 11 Pro 64-bit (compatibilidade total com sistemas municipais)</small>
                 </div>
                 <div style="text-align: right;">
-                  <span style="font-size: 0.78rem; color: var(--dark-accent);">ECONOMIA GERADA</span>
-                  <div style="font-size: 1.15rem; font-weight: 800; color: var(--dark-accent);" id="recEconomia">R$ 63.500,00</div>
+                  <span class="rotina-banner-badge" style="background: rgba(52, 211, 153, 0.2); color: var(--dark-accent); font-size: 0.8rem; padding: 6px 12px;">
+                    🛡️ GARANTIA ON-SITE: 36 MESES
+                  </span>
                 </div>
               </div>
             </div>
 
-            <!-- SIMULAÇÃO OPCIONAL -->
+            <!-- SIMULAÇÃO OPCIONAL DE MODELO -->
             <div style="margin-top: 20px;">
-              <label class="field-label">Deseja simular outro modelo?</label>
+              <label class="field-label">Deseja simular outro porte de equipamento?</label>
               <select id="selectSimular" class="dark-input" onchange="app.mudarModeloManual(this.value)">
-                <option value="1">Nível 1: Atendimento e Navegação (8 GB RAM - R$ 1.850/un)</option>
-                <option value="2">Nível 2: Análise de Dados e BI (16 GB RAM - R$ 3.600/un)</option>
-                <option value="3">Nível 3: Workstation Engenharia CAD (32 GB RAM - R$ 8.200/un)</option>
+                <option value="1">Nível 1: Gestão Escolar e Atendimento (8 GB RAM / x86-64)</option>
+                <option value="2">Nível 2: Análise de Dados e Relatórios Gerenciais (16 GB RAM)</option>
+                <option value="3">Nível 3: Projetos de Engenharia e CAD (32 GB RAM + GPU Dedicada)</option>
               </select>
             </div>
           </div>
@@ -571,35 +591,35 @@
           </div>
 
 
-          <!-- PASSO 5: CONCLUIR -->
+          <!-- PASSO 5: CONCLUIR REQUISIÇÃO -->
           <div class="wizard-pane" id="pane-passo-5">
-            <h3 class="pane-headline">Revisão e Formalização</h3>
-            <p class="pane-sub">Confira os dados antes de gerar o documento licitatório.</p>
+            <h3 class="pane-headline">Revisão da sua Requisição de Informática</h3>
+            <p class="pane-sub">Confira os dados da sua solicitação que será enviada para o setor de TI da Prefeitura de Lages.</p>
 
             <div class="summary-table" style="margin-top: 20px;">
               <div class="summary-row">
-                <span>Protocolo:</span>
-                <strong id="sumProtocolo">ETP-2026-AUTO</strong>
+                <span>Nº Requisição:</span>
+                <strong id="sumProtocolo">REQ-2026-AUTO</strong>
               </div>
               <div class="summary-row">
-                <span>Órgão / Destino:</span>
-                <strong id="sumOrgao">SME Educação</strong>
+                <span>Local de Atuação:</span>
+                <strong id="sumOrgao">SME Educação - Escolas Municipais</strong>
               </div>
               <div class="summary-row">
-                <span>Responsável:</span>
-                <strong id="sumServidor">Servidor</strong>
+                <span>Solicitante:</span>
+                <strong id="sumServidor">Diretora</strong>
               </div>
               <div class="summary-row">
                 <span>Quantidade:</span>
-                <strong id="sumQtd">10 PCs</strong>
+                <strong id="sumQtd">1 Equipamento</strong>
               </div>
               <div class="summary-row">
-                <span>Modelo:</span>
-                <strong id="sumModelo">Nível 1 (Básico)</strong>
+                <span>Equipamento Homologado:</span>
+                <strong id="sumModelo">Notebook Corporativo (8 GB RAM / x86-64)</strong>
               </div>
               <div class="summary-row total">
-                <span>Valor Total:</span>
-                <strong class="neon-text" id="sumTotal">R$ 22.000,00</strong>
+                <span>Validação Técnica de TI:</span>
+                <strong class="neon-text" id="sumStatusTecnico">✓ Homologado para Gestão Escolar (Sem risco de Netbook incompatível)</strong>
               </div>
             </div>
           </div>
