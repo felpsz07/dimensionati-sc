@@ -392,15 +392,86 @@
 
 
           <!-- ========================================== -->
-          <!-- PASSO 2: O QUE VOCÊ FAZ NO COMPUTADOR?     -->
+          <!-- PASSO 2: QUAL A FINALIDADE DE USO?        -->
           <!-- ========================================== -->
           <div class="wizard-pane" id="pane-passo-2">
-            <h3 class="pane-headline">O que você faz no computador?</h3>
-            <p class="pane-sub">Marque o que faz parte do seu dia a dia (o sistema cuida de toda a especificação técnica):</p>
+            <h3 class="pane-headline">Qual a finalidade de uso do computador?</h3>
+            <p class="pane-sub">Selecione o perfil de atividades que melhor representa o seu setor de trabalho:</p>
 
-            <!-- GRID LIMPA DE ATIVIDADES -->
-            <div class="rotinas-clean-grid" id="gridRotinasDinamicas">
-              <!-- Preenchido via app.renderizarRotinasPasso2() -->
+            <!-- CARDS DE NÍVEL DE DEMANDA AGRUPADA -->
+            <div class="nivel-demanda-grid">
+
+              <!-- NÍVEL 1: GESTÃO ESCOLAR E ROTINA ADMINISTRATIVA (PADRÃO) -->
+              <div class="nivel-card active" id="cardNivel1" onclick="app.setPerfilNivel(1)">
+                <div class="nivel-radio-circle"></div>
+                <div class="nivel-icon">🏫</div>
+                <div class="nivel-content">
+                  <div class="nivel-header-row">
+                    <span class="nivel-title">Gestão Escolar & Rotina Administrativa</span>
+                    <span class="rotina-banner-badge" style="background: rgba(52, 211, 153, 0.2); color: var(--dark-accent);">
+                      ✓ RECOMENDADO PARA ESCOLAS
+                    </span>
+                  </div>
+                  <p class="nivel-desc">
+                    <strong>Engloba toda a rotina escolar em um único computador ágil:</strong> Diário de Classe, Sistema Escolar, Word/Writer (provas e documentos), Excel/Planilhas de notas, pesquisas na internet, SGPe e reuniões online sem travamentos.
+                  </p>
+                  <div class="nivel-chips-row">
+                    <span class="nivel-chip">🎓 Diário de Classe & Notas</span>
+                    <span class="nivel-chip">📝 Word, Textos & Provas</span>
+                    <span class="nivel-chip">🌐 Internet & SGPe</span>
+                    <span class="nivel-chip">📊 Planilhas & Médias</span>
+                    <span class="nivel-chip">📽️ Reuniões & Apresentações</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- NÍVEL 2: ANÁLISE DE DADOS E RELATÓRIOS -->
+              <div class="nivel-card" id="cardNivel2" onclick="app.setPerfilNivel(2)">
+                <div class="nivel-radio-circle"></div>
+                <div class="nivel-icon">📊</div>
+                <div class="nivel-content">
+                  <div class="nivel-header-row">
+                    <span class="nivel-title">Análise de Dados & Relatórios Gerenciais</span>
+                    <span class="rotina-banner-badge" style="background: rgba(245, 158, 11, 0.15); color: #FBBF24;">
+                      INTERMEDIÁRIO
+                    </span>
+                  </div>
+                  <p class="nivel-desc">
+                    Trabalho intensivo com grandes planilhas fiscais (dezenas de milhares de linhas), cruzamento de dados orçamentários e dashboards no Power BI.
+                  </p>
+                  <div class="nivel-chips-row">
+                    <span class="nivel-chip">📊 Power BI & Dashboards</span>
+                    <span class="nivel-chip">📑 Análise Contábil / Fiscal</span>
+                    <span class="nivel-chip">📈 Grandes Bases de Dados</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- NÍVEL 3: ENGENHARIA E CAD -->
+              <div class="nivel-card" id="cardNivel3" onclick="app.setPerfilNivel(3)">
+                <div class="nivel-radio-circle"></div>
+                <div class="nivel-icon">📐</div>
+                <div class="nivel-content">
+                  <div class="nivel-header-row">
+                    <span class="nivel-title">Projetos de Engenharia, Plantas e CAD (3D)</span>
+                    <span class="rotina-banner-badge" style="background: rgba(239, 68, 68, 0.15); color: #F87171;">
+                      ALTO DESEMPENHO (SEPLAN)
+                    </span>
+                  </div>
+                  <p class="nivel-desc">
+                    Desenvolvimento de plantas de engenharia civil, topografia, loteamentos, modelagem 3D pesada e softwares gráficos dedicados.
+                  </p>
+                  <div class="nivel-chips-row">
+                    <span class="nivel-chip">📐 AutoCAD Civil 3D</span>
+                    <span class="nivel-chip">🗺️ Geoprocessamento / GIS</span>
+                    <span class="nivel-chip">🏗️ Projetos de Obras</span>
+                  </div>
+                  <div class="nivel-alert-tce" id="alertaNivel3Escola">
+                    🚨 <strong>Alerta TCE/SC:</strong> Equipamento de alto custo reservado a engenheiros e arquitetos. Não aplicável para rotinas escolares ou administrativas.
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             <!-- PERIFÉRICOS DE MESA (SEM COMPLICAÇÃO) -->

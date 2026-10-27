@@ -620,9 +620,7 @@ const app = {
 
     this.setFormatoEquipamento('notebook');
     this.setQtd(1);
-
-    // Renderiza dinamicamente as rotinas específicas do setor da usuária
-    this.renderizarRotinasPasso2();
+    this.setPerfilNivel(1);
 
     this.navegar('wizard');
     this.irParaPasso(1);
@@ -652,7 +650,7 @@ const app = {
     }
 
     if (passo === 2) {
-      this.renderizarRotinasPasso2();
+      this.setPerfilNivel(this.demanda.perfilEscolhidoId || 1);
     } else if (passo === 3) {
       this.calcularHardware().then(() => {
         this.analisarAuditoria().then(() => {
@@ -714,87 +712,51 @@ const app = {
   },
 
   // ==========================================
-  // RENDERIZAÇÃO OBJETIVA DO PASSO 2 (ROTINA)
+  // SELEÇÃO DO NÍVEL AGRUPADO DE DEMANDA
   // ==========================================
-  renderizarRotinasPasso2() {
-    const chave = this.detectarChaveSetor(this.demanda.setorNome || this.demanda.orgao);
-    const config = this.catalogoRotinasPorSetor[chave] || this.catalogoRotinasPorSetor['educacao'];
+  setPerfilNivel(nivel) {
+    this.demanda.perfilEscolhidoId = nivel;
 
-    // Garante que as atividades selecionadas pertençam ao catálogo atual
-    const idsValidos = config.rotinas.map(r => r.id);
-    const temAtividadesValidas = this.demanda.atividades.some(id => idsValidos.includes(id));
-
-    if (!temAtividadesValidas) {
-      this.demanda.atividades = config.rotinas.filter(r => r.padrao).map(r => r.id);
+    document.querySelectorAll('.nivel-card').forEach(c => c.classList.remove('active', 'alerta-ativo'));
+    const card = document.getElementById(`cardNivel${nivel}`);
+    if (card) {
+      card.classList.add('active');
     }
 
-    this.demanda.atividadesNomes = config.rotinas
-      .filter(r => this.demanda.atividades.includes(r.id))
-      .map(r => r.nome);
+    const ehSetorEscolaOuAdmin = (this.demanda.setorNome || '').toLowerCase().includes('escola') || 
+                                (this.demanda.setorNome || '').toLowerCase().includes('educa') ||
+                                (this.demanda.orgao || '').toLowerCase().includes('educa');
 
-    const grid = document.getElementById('gridRotinasDinamicas');
-    if (!grid) return;
+    // Se for da escola e tentar marcar nível 3 (CAD/Engenharia), exibe o alerta do TCE/SC
+    if (nivel === 3 && ehSetorEscolaOuAdmin) {
+      if (card) card.classList.add('alerta-ativo');
+    }
 
-    grid.innerHTML = config.rotinas.map(rot => {
-      const isSelected = this.demanda.atividades.includes(rot.id);
-      return `
-        <div class="clean-rotina-card ${isSelected ? 'selected' : ''}" id="act-${rot.id}" onclick="app.toggleAtividade('${rot.id}')">
-          <div class="rotina-check">${isSelected ? '✓' : ''}</div>
-          <div class="rotina-details">
-            <h5>${rot.icone} ${rot.nome}</h5>
-            <p>${rot.desc}</p>
-          </div>
-        </div>
-      `;
-    }).join('');
-  },
-
-  toggleAtividade(id) {
-    const chave = this.detectarChaveSetor(this.demanda.setorNome || this.demanda.orgao);
-    const config = this.catalogoRotinasPorSetor[chave] || this.catalogoRotinasPorSetor['educacao'];
-
-    const idx = this.demanda.atividades.indexOf(id);
-
-    if (idx > -1) {
-      if (this.demanda.atividades.length === 1) {
-        alert('Selecione ao menos uma atividade de trabalho.');
-        return;
-      }
-      this.demanda.atividades.splice(idx, 1);
+    if (nivel === 1) {
+      this.demanda.atividadesNomes = [
+        'Gestão Escolar & Rotina Administrativa (Diário de Classe, Word, SGPe, Planilhas e Internet)'
+      ];
+      this.demanda.softwareIds = [1, 2, 3];
+    } else if (nivel === 2) {
+      this.demanda.atividadesNomes = [
+        'Análise de Dados & Relatórios Gerenciais (Grandes Bases, BI e Contabilidade)'
+      ];
+      this.demanda.softwareIds = [4];
     } else {
-      this.demanda.atividades.push(id);
+      this.demanda.atividadesNomes = [
+        'Projetos de Engenharia, Plantas e CAD 3D (AutoCAD Civil 3D e Topografia)'
+      ];
+      this.demanda.softwareIds = [5, 6];
     }
 
-    const cardEl = document.getElementById(`act-${id}`);
-    if (cardEl) {
-      const isSelected = this.demanda.atividades.includes(id);
-      cardEl.classList.toggle('selected', isSelected);
-      const chk = cardEl.querySelector('.rotina-check');
-      if (chk) chk.innerText = isSelected ? '✓' : '';
-    }
-
-    this.demanda.atividadesNomes = config.rotinas
-      .filter(r => this.demanda.atividades.includes(r.id))
-      .map(r => r.nome);
+    this.calcularHardware();
   },
 
   // ==========================================
   // CÁLCULOS DO HARDWARE
   // ==========================================
   async calcularHardware() {
-    const chave = this.detectarChaveSetor(this.demanda.setorNome || this.demanda.orgao);
-    const config = this.catalogoRotinasPorSetor[chave] || this.catalogoRotinasPorSetor['educacao'];
-
-    // Mapeia os softwareIds exigidos pelas rotinas selecionadas
-    let sw = [];
-    this.demanda.atividades.forEach(id => {
-      const rot = config.rotinas.find(r => r.id === id);
-      if (rot && rot.softwareId) {
-        sw.push(rot.softwareId);
-      }
-    });
-
-    if (sw.length === 0) sw = [1];
+    const sw = this.demanda.softwareIds || [1, 2, 3];
 
     try {
       const res = await fetch('/api/calcular-perfil', {

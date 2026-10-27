@@ -1759,6 +1759,140 @@ body {
   margin-top: 16px;
 }
 
+/* CARDS DE NÍVEL DE DEMANDA AGRUPADA */
+.nivel-demanda-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.nivel-card {
+  position: relative;
+  background: var(--dark-surface);
+  border: 2px solid var(--dark-border);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  user-select: none;
+}
+
+.nivel-card:hover {
+  border-color: #475569;
+  background: #1A2634;
+}
+
+.nivel-card.active {
+  border-color: var(--dark-accent);
+  background: rgba(52, 211, 153, 0.08);
+  box-shadow: 0 0 16px rgba(52, 211, 153, 0.12);
+}
+
+.nivel-card .nivel-radio-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--dark-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4px;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.nivel-card.active .nivel-radio-circle {
+  border-color: var(--dark-accent);
+  background: var(--dark-accent);
+}
+
+.nivel-card.active .nivel-radio-circle::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0A0E14;
+}
+
+.nivel-card .nivel-icon {
+  font-size: 2.2rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.nivel-card .nivel-content {
+  flex: 1;
+}
+
+.nivel-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.nivel-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--dark-text);
+}
+
+.nivel-card.active .nivel-title {
+  color: #FFFFFF;
+}
+
+.nivel-desc {
+  font-size: 0.84rem;
+  color: var(--dark-muted);
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+.nivel-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.nivel-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--dark-border);
+  color: #CBD5E1;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+}
+
+.nivel-card.active .nivel-chip {
+  background: rgba(52, 211, 153, 0.15);
+  border-color: rgba(52, 211, 153, 0.35);
+  color: var(--dark-accent);
+}
+
+.nivel-alert-tce {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #EF4444;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  display: none;
+}
+
+.nivel-card.alerta-ativo .nivel-alert-tce {
+  display: block;
+}
+
 .clean-rotina-card {
   background: var(--dark-surface);
   border: 2px solid var(--dark-border);
