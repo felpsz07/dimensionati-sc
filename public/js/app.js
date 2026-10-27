@@ -1369,8 +1369,184 @@ const app = {
     }, 600);
   },
 
+  // Executa impressão direta em folha A4 limpa (sem scrollbar e sem cortes)
+  executarImpressaoLimpa(containerId, titulo) {
+    const el = document.getElementById(containerId);
+    if (!el) {
+      window.print();
+      return;
+    }
+
+    try {
+      const w = window.open('', '_blank', 'width=900,height=1000');
+      if (!w) {
+        window.print();
+        return;
+      }
+
+      w.document.write(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>${titulo || 'Documento Oficial - Município de Lages / TCE-SC'}</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 12mm 10mm;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    body {
+      background: #FFFFFF !important;
+      color: #000000 !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Times New Roman", serif;
+      margin: 0;
+      padding: 12px;
+    }
+    .gov-contract-doc {
+      font-family: "Times New Roman", Times, Georgia, serif;
+      color: #111827;
+      line-height: 1.5;
+      font-size: 10pt;
+      text-align: justify;
+    }
+    .gov-contract-header {
+      text-align: center;
+      border-bottom: 2px solid #000000;
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+    }
+    .gov-clause {
+      margin-bottom: 18px;
+    }
+    .gov-clause-title {
+      font-weight: 800;
+      font-size: 10pt;
+      color: #000000;
+      margin-bottom: 6px;
+      page-break-inside: avoid;
+    }
+    .gov-clause-p {
+      margin-bottom: 8px;
+      text-indent: 2.5em;
+    }
+    .gov-table, .tce-table-compare {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 8.5pt;
+      page-break-inside: auto;
+    }
+    .gov-table th, .gov-table td,
+    .tce-table-compare th, .tce-table-compare td {
+      border: 1px solid #64748B;
+      padding: 6px 8px;
+    }
+    .gov-table th, .tce-table-compare th {
+      background: #F1F5F9 !important;
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 8pt;
+    }
+    .tech-spec-box {
+      background: #F8FAFC !important;
+      border: 1px solid #CBD5E1;
+      padding: 10px 12px;
+      margin-top: 8px;
+      font-size: 8pt;
+      line-height: 1.4;
+      page-break-inside: avoid;
+    }
+    .gov-signatures-block {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-top: 36px;
+      page-break-inside: avoid;
+    }
+    .gov-sig-line {
+      border-top: 1px solid #000000;
+      padding-top: 6px;
+      text-align: center;
+      font-size: 8.5pt;
+    }
+    .tce-report-doc {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 9.5pt;
+      color: #111827;
+      line-height: 1.5;
+    }
+    .tce-report-header {
+      text-align: center;
+      border-bottom: 2px solid #0F172A;
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+    }
+    .tce-box-veredicto {
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin: 16px 0;
+      page-break-inside: avoid;
+    }
+    .tce-box-veredicto.alert-danger {
+      background: #FEF2F2 !important;
+      border: 1px solid #F87171;
+      color: #991B1B;
+    }
+    .tce-box-veredicto.alert-success {
+      background: #ECFDF5 !important;
+      border: 1px solid #34D399;
+      color: #065F46;
+    }
+    .tce-box-veredicto.alert-warning {
+      background: #FFFBEB !important;
+      border: 1px solid #FBBF24;
+      color: #92400E;
+    }
+    .tce-seal-stamp {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #F8FAFC !important;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-top: 20px;
+      font-size: 8pt;
+      color: #475569;
+      page-break-inside: avoid;
+    }
+    tr {
+      page-break-inside: avoid;
+    }
+    @media print {
+      body { padding: 0 !important; }
+    }
+  </style>
+</head>
+<body>
+  ${el.innerHTML}
+  <script>
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 250);
+    };
+  <\/script>
+</body>
+</html>`);
+      w.document.close();
+    } catch (err) {
+      console.warn('Fallback para window.print direto:', err);
+      window.print();
+    }
+  },
+
   imprimirDocumento() {
-    window.print();
+    this.executarImpressaoLimpa('corpoDocumentoEtp', 'Termo de Contrato Administrativo TIC - Lei 14.133');
   },
 
   // ==========================================
@@ -1771,7 +1947,7 @@ const app = {
   },
 
   imprimirParecerTce() {
-    window.print();
+    this.executarImpressaoLimpa('corpoParecerTce', 'Parecer Preliminar de Auditoria em TIC - TCE-SC');
   },
 
   renderizarGraficosAuditor(s) {
