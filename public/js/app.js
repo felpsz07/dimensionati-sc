@@ -596,7 +596,12 @@ const app = {
     const tbody = document.getElementById('tbodyLicitacoes');
     if (!tbody) return;
 
+    const footer = document.getElementById('tableCardFooter');
+    const footerText = document.getElementById('footerCountText');
+
     if (!demandas || demandas.length === 0) {
+      if (footer) footer.style.display = 'none';
+
       let icon = '📋';
       let title = 'Nenhuma requisição encontrada';
       let msg = 'Não há registros com os filtros atuais. Clique em <strong>+ Nova Requisição</strong> para emitir um pedido.';
@@ -626,6 +631,10 @@ const app = {
     }
 
     const totalRows = demandas.length;
+    if (footer) footer.style.display = 'flex';
+    if (footerText) {
+      footerText.innerText = `Exibindo ${totalRows} ${totalRows === 1 ? 'requisição' : 'requisições'}`;
+    }
 
     tbody.innerHTML = demandas.map((d, index) => {
       const statusUpper = String(d.status || '').toUpperCase().trim();
@@ -658,8 +667,8 @@ const app = {
         descEquip = 'Nível 3 • Engenharia (SEPLAN)';
       }
 
-      // Abre para cima quando for penúltima ou última linha para não cortar
-      const isDropUp = (index >= totalRows - 2 && totalRows >= 2) || (index === 0 && totalRows === 1);
+      // Abre para cima apenas quando houver 3 ou mais registros e for a última linha
+      const isDropUp = totalRows >= 3 && index === totalRows - 1;
 
       return `
         <tr class="table-row-item ${ehCancelado ? 'row-canceled' : ''}">
