@@ -357,6 +357,33 @@ app.get('/api/demandas/:id', (req, res) => {
   }
 });
 
+// 8.1 Cancelar Processo / Requisição com Justificativa
+app.post('/api/demandas/:protocolo/cancelar', (req, res) => {
+  try {
+    const { protocolo } = req.params;
+    const { motivo } = req.body;
+    if (!motivo || motivo.trim().length === 0) {
+      return res.status(400).json({ error: 'Por favor, informe o motivo do cancelamento.' });
+    }
+
+    const dem = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    if (!dem) {
+      return res.status(404).json({ error: 'Requisição não encontrada.' });
+    }
+
+    db.prepare(`
+      UPDATE demandas 
+      SET status = 'Cancelado', motivo_cancelamento = ? 
+      WHERE protocolo = ?
+    `).run(motivo.trim(), protocolo);
+
+    const atualizada = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    res.json({ success: true, demanda: atualizada });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 9. Estatísticas do Painel TCE/SC
 app.get('/api/estatisticas', (req, res) => {
   try {

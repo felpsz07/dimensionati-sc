@@ -456,6 +456,12 @@ function initDatabase() {
       UPDATE demandas SET custo_unitario = 1850.00, custo_total = 18500.00 WHERE perfil_escolhido_id = 1 AND quantidade_usuarios = 10;
       UPDATE demandas SET custo_unitario = 1850.00, custo_total = 27750.00 WHERE perfil_escolhido_id = 1 AND quantidade_usuarios = 15;
     `);
+
+    try {
+      db.exec('ALTER TABLE demandas ADD COLUMN motivo_cancelamento TEXT;');
+    } catch (colErr) {
+      // Coluna já existe
+    }
   } catch (e) {
     console.warn('Aviso atualização perfis:', e.message);
   }

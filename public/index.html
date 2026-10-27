@@ -283,13 +283,13 @@
             <table class="dark-table">
               <thead>
                 <tr>
-                  <th>Nº REQUISIÇÃO</th>
-                  <th>ÓRGÃO / SETOR</th>
-                  <th>SOLICITANTE</th>
-                  <th>QTD</th>
-                  <th>EQUIPAMENTO SOLICITADO</th>
-                  <th>STATUS TI</th>
-                  <th style="text-align: center;">FICHA TÉCNICA</th>
+                  <th style="width: 140px;">Nº REQUISIÇÃO</th>
+                  <th style="min-width: 190px;">ÓRGÃO / SETOR</th>
+                  <th style="min-width: 170px;">SOLICITANTE</th>
+                  <th style="width: 60px; text-align: center;">QTD</th>
+                  <th style="min-width: 200px;">EQUIPAMENTO SOLICITADO</th>
+                  <th style="width: 140px; text-align: center;">STATUS TI</th>
+                  <th style="width: 120px; text-align: right;">AÇÕES</th>
                 </tr>
               </thead>
               <tbody id="tbodyLicitacoes">
@@ -809,6 +809,77 @@
 
       <!-- FOLHA ENQUADRADA DO CONTRATO -->
       <div id="corpoDocumentoEtp"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL: CANCELAR REQUISIÇÃO (COM JUSTIFICATIVA)           -->
+  <!-- ========================================================= -->
+  <div class="modal-overlay" id="modalCancelarDemanda">
+    <div class="modal-content" style="max-width: 480px; padding: 26px; background: #111822; border: 1px solid var(--dark-border); border-radius: var(--radius-lg); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+        <div style="width: 42px; height: 42px; border-radius: 50%; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+          🚫
+        </div>
+        <div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Cancelar Requisição</h3>
+          <span id="labelProtocoloCancelar" style="font-family: monospace; font-size: 0.82rem; color: var(--dark-accent); font-weight: 700;">REQ-2026-XXXX</span>
+        </div>
+      </div>
+
+      <p style="font-size: 0.84rem; color: var(--dark-muted); line-height: 1.45; margin-bottom: 16px;">
+        Informe abaixo o motivo do cancelamento para registro formal e comunicação à Diretoria de TIC:
+      </p>
+
+      <div class="field-group">
+        <label class="field-label" style="color: #F1F5F9; font-weight: 700;">Motivo do Cancelamento (Obrigatório):</label>
+        <textarea id="txtMotivoCancelamento" class="dark-input" rows="3" placeholder="Ex: O computador antigo da escola foi consertado pelo técnico..." style="resize: vertical;"></textarea>
+      </div>
+
+      <!-- Sugestões de preenchimento rápido -->
+      <div style="margin-top: 10px;">
+        <span style="font-size: 0.72rem; color: var(--dark-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Sugestões Rápidas:</span>
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px;">
+          <span class="demo-pill-btn" onclick="app.preencherMotivo('O computador anterior da escola foi consertado e voltou a operar normalmente.')">
+            🛠️ O computador anterior foi consertado
+          </span>
+          <span class="demo-pill-btn" onclick="app.preencherMotivo('A unidade recebeu máquina remanejada de outra escola/setor.')">
+            📦 Recebida máquina remanejada
+          </span>
+          <span class="demo-pill-btn" onclick="app.preencherMotivo('Pedido emitido em duplicidade ou com quantidade incorreta.')">
+            ⚠️ Pedido emitido em duplicidade
+          </span>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px;">
+        <button type="button" class="btn-ghost" onclick="app.fecharModalCancelar()">
+          Voltar / Manter Pedido
+        </button>
+        <button type="button" class="btn-primary-neon" style="background: #EF4444; border-color: #EF4444; color: #FFFFFF;" onclick="app.confirmarCancelamento()">
+          Confirmar Cancelamento ✕
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: VER MOTIVO DO CANCELAMENTO -->
+  <div class="modal-overlay" id="modalVerCancelamento">
+    <div class="modal-content" style="max-width: 440px; padding: 24px; background: #111822; border: 1px solid var(--dark-border); border-radius: var(--radius-lg);">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+        <span style="font-size: 1.4rem;">ℹ️</span>
+        <div>
+          <h3 style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF; margin: 0;">Requisição Cancelada</h3>
+          <span id="labelVerProtocoloCancelado" style="font-family: monospace; font-size: 0.8rem; color: #F87171; font-weight: 700;">REQ-2026-XXXX</span>
+        </div>
+      </div>
+      <div style="background: var(--dark-surface); border: 1px solid var(--dark-border); border-radius: var(--radius-sm); padding: 14px; margin-top: 10px;">
+        <small style="font-size: 0.72rem; text-transform: uppercase; color: var(--dark-muted); font-weight: 700;">Motivo Declarado:</small>
+        <p id="textoVerMotivoCancelamento" style="font-size: 0.88rem; color: #F1F5F9; margin-top: 4px; line-height: 1.4;"></p>
+      </div>
+      <div style="text-align: right; margin-top: 18px;">
+        <button type="button" class="btn-ghost" onclick="app.fecharModalVerCancelamento()">Fechar</button>
+      </div>
     </div>
   </div>
 

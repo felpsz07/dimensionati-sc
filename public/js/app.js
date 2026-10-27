@@ -298,6 +298,9 @@ const app = {
     await this.carregarPerfis();
     this.renderizarDotGrid();
     this.verificarSessao();
+
+    // Fecha dropdowns de ações ao clicar fora
+    window.addEventListener('click', () => this.fecharTodosMenusAcoes());
   },
 
   mostrarTela(id) {
@@ -530,52 +533,180 @@ const app = {
     }
   },
 
+  protocoloParaCancelar: null,
+
   renderizarTabela(demandas) {
     const tbody = document.getElementById('tbodyLicitacoes');
     if (!tbody) return;
 
     if (!demandas || demandas.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 28px; color: var(--dark-muted);">Nenhuma requisição encontrada para este usuário.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 36px; color: var(--dark-muted); font-size: 0.9rem;">Nenhuma requisição encontrada. Clique em <strong>+ Novo</strong> para emitir uma nova solicitação.</td></tr>`;
       return;
     }
 
     tbody.innerHTML = demandas.map(d => {
       let stClass = 'ok';
-      let stText = 'HOMOLOGADA PELO TI';
+      let stText = '✓ HOMOLOGADO TI';
 
-      if (d.status === 'Sob Análise' || d.nivel_risco === 'MEDIO') {
+      if (d.status === 'Cancelado') {
+        stClass = 'cancelado';
+        stText = '🚫 CANCELADO';
+      } else if (d.status === 'Sob Análise' || d.nivel_risco === 'MEDIO') {
         stClass = 'warn';
-        stText = 'EM ANÁLISE DE TI';
+        stText = '⏳ EM ANÁLISE';
       } else if (d.status === 'Bloqueado TCE' || d.nivel_risco === 'ALTO') {
         stClass = 'danger';
-        stText = 'REVISÃO EXIGIDA';
+        stText = '⚠️ REVISÃO EXIGIDA';
       }
 
+      let nomeEquip = 'Notebook Corporativo';
+      let descEquip = 'Nível 1 • Gestão Escolar';
+      if (d.perfil_escolhido_id === 2) {
+        nomeEquip = 'Estação Análise de Dados';
+        descEquip = 'Nível 2 • BI & Finanças';
+      } else if (d.perfil_escolhido_id === 3) {
+        nomeEquip = 'Workstation CAD / 3D';
+        descEquip = 'Nível 3 • Engenharia (SEPLAN)';
+      }
+
+      const ehCancelado = d.status === 'Cancelado';
+
       return `
-        <tr>
-          <td><strong style="color: var(--dark-accent);">${d.protocolo}</strong></td>
+        <tr style="${ehCancelado ? 'opacity: 0.65;' : ''}">
           <td>
-            <strong>${d.setor}</strong><br>
-            <small style="color: var(--dark-muted);">${d.orgao}</small>
+            <div class="td-protocolo">${d.protocolo}</div>
           </td>
           <td>
-            ${d.usuario_nome || 'Servidor'}<br>
-            <small style="color: var(--dark-muted);">${d.cargo || ''}</small>
+            <div class="td-main-text">${d.setor || 'Escolas Municipais (SME)'}</div>
+            <div class="td-sub-text">${d.orgao || 'Prefeitura de Lages - SME'}</div>
           </td>
-          <td><strong>${d.quantidade_usuarios}</strong></td>
           <td>
-            <strong>${d.perfil_esc_nome ? d.perfil_esc_nome.split(':')[0] : 'Nível 1 (Básico)'}</strong><br>
-            <small style="color: var(--dark-muted);">${d.perfil_escolhido_id === 3 ? 'Estação Gráfica / CAD' : 'Desktop / Notebook Corporativo'}</small>
+            <div class="td-main-text">${d.usuario_nome || 'Servidor Solicitante'}</div>
+            <div class="td-sub-text">${d.cargo || 'Diretora de Escola'}</div>
           </td>
-          <td><span class="status-chip ${stClass}">${stText}</span></td>
           <td style="text-align: center;">
-            <button class="btn-table-action" onclick="app.abrirMinuta('${d.protocolo}')">
-              📄 Ficha / DOD
-            </button>
+            <span class="td-qty-badge">${d.quantidade_usuarios}</span>
+          </td>
+          <td>
+            <div class="td-main-text">${nomeEquip}</div>
+            <div class="td-sub-text">${descEquip}</div>
+          </td>
+          <td style="text-align: center;">
+            <span class="status-chip ${stClass}">${stText}</span>
+          </td>
+          <td style="text-align: right;">
+            <div class="acoes-dropdown-wrap">
+              <button type="button" class="btn-acoes-trigger" onclick="app.toggleMenuAcoes('${d.protocolo}', event)">
+                ⚡ Ações <span style="font-size: 0.65rem; margin-left: 2px;">▼</span>
+              </button>
+              <div class="acoes-menu-dropdown" id="menu-acoes-${d.protocolo}">
+                <button type="button" class="acoes-menu-item" onclick="app.abrirMinuta('${d.protocolo}')">
+                  <span>📄</span> Visualizar Ficha / DOD
+                </button>
+                ${!ehCancelado ? `
+                  <button type="button" class="acoes-menu-item danger" onclick="app.abrirModalCancelar('${d.protocolo}')">
+                    <span>🚫</span> Cancelar Requisição
+                  </button>
+                ` : `
+                  <button type="button" class="acoes-menu-item muted" onclick="app.verMotivoCancelamento('${d.protocolo}')">
+                    <span>ℹ️</span> Ver Motivo do Cancelamento
+                  </button>
+                `}
+              </div>
+            </div>
           </td>
         </tr>
       `;
     }).join('');
+  },
+
+  toggleMenuAcoes(protocolo, evt) {
+    if (evt) evt.stopPropagation();
+    const menu = document.getElementById(`menu-acoes-${protocolo}`);
+    const todosMenus = document.querySelectorAll('.acoes-menu-dropdown');
+    
+    todosMenus.forEach(m => {
+      if (m !== menu) m.classList.remove('active');
+    });
+
+    if (menu) menu.classList.toggle('active');
+  },
+
+  fecharTodosMenusAcoes() {
+    document.querySelectorAll('.acoes-menu-dropdown').forEach(m => m.classList.remove('active'));
+  },
+
+  abrirModalCancelar(protocolo) {
+    this.fecharTodosMenusAcoes();
+    this.protocoloParaCancelar = protocolo;
+    const lbl = document.getElementById('labelProtocoloCancelar');
+    const txt = document.getElementById('txtMotivoCancelamento');
+    if (lbl) lbl.innerText = protocolo;
+    if (txt) {
+      txt.value = '';
+      setTimeout(() => txt.focus(), 150);
+    }
+    const modal = document.getElementById('modalCancelarDemanda');
+    if (modal) modal.classList.add('active');
+  },
+
+  fecharModalCancelar() {
+    this.protocoloParaCancelar = null;
+    const modal = document.getElementById('modalCancelarDemanda');
+    if (modal) modal.classList.remove('active');
+  },
+
+  preencherMotivo(texto) {
+    const txt = document.getElementById('txtMotivoCancelamento');
+    if (txt) {
+      txt.value = texto;
+      txt.focus();
+    }
+  },
+
+  async confirmarCancelamento() {
+    const protocolo = this.protocoloParaCancelar;
+    const txt = document.getElementById('txtMotivoCancelamento')?.value.trim() || '';
+
+    if (!txt) {
+      alert('Por favor, informe o motivo do cancelamento da requisição.');
+      document.getElementById('txtMotivoCancelamento')?.focus();
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/demandas/${protocolo}/cancelar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ motivo: txt })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        this.fecharModalCancelar();
+        await this.carregarDemandas();
+      } else {
+        alert(data.error || 'Erro ao cancelar processo.');
+      }
+    } catch (e) {
+      alert('Erro de conexão ao cancelar processo: ' + e.message);
+    }
+  },
+
+  verMotivoCancelamento(protocolo) {
+    this.fecharTodosMenusAcoes();
+    const dem = this.demandasCarregadas.find(d => d.protocolo === protocolo);
+    const lbl = document.getElementById('labelVerProtocoloCancelado');
+    const txt = document.getElementById('textoVerMotivoCancelamento');
+    if (lbl) lbl.innerText = protocolo;
+    if (txt) txt.innerText = dem?.motivo_cancelamento || 'Motivo não informado.';
+    const modal = document.getElementById('modalVerCancelamento');
+    if (modal) modal.classList.add('active');
+  },
+
+  fecharModalVerCancelamento() {
+    const modal = document.getElementById('modalVerCancelamento');
+    if (modal) modal.classList.remove('active');
   },
 
   filtrarTabela() {
