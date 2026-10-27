@@ -20,6 +20,9 @@ const app = {
     cargo: 'Professora / Coordenadora',
     municipio: 'Lages',
     quantidade: 10,
+    opcaoMonitor: '1x', // 'none', '1x', '2x'
+    incluiPerifericos: true, // teclado e mouse
+    incluiNobreak: false,
     atividades: ['edu_1', 'edu_2', 'edu_3'],
     atividadesNomes: [
       'Diário de Classe & Sistema Escolar SME',
@@ -30,6 +33,7 @@ const app = {
     perfilEscolhido: null,
     analiseTrava: null,
     protocolo: 'ETP-2026-0000',
+    custo_unitario: 1850.00,
     custo_total: 18500.00
   },
 
@@ -806,13 +810,100 @@ const app = {
     }
   },
 
+  setOpcaoMonitor(opcao, elem) {
+    document.querySelectorAll('#btnMon1x, #btnMonNone, #btnMon2x').forEach(b => b.classList.remove('active'));
+    if (elem) elem.classList.add('active');
+    this.demanda.opcaoMonitor = opcao;
+    this.recalcularPrecoEPerifericos();
+  },
+
+  setOpcaoPerifericos(incluir, elem) {
+    document.querySelectorAll('#btnPeriSim, #btnPeriNao').forEach(b => b.classList.remove('active'));
+    if (elem) elem.classList.add('active');
+    this.demanda.incluiPerifericos = incluir;
+    this.recalcularPrecoEPerifericos();
+  },
+
+  setOpcaoNobreak(incluir, elem) {
+    document.querySelectorAll('#btnNobSim, #btnNobNao').forEach(b => b.classList.remove('active'));
+    if (elem) elem.classList.add('active');
+    this.demanda.incluiNobreak = incluir;
+    this.recalcularPrecoEPerifericos();
+  },
+
+  recalcularPrecoEPerifericos() {
+    const p = this.demanda.perfilEscolhido || this.demanda.perfilRecomendado || { id: 1 };
+    
+    // Custos base de gabinete/CPU desmembrada:
+    // Perfil 1: R$ 1.110 CPU + R$ 650 Mon + R$ 90 Kit Peri = R$ 1.850
+    // Perfil 2: R$ 2.210 CPU + R$ 1.300 Mon (2x) + R$ 90 Kit Peri = R$ 3.600
+    // Perfil 3: R$ 5.960 CPU + R$ 2.150 Mon (2x 27") + R$ 90 Kit Peri = R$ 8.200
+    let precoCpu = 1110.00;
+    let custoMonPadrao = 650.00;
+    if (p.id === 2) {
+      precoCpu = 2210.00;
+      custoMonPadrao = 650.00;
+    } else if (p.id === 3) {
+      precoCpu = 5960.00;
+      custoMonPadrao = 1075.00;
+    }
+
+    let adicionalMonitor = 0;
+    const monCard = document.getElementById('recMonitor');
+    const labelEcoMon = document.getElementById('labelEcoMonitor');
+
+    if (this.demanda.opcaoMonitor === 'none') {
+      adicionalMonitor = 0;
+      if (monCard) monCard.innerHTML = '<span style="color: var(--dark-accent); font-weight: 700;">NÃO INCLUSO</span> (Aproveitamento do setor)';
+      if (labelEcoMon) labelEcoMon.innerText = `✂️ Economia de R$ ${(custoMonPadrao * this.demanda.quantidade).toLocaleString('pt-BR')} no lote!`;
+    } else if (this.demanda.opcaoMonitor === '2x') {
+      adicionalMonitor = custoMonPadrao * 2;
+      if (monCard) monCard.innerText = p.id === 3 ? '2x Monitores 27" QHD Alta Precisão' : '2x Monitores 23.8" IPS Dual-Head';
+      if (labelEcoMon) labelEcoMon.innerText = '';
+    } else {
+      adicionalMonitor = custoMonPadrao;
+      if (monCard) monCard.innerText = p.id === 3 ? '1x Monitor 27" QHD Alta Precisão' : '23.8" IPS com ajuste de altura NR-17';
+      if (labelEcoMon) labelEcoMon.innerText = '';
+    }
+
+    const adicionalPerifericos = this.demanda.incluiPerifericos ? 90.00 : 0.00;
+    const labelEcoPeri = document.getElementById('labelEcoPerifericos');
+    if (labelEcoPeri) {
+      labelEcoPeri.innerText = !this.demanda.incluiPerifericos ? `✂️ Economia de R$ ${(90 * this.demanda.quantidade).toLocaleString('pt-BR')} no lote!` : '';
+    }
+
+    const adicionalNobreak = this.demanda.incluiNobreak ? 450.00 : 0.00;
+
+    const unit = precoCpu + adicionalMonitor + adicionalPerifericos + adicionalNobreak;
+    const total = unit * this.demanda.quantidade;
+    const pior = 8200 * this.demanda.quantidade;
+    const econ = Math.max(0, pior - total);
+
+    this.demanda.custo_unitario = unit;
+    this.demanda.custo_total = total;
+
+    // Alerta de economia de periféricos
+    const boxEco = document.getElementById('alertaEcoPerifericos');
+    if (boxEco) {
+      const poupou = (this.demanda.opcaoMonitor === 'none') || (!this.demanda.incluiPerifericos);
+      boxEco.style.display = poupou ? 'block' : 'none';
+    }
+
+    // Atualiza na tela
+    const elTot = document.getElementById('recPrecoTotal');
+    const elUni = document.getElementById('recPrecoUnit');
+    const elEco = document.getElementById('recEconomia');
+    if (elTot) elTot.innerText = `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    if (elUni) elUni.innerText = `(R$ ${unit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} por máquina)`;
+    if (elEco) elEco.innerText = `R$ ${econ.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  },
+
   renderizarHardware(p) {
     const badge = document.getElementById('recBadge');
     const title = document.getElementById('recTitle');
     const cpu = document.getElementById('recCpu');
     const ram = document.getElementById('recRam');
     const ssd = document.getElementById('recSsd');
-    const mon = document.getElementById('recMonitor');
 
     if (p.id === 1) {
       badge.innerText = 'NÍVEL 1 • ADEQUADO E ECONÔMICO';
@@ -820,33 +911,21 @@ const app = {
       cpu.innerText = 'Quad-Core 3.4GHz+ (PassMark 8.500+)';
       ram.innerText = '8 GB DDR4 3200MHz (expansível)';
       ssd.innerText = 'SSD 256GB NVMe M.2';
-      mon.innerText = '23.8" IPS com ajuste de altura (NR-17)';
     } else if (p.id === 2) {
       badge.innerText = 'NÍVEL 2 • ANÁLISE DE DADOS E BI';
-      title.innerText = 'Estação com 2 Telas para Relatórios e BI';
+      title.innerText = 'Estação para Relatórios e Análise de Dados';
       cpu.innerText = 'Hexa-Core 4.4GHz+ (PassMark 18.000+)';
       ram.innerText = '16 GB DDR4/DDR5 Dual-Channel';
       ssd.innerText = 'SSD 512GB NVMe PCIe 4.0';
-      mon.innerText = '2x Monitores 23.8" IPS com suporte articulado';
     } else {
       badge.innerText = 'NÍVEL 3 • ENGENHARIA & CAD';
       title.innerText = 'Workstation de Alto Desempenho Gráfico';
       cpu.innerText = 'Octa-Core 5.0GHz+ (PassMark 30.000+)';
       ram.innerText = '32 GB DDR5 5200MHz Dual-Channel';
       ssd.innerText = 'SSD 1TB Gen4 + GPU NVIDIA RTX';
-      mon.innerText = '2x Monitores 27" QHD Alta Precisão';
     }
 
-    const unit = p.custo_unitario_estimado;
-    const total = unit * this.demanda.quantidade;
-    const pior = 8200 * this.demanda.quantidade;
-    const econ = Math.max(0, pior - total);
-
-    this.demanda.custo_total = total;
-
-    document.getElementById('recPrecoTotal').innerText = `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-    document.getElementById('recPrecoUnit').innerText = `(R$ ${unit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} por máquina)`;
-    document.getElementById('recEconomia').innerText = `R$ ${econ.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    this.recalcularPrecoEPerifericos();
   },
 
   async mudarModeloManual(val) {
@@ -924,7 +1003,17 @@ const app = {
     document.getElementById('sumOrgao').innerText = this.demanda.setorNome;
     document.getElementById('sumServidor').innerText = `${this.demanda.usuarioNome} (${this.demanda.cargo})`;
     document.getElementById('sumQtd').innerText = `${this.demanda.quantidade} PCs`;
-    document.getElementById('sumModelo').innerText = this.demanda.perfilEscolhido?.nome?.split(':')[1] || 'Nível 1';
+
+    let infoPerifericos = [];
+    if (this.demanda.opcaoMonitor === 'none') infoPerifericos.push('Sem Monitor (Aproveitamento)');
+    else if (this.demanda.opcaoMonitor === '2x') infoPerifericos.push('2 Telas (Dual Head)');
+    else infoPerifericos.push('Com Monitor 23.8" IPS');
+
+    if (!this.demanda.incluiPerifericos) infoPerifericos.push('Sem Teclado/Mouse');
+    if (this.demanda.incluiNobreak) infoPerifericos.push('Com Nobreak');
+
+    const nomePerfil = this.demanda.perfilEscolhido?.nome?.split(':')[0] || 'Nível 1';
+    document.getElementById('sumModelo').innerText = `${nomePerfil} • [${infoPerifericos.join(' • ')}]`;
     document.getElementById('sumTotal').innerText = `R$ ${this.demanda.custo_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
   },
 
@@ -952,6 +1041,8 @@ const app = {
           setor: this.demanda.setorNome,
           cargo: this.demanda.cargo,
           quantidadeUsuarios: this.demanda.quantidade,
+          custoUnitario: this.demanda.custo_unitario,
+          custoTotal: this.demanda.custo_total,
           softwares: (this.demanda.atividadesNomes && this.demanda.atividadesNomes.length > 0)
             ? this.demanda.atividadesNomes 
             : this.demanda.atividades,
@@ -1045,6 +1136,22 @@ const app = {
       rotinasFormatadas = demanda.softwares || '';
     }
 
+    let monitorTxt = '1x Monitor 23.8" IPS Full HD ergonômico NR-17';
+    if (this.demanda.opcaoMonitor === 'none') {
+      monitorTxt = '<strong style="color: #047857;">DISPENSADO DO LOTE:</strong> Reaproveitamento integral de monitores em perfeito estado já existentes no setor de ' + setorServ + ' (Art. 11 da Lei 14.133/2021).';
+    } else if (this.demanda.opcaoMonitor === '2x') {
+      monitorTxt = '2x Monitores IPS Full HD com suporte articulado a pistão (Dual-Head)';
+    }
+
+    let periTxt = 'Kit Teclado e Mouse USB ABNT2 padrão corporativo';
+    if (this.demanda.incluiPerifericos === false) {
+      periTxt = '<strong style="color: #047857;">DISPENSADO DO LOTE:</strong> Reaproveitamento de kits de teclado e mouse existentes no órgão.';
+    }
+
+    if (this.demanda.incluiNobreak) {
+      periTxt += ' • Nobreak Senoidal 1000VA com regulação automática';
+    }
+
     corpo.innerHTML = `
       <div class="gov-contract-doc">
 
@@ -1113,7 +1220,8 @@ const app = {
                     • <strong>Memória RAM:</strong> ${perfil.ram}<br>
                     • <strong>Armazenamento:</strong> ${perfil.armazenamento}<br>
                     • <strong>Controlador Gráfico:</strong> ${perfil.gpu}<br>
-                    • <strong>Periféricos e Ergonomia:</strong> ${perfil.perifericos}
+                    • <strong>Monitor:</strong> ${monitorTxt}<br>
+                    • <strong>Periféricos e Ergonomia:</strong> ${periTxt}
                   </small>
                 </td>
                 <td style="text-align: center;">

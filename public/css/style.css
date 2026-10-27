@@ -1333,6 +1333,65 @@ body {
 }
 
 /* ========================================================== */
+/* SELEÇÃO DE PERIFÉRICOS & DESMEMBRAMENTO DE PARQUE          */
+/* ========================================================== */
+.perifericos-box {
+  background: var(--dark-surface);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  margin-top: 18px;
+}
+
+.periferico-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+
+.periferico-icon {
+  font-size: 1.4rem;
+  background: var(--dark-bg);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  line-height: 1;
+}
+
+.options-pills-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.opt-pill {
+  background: var(--dark-bg);
+  border: 1px solid var(--dark-border);
+  color: var(--dark-muted);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.opt-pill:hover {
+  border-color: var(--dark-accent);
+  color: var(--dark-text);
+}
+
+.opt-pill.active {
+  background: rgba(52, 211, 153, 0.15);
+  border-color: var(--dark-accent);
+  color: var(--dark-accent);
+}
+
+/* ========================================================== */
 /* COMPONENTES EXCLUSIVOS DE AUDITORIA TCE / HACKATHON        */
 /* ========================================================== */
 

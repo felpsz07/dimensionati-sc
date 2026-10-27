@@ -236,8 +236,8 @@ app.post('/api/demandas', (req, res) => {
     } = req.body;
 
     const perfilEsc = db.prepare('SELECT * FROM perfis_hardware WHERE id = ?').get(perfilEscolhidoId);
-    const custoUnitario = perfilEsc.custo_unitario_estimado;
-    const custoTotal = custoUnitario * quantidadeUsuarios;
+    const custoUnitario = req.body.custoUnitario || perfilEsc.custo_unitario_estimado;
+    const custoTotal = req.body.custoTotal || (custoUnitario * quantidadeUsuarios);
     
     const custoPiorCenario = 9800.00 * quantidadeUsuarios;
     const economiaEstimada = Math.max(0, custoPiorCenario - custoTotal);

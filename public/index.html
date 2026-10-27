@@ -432,7 +432,88 @@
                 </div>
               </div>
 
-              <div class="price-banner">
+              <!-- COMPOSIÇÃO DE PERIFÉRICOS & APROVEITAMENTO DO PARQUE INSTALADO -->
+              <div class="perifericos-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 6px;">
+                  <div>
+                    <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--dark-text); margin: 0;">
+                      Composição do Pacote (O setor já possui periféricos?)
+                    </h4>
+                    <p style="font-size: 0.8rem; color: var(--dark-muted); margin: 2px 0 0 0;">
+                      Desmarque o que já existe no órgão para economizar recursos públicos e evitar compras duplicadas.
+                    </p>
+                  </div>
+                  <span class="rotina-banner-badge" style="background: rgba(52, 211, 153, 0.15); color: var(--dark-accent);">
+                    SUSTENTABILIDADE • LEI 14.133
+                  </span>
+                </div>
+
+                <div class="perifericos-grid">
+                  <!-- MONITORES -->
+                  <div class="periferico-card">
+                    <span class="periferico-icon">🖥️</span>
+                    <div style="flex: 1;">
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <strong style="font-size: 0.88rem; color: var(--dark-text);">Monitor de Vídeo</strong>
+                        <span id="labelEcoMonitor" style="font-size: 0.75rem; color: var(--dark-accent); font-weight: 700;"></span>
+                      </div>
+                      <div class="options-pills-row" style="margin-top: 6px;">
+                        <button type="button" class="opt-pill active" id="btnMon1x" onclick="app.setOpcaoMonitor('1x', this)">
+                          1x Monitor IPS (Padrão)
+                        </button>
+                        <button type="button" class="opt-pill" id="btnMonNone" onclick="app.setOpcaoMonitor('none', this)">
+                          Sem Monitor (Aproveitar Existentes) ✂️ -R$650
+                        </button>
+                        <button type="button" class="opt-pill" id="btnMon2x" onclick="app.setOpcaoMonitor('2x', this)">
+                          2x Telas (Dual Head)
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- TECLADO E MOUSE -->
+                  <div class="periferico-card" style="margin-top: 10px;">
+                    <span class="periferico-icon">⌨️</span>
+                    <div style="flex: 1;">
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <strong style="font-size: 0.88rem; color: var(--dark-text);">Kit Teclado e Mouse USB ABNT2</strong>
+                        <span id="labelEcoPerifericos" style="font-size: 0.75rem; color: var(--dark-accent); font-weight: 700;"></span>
+                      </div>
+                      <div class="options-pills-row" style="margin-top: 6px;">
+                        <button type="button" class="opt-pill active" id="btnPeriSim" onclick="app.setOpcaoPerifericos(true, this)">
+                          Incluir Kit Teclado/Mouse (+R$90)
+                        </button>
+                        <button type="button" class="opt-pill" id="btnPeriNao" onclick="app.setOpcaoPerifericos(false, this)">
+                          Não incluir (Aproveitar do Setor) ✂️ -R$90
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- NOBREAK (OPCIONAL) -->
+                  <div class="periferico-card" style="margin-top: 10px;">
+                    <span class="periferico-icon">🔋</span>
+                    <div style="flex: 1;">
+                      <strong style="font-size: 0.88rem; color: var(--dark-text);">Nobreak Senoidal (Proteção Elétrica)</strong>
+                      <div class="options-pills-row" style="margin-top: 6px;">
+                        <button type="button" class="opt-pill active" id="btnNobNao" onclick="app.setOpcaoNobreak(false, this)">
+                          Sem Nobreak (Rede Padrão)
+                        </button>
+                        <button type="button" class="opt-pill" id="btnNobSim" onclick="app.setOpcaoNobreak(true, this)">
+                          Incluir Nobreak Senoidal (+R$450)
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ALERTA DE ECONOMIA DE PERIFÉRICOS -->
+                <div id="alertaEcoPerifericos" style="display: none; background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.25); border-radius: 6px; padding: 10px 14px; margin-top: 12px; font-size: 0.82rem; color: var(--dark-accent);">
+                  🌱 <strong>Economia por Aproveitamento de Parque:</strong> Você está poupando recursos do erário reutilizando monitores/periféricos existentes no órgão!
+                </div>
+              </div>
+
+              <div class="price-banner" style="margin-top: 18px;">
                 <div>
                   <span style="font-size: 0.78rem; color: var(--dark-muted);">INVESTIMENTO ESTIMADO</span>
                   <div class="price-val" id="recPrecoTotal">R$ 18.500,00</div>
