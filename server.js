@@ -62,12 +62,32 @@ app.post('/api/login', (req, res) => {
 
     const { senha: _, ...usuarioSemSenha } = usuario;
     usuarioSemSenha.atividades_padrao = JSON.parse(usuario.atividades_padrao || '[1, 2]');
-    usuarioSemSenha.tipo_usuario = usuario.tipo_usuario || (emailLimpo.includes('admin') ? 'admin' : 'padrao');
+    usuarioSemSenha.tipo_usuario = usuario.tipo_usuario || (emailLimpo.includes('admin') ? 'admin' : (emailLimpo.includes('escola') ? 'diretora' : 'padrao'));
+
+    let instInfo = null;
+    if (usuario.instituicao_id) {
+      instInfo = db.prepare('SELECT id, nome, tipo, secretaria, municipio FROM instituicoes WHERE id = ?').get(usuario.instituicao_id);
+    }
+    usuarioSemSenha.instituicao = instInfo;
+    usuarioSemSenha.instituicao_id = usuario.instituicao_id || (instInfo ? instInfo.id : null);
+    usuarioSemSenha.instituicao_nome = instInfo ? instInfo.nome : (usuario.setor || usuario.orgao);
+    usuarioSemSenha.instituicao_secretaria = instInfo ? instInfo.secretaria : usuario.orgao;
+    usuarioSemSenha.instituicao_tipo = instInfo ? instInfo.tipo : 'secretaria';
 
     res.json({
       success: true,
       usuario: usuarioSemSenha
     });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 1.1 Listar Instituições Públicas Cadastradas
+app.get('/api/instituicoes', (req, res) => {
+  try {
+    const instituicoes = db.prepare('SELECT * FROM instituicoes WHERE ativo = 1 ORDER BY tipo ASC, nome ASC').all();
+    res.json(instituicoes);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -214,10 +234,10 @@ app.post('/api/analisar-trava', (req, res) => {
   }
 });
 
-// 6. Salvar Demanda (Gera Protocolo e DOD preliminar aguardando validação do TI)
+// 6. Salvar Demanda (Gera Protocolo e DOD preliminar vinculado à instituição do usuário)
 app.post('/api/demandas', (req, res) => {
   try {
-    const {
+    let {
       usuarioId = null,
       usuarioNome = '',
       usuarioMatricula = '',
@@ -238,8 +258,38 @@ app.post('/api/demandas', (req, res) => {
       diagnosticoInterpretado = '',
       recomendacaoPreliminar = {},
       recursosExistentes = [],
-      dodConteudo = {}
+      dodConteudo = {},
+      instituicaoId = null
     } = req.body;
+
+    // Regra de Segurança: O vínculo institucional é obtido DIRETAMENTE do banco de dados do usuário
+    // O solicitante NÃO pode criar solicitação para outra instituição
+    let instituicaoFinalId = instituicaoId;
+    if (usuarioId) {
+      const userDb = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(usuarioId);
+      if (userDb) {
+        if (userDb.instituicao_id) {
+          instituicaoFinalId = userDb.instituicao_id;
+        }
+        usuarioNome = userDb.nome;
+        usuarioMatricula = userDb.matricula || usuarioMatricula;
+        cargo = userDb.cargo || cargo;
+        if (userDb.tipo_usuario !== 'admin') {
+          orgao = userDb.orgao || orgao;
+          setor = userDb.setor || setor;
+        }
+      }
+    }
+
+    // Se ainda não tiver instituicaoFinalId, tenta vincular pelo setor ou órgão
+    if (!instituicaoFinalId) {
+      const instMatch = db.prepare("SELECT id FROM instituicoes WHERE nome LIKE ? OR ? LIKE '%' || nome || '%'").get(`%${setor}%`, setor);
+      if (instMatch) {
+        instituicaoFinalId = instMatch.id;
+      } else {
+        instituicaoFinalId = 1; // Default fallback
+      }
+    }
 
     const perfilEsc = db.prepare('SELECT * FROM perfis_hardware WHERE id = ?').get(perfilEscolhidoId || 1);
     const custoUnitario = req.body.custoUnitario || perfilEsc.custo_unitario_estimado;
@@ -250,8 +300,6 @@ app.post('/api/demandas', (req, res) => {
 
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     const anoAtual = new Date().getFullYear();
-    // Protocolo oficial da solicitação do servidor: Documento de Formalização da Demanda (DOD)
-    // O identificador ETP-2026-XXXX é atribuído EXCLUSIVAMENTE após a validação do TI e geração do ETP!
     const protocolo = `DOD-${anoAtual}-${randomSuffix}`;
 
     const justificativaAutomatica = `Diagnóstico de rotina gerado automaticamente pelo DimensionaTI SC para ${cargo || 'servidor'} na unidade ${setor}. Documento de Formalização da Demanda (DOD) estruturado em conformidade com o Art. 18 da Lei Federal nº 14.133/2021 aguardando validação técnica do TI.`;
@@ -265,8 +313,8 @@ app.post('/api/demandas', (req, res) => {
         custo_unitario, custo_total, economia_estimada, irs, nivel_risco,
         tipo_necessidade, respostas_diagnostico, diagnostico_interpretado,
         recomendacao_preliminar, recursos_existentes, dod_conteudo,
-        dod_validado, etp_gerado
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0)
+        dod_validado, etp_gerado, instituicao_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?)
     `);
 
     stmt.run(
@@ -295,10 +343,16 @@ app.post('/api/demandas', (req, res) => {
       diagnosticoInterpretado,
       typeof recomendacaoPreliminar === 'string' ? recomendacaoPreliminar : JSON.stringify(recomendacaoPreliminar),
       typeof recursosExistentes === 'string' ? recursosExistentes : JSON.stringify(recursosExistentes),
-      typeof dodConteudo === 'string' ? dodConteudo : JSON.stringify(dodConteudo)
+      typeof dodConteudo === 'string' ? dodConteudo : JSON.stringify(dodConteudo),
+      instituicaoFinalId
     );
 
-    const novaDemanda = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    const novaDemanda = db.prepare(`
+      SELECT d.*, i.nome as instituicao_nome, i.secretaria as instituicao_secretaria
+      FROM demandas d
+      LEFT JOIN instituicoes i ON d.instituicao_id = i.id
+      WHERE d.protocolo = ?
+    `).get(protocolo);
 
     // Registra evento inicial no histórico de auditoria
     registrarHistorico(
@@ -308,7 +362,7 @@ app.post('/api/demandas', (req, res) => {
       usuarioNome || 'Servidor Solicitante',
       cargo || 'Servidor',
       'servidor',
-      'Diagnóstico de rotina concluído sem preenchimento técnico manual. DOD oficial de SC gerado aguardando análise do TI.',
+      `Diagnóstico de rotina concluído sem preenchimento técnico manual. DOD institucional gerado para ${novaDemanda.instituicao_nome || setor}.`,
       'Enviado para TI'
     );
 
@@ -324,23 +378,58 @@ app.post('/api/demandas', (req, res) => {
   }
 });
 
-// 7. Listar demandas (Separado por Perfil de Usuário / Admin com filtros por abas)
+// 7. Listar demandas (Com controle estrito de visualização por instituição e filtros para TI)
 app.get('/api/demandas', (req, res) => {
   try {
-    const { risco, search, usuarioId, tipoUsuario, statusTab } = req.query;
+    const { risco, search, usuarioId, tipoUsuario, statusTab, instituicaoId, secretaria, tipoNecessidade } = req.query;
+
+    let userDb = null;
+    if (usuarioId) {
+      userDb = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(usuarioId);
+    }
+
+    const ehAdmin = (tipoUsuario === 'admin') || (userDb && userDb.tipo_usuario === 'admin');
+
     let query = `
       SELECT d.*, 
-             pe.nome as perfil_esc_nome
+             pe.nome as perfil_esc_nome,
+             i.nome as instituicao_nome,
+             i.secretaria as instituicao_secretaria,
+             i.tipo as instituicao_tipo,
+             e.protocolo as etp_consolidado_protocolo,
+             e.titulo as etp_titulo
       FROM demandas d
-      JOIN perfis_hardware pe ON d.perfil_escolhido_id = pe.id
+      LEFT JOIN perfis_hardware pe ON d.perfil_escolhido_id = pe.id
+      LEFT JOIN instituicoes i ON d.instituicao_id = i.id
+      LEFT JOIN etps e ON d.etp_id = e.id
       WHERE 1=1
     `;
     const params = [];
 
-    // Se NÃO for admin, filtra apenas os pedidos deste usuário
-    if (tipoUsuario !== 'admin' && usuarioId) {
-      query += ' AND d.usuario_id = ?';
-      params.push(usuarioId);
+    // REGRA DE SEGURANÇA E ACESSO INSTITUCIONAL:
+    // Se NÃO for Admin, a diretora/solicitante visualiza EXCLUSIVAMENTE as solicitações da sua instituição!
+    if (!ehAdmin) {
+      if (userDb && userDb.instituicao_id) {
+        query += ' AND d.instituicao_id = ?';
+        params.push(userDb.instituicao_id);
+      } else if (usuarioId) {
+        query += ' AND d.usuario_id = ?';
+        params.push(usuarioId);
+      }
+    } else {
+      // Se for Admin/TI, aplica os filtros globais
+      if (instituicaoId) {
+        query += ' AND d.instituicao_id = ?';
+        params.push(instituicaoId);
+      }
+      if (secretaria) {
+        query += ' AND (i.secretaria = ? OR i.secretaria LIKE ?)';
+        params.push(secretaria, `%${secretaria}%`);
+      }
+      if (tipoNecessidade) {
+        query += ' AND d.tipo_necessidade = ?';
+        params.push(tipoNecessidade);
+      }
     }
 
     // Filtros de abas de status
@@ -351,7 +440,7 @@ app.get('/api/demandas', (req, res) => {
     } else if (statusTab === 'validados') {
       query += " AND d.status = 'Validado pelo TI'";
     } else if (statusTab === 'etp_gerado') {
-      query += " AND d.status = 'ETP gerado'";
+      query += " AND (d.status = 'ETP gerado' OR d.etp_gerado = 1)";
     } else if (statusTab === 'reprovados') {
       query += " AND d.status = 'Reprovado'";
     } else if (statusTab === 'canceladas') {
@@ -363,8 +452,8 @@ app.get('/api/demandas', (req, res) => {
       params.push(risco);
     }
     if (search) {
-      query += ' AND (d.orgao LIKE ? OR d.municipio LIKE ? OR d.setor LIKE ? OR d.protocolo LIKE ? OR d.usuario_nome LIKE ?)';
-      params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+      query += ' AND (d.orgao LIKE ? OR d.municipio LIKE ? OR d.setor LIKE ? OR d.protocolo LIKE ? OR d.usuario_nome LIKE ? OR i.nome LIKE ?)';
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
     }
 
     query += ' ORDER BY d.id DESC';
@@ -376,16 +465,47 @@ app.get('/api/demandas', (req, res) => {
   }
 });
 
-// 8. Obter demanda por protocolo ou número de ETP
+// 8. Obter demanda por protocolo ou ID (Com autorização estrita de instituição no backend: HTTP 403)
 app.get('/api/demandas/:id', (req, res) => {
   try {
     const { id } = req.params;
+    const { usuarioId, tipoUsuario } = req.query;
+
     let demanda = isNaN(id) 
-      ? db.prepare('SELECT * FROM demandas WHERE protocolo = ? OR etp_numero = ?').get(id, id)
-      : db.prepare('SELECT * FROM demandas WHERE id = ?').get(id);
+      ? db.prepare(`
+          SELECT d.*, i.nome as instituicao_nome, i.secretaria as instituicao_secretaria, i.tipo as instituicao_tipo,
+                 e.protocolo as etp_consolidado_protocolo, e.titulo as etp_titulo
+          FROM demandas d
+          LEFT JOIN instituicoes i ON d.instituicao_id = i.id
+          LEFT JOIN etps e ON d.etp_id = e.id
+          WHERE d.protocolo = ? OR d.etp_numero = ?
+        `).get(id, id)
+      : db.prepare(`
+          SELECT d.*, i.nome as instituicao_nome, i.secretaria as instituicao_secretaria, i.tipo as instituicao_tipo,
+                 e.protocolo as etp_consolidado_protocolo, e.titulo as etp_titulo
+          FROM demandas d
+          LEFT JOIN instituicoes i ON d.instituicao_id = i.id
+          LEFT JOIN etps e ON d.etp_id = e.id
+          WHERE d.id = ?
+        `).get(id);
 
     if (!demanda) {
       return res.status(404).json({ error: 'Demanda não encontrada.' });
+    }
+
+    // REGRA DE SEGURANÇA BACKEND (HTTP 403 FORBIDDEN):
+    // Se o usuário solicitante tentar acessar dados de outra instituição diretamente, bloqueia!
+    if (usuarioId) {
+      const userDb = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(usuarioId);
+      if (userDb && userDb.tipo_usuario !== 'admin') {
+        if (demanda.instituicao_id && userDb.instituicao_id && demanda.instituicao_id !== userDb.instituicao_id) {
+          return res.status(403).json({
+            error: 'Acesso Negado (HTTP 403): Você não possui autorização para consultar solicitações ou DODs pertencentes a outra instituição pública.',
+            instituicaoUsuario: userDb.instituicao_id,
+            instituicaoDemanda: demanda.instituicao_id
+          });
+        }
+      }
     }
 
     const perfilEsc = db.prepare('SELECT * FROM perfis_hardware WHERE id = ?').get(demanda.perfil_escolhido_id);
@@ -755,34 +875,433 @@ app.put('/api/demandas/:protocolo/dod', (req, res) => {
   }
 });
 
-// 9. Estatísticas do Painel TCE/SC e Dashboard Operacional do TI
+// 8.11 Listar Demandas com DOD Validado para Agrupamento em ETP
+app.get('/api/demandas-para-etp', (req, res) => {
+  try {
+    const { tipoNecessidade, secretaria } = req.query;
+    let query = `
+      SELECT d.*, 
+             pe.nome as perfil_esc_nome,
+             i.nome as instituicao_nome,
+             i.secretaria as instituicao_secretaria,
+             i.tipo as instituicao_tipo,
+             e.protocolo as etp_consolidado_protocolo,
+             e.titulo as etp_titulo
+      FROM demandas d
+      LEFT JOIN perfis_hardware pe ON d.perfil_escolhido_id = pe.id
+      LEFT JOIN instituicoes i ON d.instituicao_id = i.id
+      LEFT JOIN etps e ON d.etp_id = e.id
+      WHERE d.dod_validado = 1
+    `;
+    const params = [];
+
+    if (tipoNecessidade) {
+      query += ' AND d.tipo_necessidade = ?';
+      params.push(tipoNecessidade);
+    }
+    if (secretaria) {
+      query += ' AND (i.secretaria = ? OR i.secretaria LIKE ?)';
+      params.push(secretaria, `%${secretaria}%`);
+    }
+
+    query += ' ORDER BY d.id DESC';
+
+    const demandas = db.prepare(query).all(...params);
+
+    // Mapeia para adicionar informações de disponibilidade de agrupamento
+    const demandasMapeadas = demandas.map(d => {
+      const jaVinculado = !!(d.etp_id || d.status === 'ETP gerado');
+      return {
+        ...d,
+        disponivel_agrupamento: !jaVinculado,
+        etp_vinculado_numero: d.etp_consolidado_protocolo || d.etp_numero || null
+      };
+    });
+
+    res.json(demandasMapeadas);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 8.12 Agrupamento de Demandas para Geração de ETP Único Consolidado
+app.post('/api/etps/agrupar', (req, res) => {
+  try {
+    const {
+      dodProtocolos = [],
+      titulo = 'Aquisição Consolidada de Equipamentos de TIC',
+      objetivoConsolidado = '',
+      usuarioNome = 'Equipe de TIC e Planejamento',
+      usuarioCargo = 'Diretoria Geral de TIC'
+    } = req.body;
+
+    if (!Array.isArray(dodProtocolos) || dodProtocolos.length === 0) {
+      return res.status(400).json({ error: 'Selecione pelo menos 1 (uma) demanda com DOD validado para gerar o ETP.' });
+    }
+
+    // Busca as demandas selecionadas no banco
+    const placeholders = dodProtocolos.map(() => '?').join(',');
+    const demandas = db.prepare(`
+      SELECT d.*, 
+             pe.nome as perfil_esc_nome,
+             i.nome as instituicao_nome,
+             i.secretaria as instituicao_secretaria
+      FROM demandas d
+      LEFT JOIN perfis_hardware pe ON d.perfil_escolhido_id = pe.id
+      LEFT JOIN instituicoes i ON d.instituicao_id = i.id
+      WHERE d.protocolo IN (${placeholders})
+    `).all(...dodProtocolos);
+
+    if (demandas.length !== dodProtocolos.length) {
+      return res.status(400).json({ error: 'Uma ou mais demandas selecionadas não foram encontradas no sistema.' });
+    }
+
+    // 1. Valida se todas estão validadas pelo TI
+    const naoValidadas = demandas.filter(d => d.dod_validado !== 1);
+    if (naoValidadas.length > 0) {
+      return res.status(400).json({
+        error: `Não é possível agrupar: o DOD ${naoValidadas[0].protocolo} (${naoValidadas[0].instituicao_nome || 'Instituição'}) ainda não foi validado tecnicamente pelo TI.`
+      });
+    }
+
+    // 2. Valida se alguma já está vinculada a outro ETP (Evita duplicidade de compras)
+    const jaVinculadas = demandas.filter(d => d.etp_id || d.status === 'ETP gerado');
+    if (jaVinculadas.length > 0) {
+      return res.status(400).json({
+        error: `A demanda ${jaVinculadas[0].protocolo} (${jaVinculadas[0].instituicao_nome || 'Instituição'}) já está vinculada ao ${jaVinculadas[0].etp_numero || 'outro ETP'}. Não é permitido agrupar a mesma demanda mais de uma vez.`
+      });
+    }
+
+    // 3. Cálculos de Consolidação
+    let quantidadeTotal = 0;
+    let custoTotalEstimado = 0;
+    let economiaEstimadaTotal = 0;
+    const tiposDispositivo = new Set();
+    const instituicoesMap = new Map();
+
+    for (const d of demandas) {
+      const qtd = d.quantidade_usuarios || 1;
+      quantidadeTotal += qtd;
+      custoTotalEstimado += (d.custo_total || (d.custo_unitario * qtd));
+      economiaEstimadaTotal += (d.economia_estimada || 0);
+
+      try {
+        const resp = JSON.parse(d.respostas_diagnostico || '{}');
+        if (resp.tipoDispositivo) tiposDispositivo.add(resp.tipoDispositivo);
+      } catch (e) {}
+
+      const instId = d.instituicao_id || 1;
+      const instNome = d.instituicao_nome || d.orgao;
+      if (!instituicoesMap.has(instId)) {
+        instituicoesMap.set(instId, {
+          instituicaoId: instId,
+          instituicaoNome: instNome,
+          secretaria: d.instituicao_secretaria || d.orgao,
+          quantidade: 0,
+          custoTotal: 0,
+          dods: []
+        });
+      }
+      const instReg = instituicoesMap.get(instId);
+      instReg.quantidade += qtd;
+      instReg.custoTotal += (d.custo_total || (d.custo_unitario * qtd));
+      instReg.dods.push(d.protocolo);
+    }
+
+    const custoUnitarioEstimado = quantidadeTotal > 0 ? (custoTotalEstimado / quantidadeTotal) : 0;
+    // Bônus adicional de ganho de escala pela contratação conjunta em lote
+    const bonusEscala = quantidadeTotal >= 5 ? (custoTotalEstimado * 0.08) : 0;
+    economiaEstimadaTotal += bonusEscala;
+
+    // 4. Gera Protocolo Oficial do ETP Consolidado
+    const anoAtual = new Date().getFullYear();
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const etpProtocolo = `ETP-${anoAtual}-${randomSuffix}`;
+    const geradorFormatado = `${usuarioNome} (${usuarioCargo})`;
+
+    // 5. Monta a Estrutura Oficial do ETP (Lei 14.133/2021 + Decreto Municipal de Lages nº 20.682/2023)
+    const instituicoesNomes = Array.from(instituicoesMap.values()).map(i => i.instituicaoNome);
+    const tituloFinal = titulo && titulo.trim() ? titulo.trim() : `Aquisição Consolidada de Computadores e Equipamentos de TIC para ${instituicoesNomes.length} Instituições Municipais de Lages`;
+
+    const tabelaDemandasOrigem = demandas.map(d => ({
+      protocoloDod: d.protocolo,
+      instituicao: d.instituicao_nome || d.orgao,
+      secretaria: d.instituicao_secretaria || d.orgao,
+      solicitante: d.usuario_nome,
+      cargo: d.cargo,
+      quantidade: d.quantidade_usuarios,
+      custoTotal: d.custo_total,
+      justificativa: d.justificativa_usuario || 'Atendimento às rotinas administrativas e pedagógicas.'
+    }));
+
+    const etpConteudoCompleto = {
+      protocoloEtp: etpProtocolo,
+      titulo: tituloFinal,
+      objeto: `Contratação pública para aquisição unificada de ${quantidadeTotal} equipamentos de TIC, agrupando as demandas formalizadas por ${demandas.length} DODs das instituições municipais de Lages/SC.`,
+      objetivoConsolidado: objetivoConsolidado || `Unificar em um único procedimento licitatório as necessidades compatíveis de TIC das instituições públicas municipais (${instituicoesNomes.join(', ')}), garantindo economia de escala, celeridade processual, padronização do parque tecnológico municipal e estrito cumprimento ao Art. 18 da Lei Federal nº 14.133/2021.`,
+      quantidadeTotal,
+      custoUnitarioEstimado,
+      custoTotalEstimado,
+      economiaEstimadaTotal,
+      bonusEscala,
+      geradorFormatado,
+      dataGeracao: new Date().toLocaleDateString('pt-BR'),
+      tabelaDemandasOrigem,
+      instituicoesParticipantes: Array.from(instituicoesMap.values()),
+      dodsAgrupados: dodProtocolos,
+      especificacoesPadronizadas: {
+        equipamento: tiposDispositivo.has('notebook') ? 'Notebook Corporativo Padronizado' : 'Desktop Corporativo + Monitor',
+        processador: 'Processador de arquitetura moderna (6 núcleos físicos, frequência turbo mín. 4.0 GHz)',
+        memoriaRam: '16 GB DDR4/DDR5 em Dual-Channel com possibilidade de expansão',
+        armazenamento: 'SSD de alta velocidade 512 GB NVMe M.2 PCIe Gen 3/4',
+        tela: 'Tela 15.6 polegadas Full HD Antirreflexo (ou Monitor 21.5")',
+        garantia: 'Garantia de 36 meses on-site no Município de Lages'
+      },
+      levantamentoMercado: [
+        {
+          alternativa: 'Alternativa 1 (Recomendada): Aquisição Definitiva em Lote Único Consolidado',
+          vantagens: 'Menor custo a longo prazo, aproveitamento pleno da vida útil de 5 a 6 anos, patrimônio próprio do Município de Lages e ganho expressivo de escala na licitação.',
+          desvantagens: 'Exige desembolso inicial de investimento (CAPEX).',
+          viabilidade: 'Altamente Viável e Mais Econômica'
+        },
+        {
+          alternativa: 'Alternativa 2: Locação Mensal de Equipamentos (HaaS - Hardware as a Service)',
+          vantagens: 'Suporte e substituição contínuos pela locadora, custos distribuídos mês a mês (OPEX).',
+          desvantagens: 'Custo acumulado em 3 anos supera em 42% o valor da aquisição definitiva sem retorno patrimonial ao município.',
+          viabilidade: 'Inviável Economicamente para o volume atual'
+        },
+        {
+          alternativa: 'Alternativa 3: Manutenção e Upgrade dos Equipamentos Antigos Existentes',
+          vantagens: 'Baixo desembolso imediato.',
+          desvantagens: 'Inviabilidade técnica de upgrade em placas-mãe obsoletas de 8 anos; incompatibilidade com Windows 11 Pro e alto custo recorrente de paradas operacionais.',
+          viabilidade: 'Inviável Tecnicamente'
+        }
+      ],
+      conclusaoViabilidade: `A Equipe de Planejamento da TIC e Licitações declara VIÁVEL a contratação pretendida na modalidade consolidada. O agrupamento das demandas dos DODs ${dodProtocolos.join(', ')} proporciona otimização administrativa, conformidade com as orientações do TCE/SC e economicidade estimada em R$ ${economiaEstimadaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}.`
+    };
+
+    // 6. Insere o ETP no banco de dados
+    const insertEtp = db.prepare(`
+      INSERT INTO etps (
+        protocolo, titulo, objetivo_consolidado, tipo_necessidade,
+        quantidade_total, custo_unitario_estimado, custo_total_estimado, economia_estimada_total,
+        custo_total, economia_total, conteudo_etp, gerado_por, created_by, status, validado_por, validado_em
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Validado pelo TI', ?, datetime('now', 'localtime'))
+    `);
+
+    insertEtp.run(
+      etpProtocolo,
+      tituloFinal,
+      objetivoConsolidado || etpConteudoCompleto.objetivoConsolidado,
+      tiposDispositivo.has('notebook') ? 'notebook' : 'computador',
+      quantidadeTotal,
+      custoUnitarioEstimado,
+      custoTotalEstimado,
+      economiaEstimadaTotal,
+      custoTotalEstimado,
+      economiaEstimadaTotal,
+      JSON.stringify(etpConteudoCompleto),
+      geradorFormatado,
+      geradorFormatado,
+      geradorFormatado
+    );
+
+    const novoEtp = db.prepare('SELECT * FROM etps WHERE protocolo = ?').get(etpProtocolo);
+
+    // 7. Insere os registros de vínculos em etp_dods e etp_instituicoes
+    const insertEtpDod = db.prepare(`
+      INSERT INTO etp_dods (
+        etp_id, etp_protocolo, demanda_id, dod_protocolo, protocolo_dod, instituicao_id,
+        instituicao_nome, quantidade, custo_total, solicitante_nome, cargo, motivo_necessidade
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    for (const d of demandas) {
+      insertEtpDod.run(
+        novoEtp.id,
+        etpProtocolo,
+        d.id,
+        d.protocolo,
+        d.protocolo,
+        d.instituicao_id || 1,
+        d.instituicao_nome || d.orgao,
+        d.quantidade_usuarios,
+        d.custo_total,
+        d.usuario_nome,
+        d.cargo,
+        d.justificativa_usuario
+      );
+    }
+
+    const insertEtpInst = db.prepare(`
+      INSERT INTO etp_instituicoes (
+        etp_id, instituicao_id, instituicao_nome, quantidade_total, custo_total
+      ) VALUES (?, ?, ?, ?, ?)
+    `);
+
+    for (const inst of instituicoesMap.values()) {
+      insertEtpInst.run(
+        novoEtp.id,
+        inst.instituicaoId,
+        inst.instituicaoNome,
+        inst.quantidade,
+        inst.custoTotal
+      );
+    }
+
+    // 8. Atualiza as demandas individuais vinculando-as ao ETP consolidado
+    const updateDemandaStmt = db.prepare(`
+      UPDATE demandas 
+      SET etp_id = ?,
+          etp_numero = ?,
+          status = 'ETP gerado',
+          etp_gerado = 1,
+          etp_gerado_por = ?,
+          etp_gerado_em = datetime('now', 'localtime'),
+          etp_conteudo = ?
+      WHERE id = ?
+    `);
+
+    for (const d of demandas) {
+      updateDemandaStmt.run(
+        novoEtp.id,
+        etpProtocolo,
+        geradorFormatado,
+        JSON.stringify(etpConteudoCompleto),
+        d.id
+      );
+
+      // Registra evento de agrupamento no histórico de auditoria
+      registrarHistorico(
+        d.id,
+        d.protocolo,
+        'Demanda agrupada no ETP Consolidado pelo TI',
+        usuarioNome,
+        usuarioCargo,
+        'admin',
+        `Esta demanda individual foi unificada ao ${etpProtocolo} juntamente com outras instituições (${instituicoesNomes.join(', ')}). Total consolidado do lote: ${quantidadeTotal} equipamentos.`,
+        'ETP gerado'
+      );
+    }
+
+    res.status(201).json({
+      success: true,
+      protocolo: etpProtocolo,
+      etp: novoEtp,
+      quantidadeTotal,
+      custoTotalEstimado,
+      economiaEstimadaTotal,
+      instituicoesParticipantes: Array.from(instituicoesMap.values()),
+      dodsVinculados: dodProtocolos
+    });
+  } catch (err) {
+    console.error('Erro ao agrupar demandas para ETP:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 8.13 Obter ETP Consolidado e Rastreabilidade das Demandas Agrupadas
+app.get('/api/etps/:protocolo', (req, res) => {
+  try {
+    const { protocolo } = req.params;
+    const { usuarioId, tipoUsuario } = req.query;
+
+    const etp = db.prepare('SELECT * FROM etps WHERE protocolo = ? OR id = ?').get(protocolo, protocolo);
+    if (!etp) {
+      return res.status(404).json({ error: 'Estudo Técnico Preliminar (ETP) não encontrado.' });
+    }
+
+    const dodsVinculados = db.prepare(`
+      SELECT ed.*, d.respostas_diagnostico, d.diagnostico_interpretado, d.recursos_existentes, d.setor, d.orgao
+      FROM etp_dods ed
+      LEFT JOIN demandas d ON ed.demanda_id = d.id
+      WHERE ed.etp_id = ?
+      ORDER BY ed.id ASC
+    `).all(etp.id);
+
+    const instituicoesParticipantes = db.prepare(`
+      SELECT * FROM etp_instituicoes 
+      WHERE etp_id = ?
+      ORDER BY instituicao_nome ASC
+    `).all(etp.id);
+
+    // Verificação de Autorização: Se for solicitante/diretora, valida se a instituição dela faz parte deste ETP
+    if (usuarioId) {
+      const userDb = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(usuarioId);
+      if (userDb && userDb.tipo_usuario !== 'admin') {
+        const pertence = instituicoesParticipantes.some(i => i.instituicao_id === userDb.instituicao_id);
+        if (!pertence && userDb.instituicao_id) {
+          return res.status(403).json({
+            error: 'Acesso Negado (HTTP 403): Sua instituição não é participante deste Estudo Técnico Preliminar consolidado.'
+          });
+        }
+      }
+    }
+
+    res.json({
+      etp,
+      conteudo: JSON.parse(etp.conteudo_etp || '{}'),
+      dodsVinculados,
+      instituicoesParticipantes
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 9. Estatísticas do Painel TCE/SC e Dashboard Operacional (Com filtro institucional)
 app.get('/api/estatisticas', (req, res) => {
   try {
-    const totalDemandas = db.prepare('SELECT COUNT(*) as c FROM demandas').get().c;
-    const totalEconomia = db.prepare('SELECT SUM(economia_estimada) as total FROM demandas').get().total || 0;
-    const mediaIrs = db.prepare('SELECT AVG(irs) as media FROM demandas').get().media || 0;
+    const { usuarioId, tipoUsuario } = req.query;
 
-    // Contadores operacionais para os cards do dashboard TI
-    const aguardandoAnalise = db.prepare("SELECT COUNT(*) as c FROM demandas WHERE status IN ('Enviado para TI', 'Em análise pelo TI')").get().c;
-    const ajustesSolicitados = db.prepare("SELECT COUNT(*) as c FROM demandas WHERE status = 'Ajustes solicitados'").get().c;
-    const dodsValidados = db.prepare("SELECT COUNT(*) as c FROM demandas WHERE status = 'Validado pelo TI'").get().c;
-    const etpsGerados = db.prepare("SELECT COUNT(*) as c FROM demandas WHERE status = 'ETP gerado'").get().c;
-    const reprovados = db.prepare("SELECT COUNT(*) as c FROM demandas WHERE status = 'Reprovado'").get().c;
-    const canceladas = db.prepare("SELECT COUNT(*) as c FROM demandas WHERE status = 'Cancelado'").get().c;
+    let userDb = null;
+    if (usuarioId) {
+      userDb = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(usuarioId);
+    }
+    const ehAdmin = (tipoUsuario === 'admin') || (userDb && userDb.tipo_usuario === 'admin');
+
+    let whereSql = '';
+    const params = [];
+
+    if (!ehAdmin) {
+      if (userDb && userDb.instituicao_id) {
+        whereSql = ' WHERE instituicao_id = ?';
+        params.push(userDb.instituicao_id);
+      } else if (usuarioId) {
+        whereSql = ' WHERE usuario_id = ?';
+        params.push(usuarioId);
+      }
+    }
+
+    const totalDemandas = db.prepare(`SELECT COUNT(*) as c FROM demandas ${whereSql}`).get(...params).c;
+    const totalEconomia = db.prepare(`SELECT SUM(economia_estimada) as total FROM demandas ${whereSql}`).get(...params).total || 0;
+    const mediaIrs = db.prepare(`SELECT AVG(irs) as media FROM demandas ${whereSql}`).get(...params).media || 0;
+
+    const whereComAnd = whereSql ? `${whereSql} AND` : ' WHERE';
+
+    const aguardandoAnalise = db.prepare(`SELECT COUNT(*) as c FROM demandas ${whereComAnd} status IN ('Enviado para TI', 'Em análise pelo TI')`).get(...params).c;
+    const ajustesSolicitados = db.prepare(`SELECT COUNT(*) as c FROM demandas ${whereComAnd} status = 'Ajustes solicitados'`).get(...params).c;
+    const dodsValidados = db.prepare(`SELECT COUNT(*) as c FROM demandas ${whereComAnd} status = 'Validado pelo TI'`).get(...params).c;
+    const etpsGerados = db.prepare(`SELECT COUNT(*) as c FROM demandas ${whereComAnd} (status = 'ETP gerado' OR etp_gerado = 1)`).get(...params).c;
+    const reprovados = db.prepare(`SELECT COUNT(*) as c FROM demandas ${whereComAnd} status = 'Reprovado'`).get(...params).c;
+    const canceladas = db.prepare(`SELECT COUNT(*) as c FROM demandas ${whereComAnd} status = 'Cancelado'`).get(...params).c;
 
     const riscoContagem = db.prepare(`
       SELECT nivel_risco, COUNT(*) as qtd 
       FROM demandas 
+      ${whereSql}
       GROUP BY nivel_risco
-    `).all();
+    `).all(...params);
 
     const porOrgao = db.prepare(`
-      SELECT orgao, COUNT(*) as total_processos, SUM(custo_total) as valor_total
-      FROM demandas
-      GROUP BY orgao
+      SELECT COALESCE(i.nome, d.orgao) as orgao, COUNT(*) as total_processos, SUM(d.custo_total) as valor_total
+      FROM demandas d
+      LEFT JOIN instituicoes i ON d.instituicao_id = i.id
+      ${whereSql}
+      GROUP BY COALESCE(i.nome, d.orgao)
       ORDER BY valor_total DESC
       LIMIT 6
-    `).all();
+    `).all(...params);
 
     res.json({
       totalDemandas,

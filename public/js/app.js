@@ -366,16 +366,23 @@ const app = {
       }
 
       this.usuarioLogado = data.usuario;
+      localStorage.setItem('dimensionati_sessao', JSON.stringify(data.usuario));
 
-      // Popula tela de lotação
-      const wpNome = document.getElementById('wpNome');
-      const wpMat = document.getElementById('wpMatricula');
-      const wpCargo = document.getElementById('wpCargo');
-      if (wpNome) wpNome.value = data.usuario.nome || '';
-      if (wpMat) wpMat.value = data.usuario.matricula || '';
-      if (wpCargo) wpCargo.value = data.usuario.cargo || 'Servidor Público';
+      // Se já possui lotação/instituição definida (ex: Diretora ou Admin), entra direto no painel
+      if (data.usuario.setor && data.usuario.cargo) {
+        this.aplicarUsuario(data.usuario);
+        this.mostrarTela('screen-app');
+        this.navegar('licitacoes');
+      } else {
+        const wpNome = document.getElementById('wpNome');
+        const wpMat = document.getElementById('wpMatricula');
+        const wpCargo = document.getElementById('wpCargo');
+        if (wpNome) wpNome.value = data.usuario.nome || '';
+        if (wpMat) wpMat.value = data.usuario.matricula || '';
+        if (wpCargo) wpCargo.value = data.usuario.cargo || 'Servidor Público';
 
-      this.mostrarTela('screen-workplace');
+        this.mostrarTela('screen-workplace');
+      }
     } catch (err) {
       erro.textContent = 'Erro ao conectar ao servidor.';
     } finally {
@@ -452,40 +459,71 @@ const app = {
     if (p.length >= 2) ini = (p[0][0] + p[p.length - 1][0]).toUpperCase();
     else if (p.length === 1) ini = p[0].substring(0, 2).toUpperCase();
 
-    document.getElementById('navAvatar').innerText = ini;
-    document.getElementById('navNome').innerText = (u.nome || 'Servidor').split(' ')[0];
-    document.getElementById('navSetor').innerText = u.setor || 'Lages';
+    const navAvatar = document.getElementById('navAvatar');
+    const navNome = document.getElementById('navNome');
+    const navSetor = document.getElementById('navSetor');
+    if (navAvatar) navAvatar.innerText = ini;
+    if (navNome) navNome.innerText = (u.nome || 'Servidor').split(' ')[0];
+    if (navSetor) navSetor.innerText = u.setor || 'Lages';
 
     const ehAdmin = u.tipo_usuario === 'admin' || (u.email && u.email.includes('admin'));
+
+    // Tag institucional no Navbar Superior
+    const navInstNome = document.getElementById('navInstituicaoNome');
+    const navInstIco = document.getElementById('navInstituicaoIcone');
+    const navInstTag = document.getElementById('navInstituicaoTag');
+    const nomeInst = u.instituicao_nome || u.setor || 'Instituição Pública';
+
+    if (navInstNome) navInstNome.innerText = nomeInst;
+    if (navInstIco) navInstIco.innerText = ehAdmin ? '👑' : (u.tipo_usuario === 'diretora' ? '🏫' : '🏛️');
+    if (navInstTag) {
+      navInstTag.style.borderColor = ehAdmin ? 'rgba(0, 240, 255, 0.4)' : 'rgba(16, 185, 129, 0.4)';
+      navInstTag.style.color = ehAdmin ? '#00F0FF' : '#10B981';
+      navInstTag.style.background = ehAdmin ? 'rgba(0, 240, 255, 0.08)' : 'rgba(16, 185, 129, 0.08)';
+    }
 
     // Atualiza cabeçalho da visão de licitações
     const tituloSecao = document.getElementById('tituloSecaoLicitacoes');
     const subSecao = document.getElementById('subtituloSecaoLicitacoes');
     const badgePapel = document.getElementById('badgePapelUsuario');
     const btnAuditor = document.getElementById('btnNavAuditor');
+    const btnAgruparEtp = document.getElementById('btnAbrirAgrupamentoEtp');
+    const filtrosAdminWrap = document.getElementById('filtrosAdminWrap');
+    const bannerVinculo = document.getElementById('bannerVinculoInstitucional');
+    const bannerNomeInst = document.getElementById('bannerNomeInstituicao');
 
     if (ehAdmin) {
-      if (tituloSecao) tituloSecao.innerText = 'Todos os Processos Licitatórios (Todas as Secretarias - Visão Admin)';
-      if (subSecao) subSecao.innerText = 'Painel Global de Auditoria e Governança de TIC de Lages / SC';
+      if (tituloSecao) tituloSecao.innerText = 'Todas as Demandas Municipais (Gestão Central TIC - Acesso Global)';
+      if (subSecao) subSecao.innerText = 'Painel Global de Auditoria, Análise Técnica de DODs e Agrupamento de ETPs de Lages / SC';
       if (badgePapel) {
-        badgePapel.innerText = 'ADMINISTRADOR GERAL (TCE)';
-        badgePapel.style.background = 'rgba(124, 58, 237, 0.2)';
-        badgePapel.style.color = '#A78BFA';
+        badgePapel.innerText = '👑 ADMIN CENTRAL DE TIC';
+        badgePapel.style.background = 'rgba(0, 240, 255, 0.15)';
+        badgePapel.style.color = '#00F0FF';
       }
       if (btnAuditor) btnAuditor.style.display = 'inline-block';
+      if (btnAgruparEtp) btnAgruparEtp.style.display = 'inline-flex';
+      if (filtrosAdminWrap) filtrosAdminWrap.style.display = 'flex';
+      if (bannerVinculo) bannerVinculo.style.display = 'none';
+
+      this.carregarInstituicoesFiltro();
     } else {
-      if (tituloSecao) tituloSecao.innerText = 'Meus Pedidos de Licitação';
-      if (subSecao) subSecao.innerText = `Processos emitidos por ${u.nome.split(' ')[0]} para ${u.setor || 'Lages'}`;
+      if (tituloSecao) tituloSecao.innerText = `Demandas: ${nomeInst}`;
+      if (subSecao) subSecao.innerText = `Exibindo exclusivamente solicitações e DODs relacionados à ${nomeInst}.`;
       if (badgePapel) {
-        badgePapel.innerText = 'SERVIDOR SOLICITANTE';
-        badgePapel.style.background = 'rgba(52, 211, 153, 0.15)';
-        badgePapel.style.color = 'var(--dark-accent)';
+        badgePapel.innerText = u.tipo_usuario === 'diretora' ? '👩‍🏫 DIRETORA / SOLICITANTE' : '👤 SERVIDOR SOLICITANTE';
+        badgePapel.style.background = 'rgba(16, 185, 129, 0.15)';
+        badgePapel.style.color = '#10B981';
       }
-      if (btnAuditor) btnAuditor.style.display = 'none'; // Acesso restrito ao auditor geral
+      if (btnAuditor) btnAuditor.style.display = 'none';
+      if (btnAgruparEtp) btnAgruparEtp.style.display = 'none';
+      if (filtrosAdminWrap) filtrosAdminWrap.style.display = 'none';
+      if (bannerVinculo) bannerVinculo.style.display = 'flex';
+      if (bannerNomeInst) bannerNomeInst.innerText = nomeInst;
     }
 
-    // Demanda local
+    // Demanda local vinculada à instituição do usuário
     this.demanda.usuarioId = u.id;
+    this.demanda.instituicaoId = u.instituicao_id;
     this.demanda.usuarioNome = u.nome;
     this.demanda.usuarioMatricula = u.matricula;
     this.demanda.orgao = u.orgao;
@@ -525,13 +563,21 @@ const app = {
     try {
       const u = this.usuarioLogado;
       const ehAdmin = u && (u.tipo_usuario === 'admin' || (u.email && u.email.includes('admin')));
-      const url = ehAdmin 
+      let url = ehAdmin 
         ? '/api/demandas?tipoUsuario=admin' 
-        : `/api/demandas?tipoUsuario=padrao&usuarioId=${u?.id || ''}`;
+        : `/api/demandas?tipoUsuario=${u?.tipo_usuario || 'diretora'}&usuarioId=${u?.id || ''}`;
+
+      if (ehAdmin) {
+        const sec = document.getElementById('filtroSecretariaAdmin')?.value;
+        const inst = document.getElementById('filtroInstituicaoAdmin')?.value;
+        if (sec) url += `&secretaria=${encodeURIComponent(sec)}`;
+        if (inst) url += `&instituicaoId=${encodeURIComponent(inst)}`;
+      }
 
       const res = await fetch(url);
       this.demandasCarregadas = await res.json();
       await this.carregarEstatisticasTi();
+      await this.atualizarContadorDemandasAptasEtp();
       this.filtrarTabela();
     } catch (e) {
       console.error(e);
@@ -540,7 +586,13 @@ const app = {
 
   async carregarEstatisticasTi() {
     try {
-      const res = await fetch('/api/estatisticas');
+      const u = this.usuarioLogado;
+      const ehAdmin = u && (u.tipo_usuario === 'admin' || (u.email && u.email.includes('admin')));
+      const statsUrl = ehAdmin 
+        ? '/api/estatisticas?tipoUsuario=admin' 
+        : `/api/estatisticas?tipoUsuario=padrao&usuarioId=${u?.id || ''}`;
+
+      const res = await fetch(statsUrl);
       const stats = await res.json();
 
       const elAg = document.getElementById('metricAguardandoAnalise');
@@ -733,14 +785,19 @@ const app = {
           <td class="col-protocolo">
             <span class="badge-protocolo">${d.protocolo}</span>
             ${(d.etp_numero || d.etp_gerado === 1) ? `
-              <div class="badge-etp-sub" title="Estudo Técnico Preliminar Gerado">
-                <span class="etp-tag-pill">📑 ${d.etp_numero || d.protocolo.replace('DOD-', 'ETP-')}</span>
+              <div class="badge-etp-sub" title="Demanda unificada no Estudo Técnico Preliminar">
+                <span class="etp-tag-pill" style="cursor: pointer; background: rgba(0,240,255,0.15); color: #00F0FF; border: 1px solid rgba(0,240,255,0.3); font-weight: 700;" onclick="app.abrirModalEtpCompleto('${d.protocolo}')">
+                  📑 ${d.etp_numero || d.protocolo.replace('DOD-', 'ETP-')}
+                </span>
               </div>
             ` : ''}
           </td>
           <td class="col-orgao">
-            <div class="text-primary-strong orgao-setor">${d.setor || 'Escolas Municipais (SME)'}</div>
-            <div class="text-secondary-muted orgao-nome">${d.orgao || 'Prefeitura de Lages - SME'}</div>
+            <div class="text-primary-strong orgao-setor" style="display: flex; align-items: center; gap: 5px;">
+              <span style="color: #00F0FF; font-size: 0.95rem;">🏛️</span>
+              <span style="font-weight: 700;">${d.instituicao_nome || d.setor || 'Escolas Municipais (SME)'}</span>
+            </div>
+            <div class="text-secondary-muted orgao-nome">${d.setor || d.instituicao_secretaria || d.orgao || 'Prefeitura de Lages'}</div>
           </td>
           <td class="col-solicitante">
             <div class="text-primary-strong solicitante-nome">${d.usuario_nome || 'Servidor Solicitante'}</div>
@@ -3171,16 +3228,36 @@ const app = {
   async abrirModalEtpCompleto(protocolo) {
     this.fecharTodosMenusAcoes();
     try {
-      const res = await fetch(`/api/demandas/${protocolo}`);
+      const u = this.usuarioLogado;
+      const res = await fetch(`/api/demandas/${protocolo}?usuarioId=${u?.id || ''}&tipoUsuario=${u?.tipo_usuario || ''}`);
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || 'Acesso negado ao ETP.');
+        return;
+      }
       const data = await res.json();
       const d = data.demanda;
       if (!d) return;
 
       this.etpAtual = d;
+
+      // Se a demanda estiver vinculada a um ETP consolidado, busca os dados completos interinstitucionais
+      if (d.etp_numero) {
+        try {
+          const resEtp = await fetch(`/api/etps/${d.etp_numero}?usuarioId=${u?.id || ''}&tipoUsuario=${u?.tipo_usuario || ''}`);
+          if (resEtp.ok) {
+            const dadosEtp = await resEtp.json();
+            this.renderizarEtpConsolidadoCompleto(dadosEtp);
+            document.getElementById('modalEtpCompleto')?.classList.add('active');
+            return;
+          }
+        } catch (e) {}
+      }
+
       let etpConteudo = null;
       try {
         etpConteudo = typeof d.etp_conteudo === 'string' ? JSON.parse(d.etp_conteudo) : d.etp_conteudo;
-      } catch(e){}
+      } catch (e) {}
 
       this.renderizarEtpCompleto(d, etpConteudo);
       document.getElementById('modalEtpCompleto')?.classList.add('active');
@@ -4041,7 +4118,505 @@ const app = {
         ctx.fill();
       }
     }
-  }
+  },
+
+  // ==========================================
+  // FILTROS AVANÇADOS E AGRUPAMENTO DE DEMANDAS PARA ETP ÚNICO
+  // ==========================================
+  instituicoesCadastradas: [],
+  dodsSelecionadosParaEtp: new Set(),
+  dodsAptosCarregados: [],
+
+  async carregarInstituicoesFiltro() {
+    try {
+      const res = await fetch('/api/instituicoes');
+      this.instituicoesCadastradas = await res.json();
+      const sel = document.getElementById('filtroInstituicaoAdmin');
+      if (!sel) return;
+
+      const valorAtual = sel.value;
+      let html = '<option value="">Todas as Instituições</option>';
+      for (const inst of this.instituicoesCadastradas) {
+        html += `<option value="${inst.id}">${inst.nome} (${inst.secretaria})</option>`;
+      }
+      sel.innerHTML = html;
+      sel.value = valorAtual;
+    } catch (e) {
+      console.error('Erro ao carregar instituições no filtro:', e);
+    }
+  },
+
+  aplicarFiltrosAdmin() {
+    this.carregarDemandas();
+  },
+
+  async atualizarContadorDemandasAptasEtp() {
+    try {
+      const res = await fetch('/api/demandas-para-etp');
+      const aptos = await res.json();
+      const disponiveis = aptos.filter(d => d.disponivel_agrupamento);
+      const badge = document.getElementById('badgeTotalAptosEtp');
+      if (badge) {
+        badge.innerText = `${disponiveis.length} aptos`;
+      }
+    } catch (e) {
+      console.error('Erro ao atualizar contador de aptos para ETP:', e);
+    }
+  },
+
+  async abrirModalAgruparEtp() {
+    const modal = document.getElementById('modalAgruparEtp');
+    if (!modal) return;
+
+    this.dodsSelecionadosParaEtp.clear();
+    await this.carregarTabelaAgrupamentoEtp();
+    modal.classList.add('active');
+  },
+
+  fecharModalAgruparEtp() {
+    const modal = document.getElementById('modalAgruparEtp');
+    if (modal) modal.classList.remove('active');
+  },
+
+  async carregarTabelaAgrupamentoEtp() {
+    const tbody = document.getElementById('tbodyDodsAgrupamento');
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px; color: #94A3B8;">Carregando demandas validadas...</td></tr>';
+
+    try {
+      const res = await fetch('/api/demandas-para-etp');
+      this.dodsAptosCarregados = await res.json();
+
+      if (this.dodsAptosCarregados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px; color: #94A3B8;">Nenhuma demanda com DOD validado encontrada para agrupamento no momento.</td></tr>';
+        this.atualizarResumoConsolidacaoEtp();
+        return;
+      }
+
+      // Pré-seleciona os DODs do cenário de teste (DOD-2026-0001, DOD-2026-0002, DOD-2026-0003) se estiverem disponíveis
+      const cenarioDods = ['DOD-2026-0001', 'DOD-2026-0002', 'DOD-2026-0003'];
+      for (const d of this.dodsAptosCarregados) {
+        if (cenarioDods.includes(d.protocolo) && d.disponivel_agrupamento) {
+          this.dodsSelecionadosParaEtp.add(d.protocolo);
+        }
+      }
+
+      tbody.innerHTML = this.dodsAptosCarregados.map(d => {
+        const isSelected = this.dodsSelecionadosParaEtp.has(d.protocolo);
+        const jaVinculado = !d.disponivel_agrupamento;
+        const etpNumero = d.etp_vinculado_numero || d.etp_numero;
+
+        return `
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); ${jaVinculado ? 'opacity: 0.55; background: rgba(0,0,0,0.2);' : ''}">
+            <td style="text-align: center; padding: 10px;">
+              <input type="checkbox" 
+                     ${isSelected ? 'checked' : ''} 
+                     ${jaVinculado ? 'disabled title="Já vinculado ao ' + etpNumero + '"' : ''} 
+                     onchange="app.toggleSelecaoDodEtp('${d.protocolo}')"
+                     style="cursor: ${jaVinculado ? 'not-allowed' : 'pointer'}; width: 17px; height: 17px; accent-color: #00F0FF;">
+            </td>
+            <td style="padding: 10px; font-weight: 700; color: #F1F5F9; font-family: monospace;">
+              ${d.protocolo}
+            </td>
+            <td style="padding: 10px;">
+              <div style="font-weight: 700; color: #FFFFFF;">${d.instituicao_nome || d.orgao}</div>
+              <small style="color: #64748B;">${d.instituicao_secretaria || d.orgao}</small>
+            </td>
+            <td style="padding: 10px;">
+              <div style="color: #E2E8F0;">${d.usuario_nome || 'Servidor'}</div>
+              <small style="color: #64748B;">${d.cargo || 'Diretora'}</small>
+            </td>
+            <td style="padding: 10px; color: #94A3B8;">
+              ${d.perfil_esc_nome || (d.tipo_necessidade === 'computador' ? 'Notebook Corporativo' : 'Hardware')}
+            </td>
+            <td style="text-align: center; padding: 10px; font-weight: 800; color: #00F0FF;">
+              ${d.quantidade_usuarios}
+            </td>
+            <td style="text-align: right; padding: 10px; font-weight: 700; color: #E2E8F0;">
+              R$ ${(d.custo_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </td>
+            <td style="text-align: center; padding: 10px;">
+              ${jaVinculado ? `
+                <span style="font-size: 0.73rem; background: rgba(245, 158, 11, 0.15); color: #FBBF24; padding: 3px 8px; border-radius: 4px; font-weight: 700;">
+                  🔒 ${etpNumero || 'Vinculado a ETP'}
+                </span>
+              ` : `
+                <span style="font-size: 0.73rem; background: rgba(16, 185, 129, 0.15); color: #10B981; padding: 3px 8px; border-radius: 4px; font-weight: 700;">
+                  ✓ Disponível
+                </span>
+              `}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      this.atualizarResumoConsolidacaoEtp();
+    } catch (e) {
+      console.error('Erro ao carregar demandas para ETP:', e);
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 20px; color: #EF4444;">Erro ao carregar demandas: ${e.message}</td></tr>`;
+    }
+  },
+
+  toggleSelecaoDodEtp(protocolo) {
+    if (this.dodsSelecionadosParaEtp.has(protocolo)) {
+      this.dodsSelecionadosParaEtp.delete(protocolo);
+    } else {
+      this.dodsSelecionadosParaEtp.add(protocolo);
+    }
+    this.atualizarResumoConsolidacaoEtp();
+  },
+
+  selecionarTodosDodsEtp() {
+    const disponiveis = this.dodsAptosCarregados.filter(d => d.disponivel_agrupamento);
+    for (const d of disponiveis) {
+      this.dodsSelecionadosParaEtp.add(d.protocolo);
+    }
+    this.carregarTabelaAgrupamentoEtp();
+  },
+
+  atualizarResumoConsolidacaoEtp() {
+    const selecionados = this.dodsAptosCarregados.filter(d => this.dodsSelecionadosParaEtp.has(d.protocolo));
+
+    let qtdTotal = 0;
+    let custoTotal = 0;
+    let economiaTotal = 0;
+    const instSet = new Set();
+
+    for (const d of selecionados) {
+      const q = d.quantidade_usuarios || 1;
+      qtdTotal += q;
+      custoTotal += (d.custo_total || (d.custo_unitario * q));
+      economiaTotal += (d.economia_estimada || 0);
+      instSet.add(d.instituicao_id || d.instituicao_nome || d.orgao);
+    }
+
+    if (qtdTotal >= 5) {
+      economiaTotal += (custoTotal * 0.08); // Bônus de escala
+    }
+
+    const cardDods = document.getElementById('etpCardQtdDods');
+    const cardInst = document.getElementById('etpCardQtdInst');
+    const cardQtd = document.getElementById('etpCardQtdTotal');
+    const cardEco = document.getElementById('etpCardEconomia');
+
+    if (cardDods) cardDods.innerText = `${selecionados.length} DODs`;
+    if (cardInst) cardInst.innerText = `${instSet.size} unidades`;
+    if (cardQtd) cardQtd.innerText = `${qtdTotal} un`;
+    if (cardEco) cardEco.innerText = `R$ ${economiaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+
+    // Sugere título e justificativa automáticos
+    const inputTitulo = document.getElementById('inputTituloEtpAgrupado');
+    const txtObjetivo = document.getElementById('txtObjetivoEtpAgrupado');
+
+    if (selecionados.length > 0) {
+      const nomesInsts = Array.from(new Set(selecionados.map(s => s.instituicao_nome || s.setor))).slice(0, 3);
+      const sufixoInsts = nomesInsts.join(', ') + (instSet.size > 3 ? ` e outras ${instSet.size - 3} instituições` : '');
+      if (inputTitulo && (!inputTitulo.value || inputTitulo.value.startsWith('Aquisição Unificada'))) {
+        inputTitulo.value = `Aquisição Unificada de ${qtdTotal} Notebooks para ${sufixoInsts}`;
+      }
+      if (txtObjetivo && (!txtObjetivo.value || txtObjetivo.value.startsWith('Unificar em um único procedimento'))) {
+        txtObjetivo.value = `Unificar em um único procedimento licitatório as necessidades compatíveis de TIC das instituições municipais (${sufixoInsts}), garantindo economia de escala, celeridade processual, padronização do parque tecnológico municipal e estrito cumprimento ao Art. 18 da Lei Federal nº 14.133/2021.`;
+      }
+    }
+  },
+
+  async executarAgrupamentoEtp() {
+    const selecionados = Array.from(this.dodsSelecionadosParaEtp);
+    if (selecionados.length === 0) {
+      alert('Selecione pelo menos 1 (uma) demanda com DOD validado para agrupar no ETP.');
+      return;
+    }
+
+    const titulo = document.getElementById('inputTituloEtpAgrupado')?.value.trim();
+    const tecnico = document.getElementById('inputTecnicoEtpAgrupado')?.value.trim();
+    const objetivo = document.getElementById('txtObjetivoEtpAgrupado')?.value.trim();
+
+    try {
+      const res = await fetch('/api/etps/agrupar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dodProtocolos: selecionados,
+          titulo: titulo || 'Aquisição Consolidada de Equipamentos de TIC',
+          objetivoConsolidado: objetivo,
+          usuarioNome: tecnico || (this.usuarioLogado?.nome || 'Téc. Roberto Valente'),
+          usuarioCargo: 'Diretoria Geral de TIC'
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert('Erro ao agrupar demandas: ' + (data.error || 'Falha no servidor.'));
+        return;
+      }
+
+      this.fecharModalAgruparEtp();
+      alert(`✓ Estudo Técnico Preliminar Único (${data.protocolo}) gerado com sucesso!\n\nTotal Consolidado: ${data.quantidadeTotal} equipamentos para ${data.instituicoesParticipantes.length} instituições.\nEconomia Total Estimada: R$ ${data.economiaEstimadaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}.`);
+
+      await this.carregarDemandas();
+      await this.abrirEtpConsolidado(data.protocolo);
+    } catch (e) {
+      console.error('Erro ao agrupar demandas para ETP:', e);
+      alert('Erro ao processar agrupamento: ' + e.message);
+    }
+  },
+
+  async abrirEtpConsolidado(etpProtocolo) {
+    try {
+      const u = this.usuarioLogado;
+      const res = await fetch(`/api/etps/${etpProtocolo}?usuarioId=${u?.id || ''}&tipoUsuario=${u?.tipo_usuario || ''}`);
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || 'Não foi possível carregar o ETP consolidado.');
+        return;
+      }
+
+      const dados = await res.json();
+      this.renderizarEtpConsolidadoCompleto(dados);
+      document.getElementById('modalEtpCompleto')?.classList.add('active');
+    } catch (e) {
+      console.error('Erro ao abrir ETP consolidado:', e);
+      alert('Erro ao abrir ETP: ' + e.message);
+    }
+  },
+
+  renderizarEtpConsolidadoCompleto(dados) {
+    const corpo = document.getElementById('corpoEtpCompleto');
+    if (!corpo) return;
+
+    const { etp, conteudo, dodsVinculados = [], instituicoesParticipantes = [] } = dados;
+    this.etpAtual = etp;
+    this.modoEdicaoEtp = false;
+
+    const ano = new Date().getFullYear();
+    const dia = new Date().getDate();
+    const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+    const mes = meses[new Date().getMonth()];
+
+    const tabelaDodsHtml = dodsVinculados.map(d => `
+      <tr style="border-bottom: 1px solid #CBD5E1;">
+        <td style="padding: 8px 10px; font-weight: 800; font-family: monospace; color: #0F172A;">${d.dod_protocolo || d.protocolo_dod}</td>
+        <td style="padding: 8px 10px; font-weight: 700; color: #1E293B;">${d.instituicao_nome || d.setor || 'Escola Municipal'}</td>
+        <td style="padding: 8px 10px; color: #334155;">${d.solicitante_nome || 'Servidor'}<br><small style="color: #64748B;">${d.cargo || 'Diretora'}</small></td>
+        <td style="padding: 8px 10px; text-align: center; font-weight: 800; color: #0F172A;">${d.quantidade} un</td>
+        <td style="padding: 8px 10px; text-align: right; font-weight: 700; color: #0F172A;">R$ ${(d.custo_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 8px 10px; font-size: 8.5pt; color: #475569;">${d.motivo_necessidade || 'Atendimento pedagógico e administrativo.'}</td>
+      </tr>
+    `).join('');
+
+    const tabelaInstHtml = instituicoesParticipantes.map(i => `
+      <tr style="border-bottom: 1px solid #CBD5E1;">
+        <td style="padding: 8px 10px; font-weight: 700; color: #0F172A;">${i.instituicao_nome}</td>
+        <td style="padding: 8px 10px; text-align: center; font-weight: 800; color: #059669;">${i.quantidade_total} un</td>
+        <td style="padding: 8px 10px; text-align: right; font-weight: 700; color: #0F172A;">R$ ${(i.custo_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+      </tr>
+    `).join('');
+
+    corpo.innerHTML = `
+      <div class="lages-doc-container">
+        <!-- CABEÇALHO OFICIAL DE LAGES -->
+        <div class="lages-header-logos" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <img src="/img/brasao_lages.png" class="lages-logo-brasao" alt="Município de Lages" style="height:52px;max-height:52px;width:auto;max-width:80px;object-fit:contain;">
+          <div class="lages-header-titles" style="flex:1;text-align:center;padding:0 10px;">
+            <div class="lages-title-city">MUNICÍPIO DE LAGES</div>
+            <div class="lages-title-state">ESTADO DE SANTA CATARINA</div>
+            <div class="lages-title-secretaria">SECRETARIA MUNICIPAL DE ADMINISTRAÇÃO E FAZENDA • DIRETORIA DE TECNOLOGIA DA INFORMAÇÃO E COMUNICAÇÕES</div>
+          </div>
+          <img src="/img/bandeira_lages.png" class="lages-logo-bandeira" alt="Bandeira de Lages" style="height:44px;max-height:44px;width:auto;max-width:80px;object-fit:contain;">
+        </div>
+        <div class="lages-header-divider"></div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+          <span style="font-weight: 800; font-size: 10pt; color: #059669;">
+            ● ETP CONSOLIDADO INTERINSTITUCIONAL (UNIFICAÇÃO DE ${dodsVinculados.length} DODs)
+          </span>
+          <span style="font-size: 8.5pt; color: #64748B;">Lei Federal nº 14.133/2021 • Art. 18</span>
+        </div>
+
+        <div class="lages-doc-main-title" style="margin-top: 4px; margin-bottom: 4px;">
+          ESTUDO TÉCNICO PRELIMINAR (ETP CONSOLIDADO) Nº ${etp.protocolo}
+        </div>
+        <div style="font-weight: 700; font-size: 9.5pt; color: #0F172A; margin-bottom: 16px; border-bottom: 1px solid #CBD5E1; padding-bottom: 8px;">
+          OBJETO: ${conteudo.objeto || etp.titulo}
+        </div>
+
+        <!-- SEÇÃO ESPECIAL: DEMANDAS DE ORIGEM E RASTREABILIDADE INTERINSTITUCIONAL -->
+        <div class="lages-section-card" style="border: 2px solid #0EA5E9; background: #F0F9FF;">
+          <div class="lages-section-header" style="background: #0284C7; color: #FFFFFF;">
+            RASTREABILIDADE INTERINSTITUCIONAL: DEMANDAS UNIFICADAS NESTE ETP
+          </div>
+          <div class="lages-section-body" style="padding: 14px;">
+            <p style="margin: 0 0 10px 0; font-size: 9pt; color: #0369A1; line-height: 1.45;">
+              Em observância aos princípios da eficiência, celeridade e economicidade previstos no Art. 5º da Lei Federal nº 14.133/2021, a Diretoria Geral de TIC unificou os Documentos de Formalização de Demanda (DODs) abaixo relacionados, que possuem mesmo objeto e perfil técnico compatível:
+            </p>
+
+            <table class="lages-table-orcamento" style="background: #FFFFFF; font-size: 8.5pt; margin-bottom: 14px;">
+              <thead>
+                <tr style="background: #E0F2FE;">
+                  <th>DOD Nº</th>
+                  <th>INSTITUIÇÃO PÚBLICA</th>
+                  <th>SOLICITANTE</th>
+                  <th style="text-align: center;">QTD</th>
+                  <th style="text-align: right;">VALOR ESTIMADO</th>
+                  <th>JUSTIFICATIVA LOCAL</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${tabelaDodsHtml}
+              </tbody>
+            </table>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; background: #FFFFFF; border: 1px solid #BAE6FD; border-radius: 6px; padding: 10px;">
+              <div>
+                <strong style="color: #0369A1; font-size: 8.5pt; text-transform: uppercase;">Distribuição Consolidada por Instituição:</strong>
+                <table style="width: 100%; font-size: 8.5pt; margin-top: 6px; border-collapse: collapse;">
+                  <tbody>
+                    ${tabelaInstHtml}
+                  </tbody>
+                </table>
+              </div>
+              <div style="display: flex; flex-direction: column; justify-content: center; border-left: 1px solid #E2E8F0; padding-left: 14px;">
+                <span style="font-size: 8.5pt; color: #64748B;">Total Consolidado do Lote:</span>
+                <span style="font-size: 1.3rem; font-weight: 800; color: #0F172A;">${etp.quantidade_total} Equipamentos</span>
+                <span style="font-size: 8.5pt; color: #059669; font-weight: 700; margin-top: 4px;">
+                  Economia de Escala Estimada: R$ ${(etp.economia_estimada_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1. DESCRIÇÃO DA NECESSIDADE CONSOLIDADA -->
+        <div class="lages-section-card">
+          <div class="lages-section-header">1. DESCRIÇÃO DA NECESSIDADE CONSOLIDADA</div>
+          <div class="lages-section-body etp-editable-field">
+            <p style="margin: 0 0 8px 0;">
+              ${conteudo.objetivoConsolidado || etp.objetivo_consolidado || 'Contratação consolidada para renovação do parque computacional das instituições municipais participantes.'}
+            </p>
+            <p style="margin: 0;">
+              A formalização conjunta viabiliza ganho expressivo de poder de barganha para a Prefeitura do Município de Lages nas fases de cotação e disputa do pregão eletrônico, gerando padronização total das máquinas, das garantias técnicas de 36 meses e facilidade de suporte pela equipe central de TIC.
+            </p>
+          </div>
+        </div>
+
+        <!-- 2. PREVISÃO NO PLANO DE CONTRATAÇÕES ANUAL -->
+        <div class="lages-section-card">
+          <div class="lages-section-header">2. PREVISÃO NO PLANO DE CONTRATAÇÕES ANUAL</div>
+          <div class="lages-section-body etp-editable-field">
+            A contratação está contemplada no Plano de Contratações Anual (PCA) de Lages do exercício de <strong>${ano}</strong>, cumprindo as metas de modernização do ensino municipal e estruturação das unidades de atendimento público (Art. 18, § 1º, II da Lei nº 14.133/2021).
+          </div>
+        </div>
+
+        <!-- 3. REQUISITOS DA CONTRATAÇÃO -->
+        <div class="lages-section-card">
+          <div class="lages-section-header">3. REQUISITOS E ESPECIFICAÇÃO PADRONIZADA</div>
+          <div class="lages-section-body etp-editable-field">
+            <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
+              <li><strong>Padrão dos Equipamentos:</strong> Notebook Corporativo 15.6" Full HD (ou Desktop Corporativo equivalente);</li>
+              <li><strong>Processador:</strong> Arquitetura de 6 núcleos físicos / 12 threads com clock turbo mín. 4.0 GHz;</li>
+              <li><strong>Memória Operacional:</strong> 16 GB DDR4/DDR5 Dual-Channel de alta velocidade;</li>
+              <li><strong>Armazenamento:</strong> SSD 512 GB NVMe M.2 PCIe Gen 3/4 com leitura ultrarrápida;</li>
+              <li><strong>Garantia Integral On-Site:</strong> 36 (trinta e seis) meses de garantia no município de Lages com SLA de 48h úteis;</li>
+              <li><strong>Licenciamento de Software:</strong> Windows 11 Pro 64-bit original integrado ao domínio da PML.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 4. ESTIMATIVA DAS QUANTIDADES CONSOLIDADAS -->
+        <div class="lages-section-card">
+          <div class="lages-section-header">4. ESTIMATIVA DAS QUANTIDADES CONSOLIDADAS</div>
+          <div class="lages-section-body etp-editable-field">
+            A quantidade consolidada foi estritamente apurada a partir da soma dos quantitativos individuais demandados nos DODs das instituições vinculadas, totalizando <strong>${etp.quantidade_total} unidade(s)</strong> de equipamentos, vedado o superdimensionamento.
+          </div>
+        </div>
+
+        <!-- 5. LEVANTAMENTO DE MERCADO E COMPARATIVO -->
+        <div class="lages-section-card">
+          <div class="lages-section-header">5. LEVANTAMENTO DE MERCADO (ANÁLISE DE ALTERNATIVAS)</div>
+          <div class="lages-section-body etp-editable-field">
+            <p style="margin: 0 0 10px 0;">Comparativo entre as soluções avaliadas pela equipe de TIC:</p>
+            <table class="lages-table-orcamento">
+              <thead>
+                <tr>
+                  <th style="width: 30%;">ALTERNATIVA</th>
+                  <th style="width: 44%;">ANÁLISE OPERACIONAL</th>
+                  <th style="width: 26%;">CUSTO ESTIMADO DO LOTE</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="background: #F0FDF4;">
+                  <td><strong>Alternativa 1 (Eleita):</strong><br>Aquisição Consolidada em Lote Único</td>
+                  <td>Aquisição unificada gerando ganho de escala na licitação, padronização do parque escolar e patrimônio definitivo da PML.</td>
+                  <td><strong>R$ ${(etp.custo_total_estimado || etp.custo_total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong><br><small style="color: #059669;">Solução de Maior Economicidade</small></td>
+                </tr>
+                <tr>
+                  <td><strong>Alternativa 2:</strong><br>Locação Mensal (HaaS) por 36 meses</td>
+                  <td>Custos mensais contínuos que totalizam valores muito superiores ao custo de compra, sem ganho patrimonial.</td>
+                  <td><strong>R$ ${((etp.quantidade_total * 145 * 36) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong><br><small style="color: #EF4444;">160% mais caro</small></td>
+                </tr>
+                <tr>
+                  <td><strong>Alternativa 3:</strong><br>Manutenção e Upgrade de PCs Sucateados</td>
+                  <td>Inviabilidade de upgrade em máquinas de 8 anos; incompatibilidade com Windows 11 e falhas recorrentes.</td>
+                  <td><strong>Inviável Tecnicamente</strong><br><small>Risco de perda de dados</small></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 6. ESTIMATIVA DO VALOR CONSOLIDADO -->
+        <div class="lages-section-card">
+          <div class="lages-section-header">6. ESTIMATIVA DO VALOR DA CONTRATAÇÃO CONSOLIDADA</div>
+          <div class="lages-section-body etp-editable-field">
+            <p style="margin: 0 0 6px 0;">O valor total estimado consolidado para a aquisição de ${etp.quantidade_total} equipamentos é de:</p>
+            <p style="margin: 0 0 6px 0; font-size: 11pt; font-weight: 800; color: #0F172A;">
+              R$ ${(etp.custo_total_estimado || etp.custo_total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${this.valorPorExtenso(etp.custo_total_estimado || etp.custo_total)})
+            </p>
+            <p style="margin: 0; font-size: 8.5pt; color: #059669; font-weight: 700;">
+              ✓ Economia estimada em relação aos preços de tabela avulsos: R$ ${(etp.economia_estimada_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </p>
+          </div>
+        </div>
+
+        <!-- 7. CONCLUSÃO E VIABILIDADE -->
+        <div class="lages-section-card">
+          <div class="lages-section-header">7. PARECER CONCLUSIVO DE VIABILIDADE TÉCNICA E ECONÔMICA</div>
+          <div class="lages-section-body etp-editable-field">
+            ${conteudo.conclusaoViabilidade || 'A Diretoria Geral de TIC declara plenamente VIÁVEL, oportuna e econômica a contratação na modalidade unificada, em conformidade com as diretrizes do TCE/SC.'}
+          </div>
+        </div>
+
+        <!-- 8. ASSINATURAS -->
+        <div class="lages-section-card">
+          <div class="lages-section-header">8. RESPONSÁVEIS PELA CONSOLIDAÇÃO</div>
+          <div class="lages-section-body">
+            <div style="text-align: right; margin-bottom: 24px; font-weight: 700;">
+              Lages (SC), ${dia} de ${mes} de ${ano}.
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; text-align: center;">
+              <div class="lages-assinatura-box">
+                <strong>Equipe Central de Planejamento da TIC</strong><br>
+                Responsável pelo ETP Consolidado<br>
+                <small>Diretoria Geral de TIC — PML</small>
+              </div>
+              <div class="lages-assinatura-box">
+                <strong>Diretoria de Licitações e Contratos</strong><br>
+                Secretaria Municipal de Administração<br>
+                <small>Prefeitura do Município de Lages / SC</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lages-doc-footer-legal">
+          <span>ETP Consolidado Interinstitucional – Lei 14.133/21</span>
+          <span>Município de Lages / SC • Decreto Municipal nº 20.682/2023 • Atualização: 2026</span>
+        </div>
+      </div>
+    `;
+  },
+
 };
 
 document.addEventListener('DOMContentLoaded', () => {

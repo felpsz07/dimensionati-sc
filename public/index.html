@@ -58,25 +58,40 @@
         <div class="error-text" id="loginErrorMsg"></div>
 
         <div class="demo-credentials-box">
-          <div style="font-weight: 700; color: var(--dark-text); margin-bottom: 6px;">⚡ Contas de Acesso Rápido:</div>
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <div>
-              <span class="demo-pill-btn" onclick="app.preencherLogin('angelita.escola@lages.sc.gov.br', '123456')">
-                👩‍💼 <strong>Diretora Angelita (Escola):</strong> angelita.escola@lages.sc.gov.br
-              </span>
-            </div>
-            <div>
-              <span class="demo-pill-btn" onclick="app.preencherLogin('carlos.eng@lages.sc.gov.br', '123456')">
-                🚧 <strong>Obras / Engenharia:</strong> carlos.eng@lages.sc.gov.br
-              </span>
-            </div>
+          <div style="font-weight: 800; color: #FFFFFF; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+            <span>🏛️</span>
+            <span>Perfis e Instituições para Demonstração:</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
             <div>
               <span class="demo-pill-btn" onclick="app.preencherLogin('admin@lages.sc.gov.br', '123456')">
-                🛡️ <strong>Responsável de TIC (Admin/TCE):</strong> admin@lages.sc.gov.br
+                👑 <strong>Admin Central de TIC:</strong> admin@lages.sc.gov.br <em style="color:#00F0FF; font-size:0.75rem;">(Visão Global + Agrupamento ETP)</em>
+              </span>
+            </div>
+            <div>
+              <span class="demo-pill-btn" onclick="app.preencherLogin('angelita.escola@lages.sc.gov.br', '123456')">
+                👩‍🏫 <strong>Profa. Angelita (Escola Municipal A):</strong> angelita.escola@lages.sc.gov.br
+              </span>
+            </div>
+            <div>
+              <span class="demo-pill-btn" onclick="app.preencherLogin('maria.prof@lages.sc.gov.br', '123456')">
+                👩‍🏫 <strong>Profa. Maria Eduarda (Escola Municipal B):</strong> maria.prof@lages.sc.gov.br
+              </span>
+            </div>
+            <div>
+              <span class="demo-pill-btn" onclick="app.preencherLogin('carla.escola@lages.sc.gov.br', '123456')">
+                👩‍🏫 <strong>Profa. Carla Cristina (Escola Municipal C):</strong> carla.escola@lages.sc.gov.br
+              </span>
+            </div>
+            <div>
+              <span class="demo-pill-btn" onclick="app.preencherLogin('camila.saude@lages.sc.gov.br', '123456')">
+                👩‍⚕️ <strong>Dra. Camila Ramos (UBS Centro - Saúde):</strong> camila.saude@lages.sc.gov.br
               </span>
             </div>
           </div>
-          <div style="margin-top: 6px; font-size: 0.72rem; color: var(--dark-muted);">Senha padrão: <code>123456</code></div>
+          <div style="margin-top: 8px; font-size: 0.72rem; color: #94A3B8; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 6px;">
+            🔒 <strong>Segurança Backend:</strong> Diretora visualiza estritamente sua instituição. Tentativas cruzadas são bloqueadas com <code>HTTP 403 Forbidden</code>.
+          </div>
         </div>
 
         <div class="login-foot">
@@ -228,6 +243,11 @@
       </div>
 
       <div class="dark-nav-right">
+        <div id="navInstituicaoTag" class="user-inst-badge" style="background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.25); color: #00F0FF; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+          <span id="navInstituicaoIcone">🏫</span>
+          <span id="navInstituicaoNome">Escola Municipal A</span>
+        </div>
+
         <div class="user-pill-badge" onclick="app.mostrarTela('screen-workplace')" title="Clique para editar lotação">
           <div class="user-avatar-mini" id="navAvatar">ME</div>
           <div class="user-text-mini">
@@ -263,10 +283,33 @@
               </p>
             </div>
 
-            <button type="button" class="btn-primary-action" onclick="app.abrirWizardNovo()">
-              <span class="btn-action-icon">+</span>
-              <span>Nova Requisição</span>
-            </button>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <!-- Botão Exclusivo do Admin / TI: Agrupar Demandas para ETP Único -->
+              <button type="button" class="btn-primary-action" id="btnAbrirAgrupamentoEtp" style="display: none; background: linear-gradient(135deg, #00F0FF, #0284C7); color: #000000; font-weight: 800; border: none; box-shadow: 0 4px 18px rgba(0,240,255,0.35);" onclick="app.abrirModalAgruparEtp()">
+                <span class="btn-action-icon">📑</span>
+                <span>Agrupar Demandas para ETP</span>
+                <span class="badge-count-etp" id="badgeTotalAptosEtp" style="background: #000000; color: #00F0FF; padding: 2px 7px; border-radius: 10px; font-size: 0.76rem; margin-left: 4px;">0</span>
+              </button>
+
+              <button type="button" class="btn-primary-action" onclick="app.abrirWizardNovo()">
+                <span class="btn-action-icon">+</span>
+                <span>Nova Requisição</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- BANNER INFORMATIVO DE VÍNCULO INSTITUCIONAL (PARA DIRETORA / SOLICITANTE) -->
+          <div id="bannerVinculoInstitucional" style="display: none; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px; padding: 10px 16px; margin: 12px 0; font-size: 0.88rem; color: #E2E8F0; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.2rem;">🏫</span>
+              <span>
+                Instituição Vinculada: <strong id="bannerNomeInstituicao" style="color: #10B981;">Escola Municipal A</strong>.
+                Você visualiza e cria demandas exclusivamente para a sua unidade.
+              </span>
+            </div>
+            <span style="font-size: 0.75rem; background: rgba(16,185,129,0.15); color: #10B981; padding: 3px 8px; border-radius: 4px; font-weight: 700;">
+              ACESSO RESTRITO
+            </span>
           </div>
 
           <!-- CARDS OPERACIONAIS DE FLUXO / GESTÃO DO TI (Métricas em background) -->
@@ -308,15 +351,31 @@
             </div>
           </div>
 
-          <!-- LINHA 2: BARRA DE PESQUISA E IDENTIFICAÇÃO DO PERFIL -->
+          <!-- LINHA 2: BARRA DE PESQUISA, FILTROS INSTITUCIONAIS (ADMIN) E IDENTIFICAÇÃO DO PERFIL -->
           <div class="header-controls-row">
             <!-- BUSCA PROFISSIONAL AMPLIADA E VISÍVEL -->
-            <div class="search-pro-box">
+            <div class="search-pro-box" style="flex: 1;">
               <svg class="search-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
               <input type="text" id="inputBusca" class="search-pro-field" placeholder="Buscar por protocolo, órgão ou solicitante..." oninput="app.filtrarTabela()">
+            </div>
+
+            <!-- FILTROS AVANÇADOS EXCLUSIVOS PARA ADMIN/TI -->
+            <div id="filtrosAdminWrap" style="display: none; align-items: center; gap: 8px;">
+              <select id="filtroSecretariaAdmin" class="dark-input" style="padding: 7px 12px; font-size: 0.85rem; background: #0B111D; border-color: rgba(255,255,255,0.12);" onchange="app.aplicarFiltrosAdmin()">
+                <option value="">Todas as Secretarias</option>
+                <option value="Secretaria Municipal de Educação">Educação (SME)</option>
+                <option value="Secretaria Municipal de Saúde">Saúde (SMS)</option>
+                <option value="Secretaria de Planejamento e Obras">Planejamento e Obras (SEPLAN)</option>
+                <option value="Secretaria da Fazenda">Fazenda e Finanças</option>
+              </select>
+
+              <select id="filtroInstituicaoAdmin" class="dark-input" style="padding: 7px 12px; font-size: 0.85rem; background: #0B111D; border-color: rgba(255,255,255,0.12);" onchange="app.aplicarFiltrosAdmin()">
+                <option value="">Todas as Instituições</option>
+                <!-- Preenchido via app.carregarInstituicoesFiltro() -->
+              </select>
             </div>
 
             <!-- IDENTIFICAÇÃO DO PERFIL DO USUÁRIO -->
@@ -1625,6 +1684,130 @@
           Reenviar Demanda ao TI &rarr;
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL: AGRUPAR DEMANDAS PARA ETP ÚNICO CONSOLIDADO         -->
+  <!-- ========================================================= -->
+  <div class="modal-overlay" id="modalAgruparEtp">
+    <div class="modal-content modal-drawer-xl" style="max-width: 1100px; padding: 26px; background: #0E1624; border: 1px solid var(--dark-border); border-radius: 14px; box-shadow: 0 25px 60px rgba(0,0,0,0.85); color: #F1F5F9; max-height: 90vh; display: flex; flex-direction: column;">
+      
+      <!-- CABEÇALHO DO MODAL -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px; margin-bottom: 18px; flex-shrink: 0;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 46px; height: 46px; border-radius: 10px; background: linear-gradient(135deg, rgba(0,240,255,0.2), rgba(16,185,129,0.2)); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: 1px solid rgba(0,240,255,0.3);">
+            📑
+          </div>
+          <div>
+            <div class="drawer-badge-ti" style="display: inline-block; margin-bottom: 4px; background: rgba(0,240,255,0.12); color: #00F0FF; border: 1px solid rgba(0,240,255,0.3); font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 700;">
+              PLANEJAMENTO CONSOLIDADO • LEI 14.133/2021 ART. 18
+            </div>
+            <h2 style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin: 0;">
+              Agrupar Demandas para ETP Único
+            </h2>
+            <p style="font-size: 0.85rem; color: #94A3B8; margin: 4px 0 0 0;">
+              Várias instituições municipais podem possuir a mesma necessidade. O DimensionaTI consolida os quantitativos, unifica as especificações e gera um único ETP com ganho de escala e rastreabilidade total.
+            </p>
+          </div>
+        </div>
+
+        <button type="button" class="btn-doc-action btn-doc-close" onclick="app.fecharModalAgruparEtp()" title="Fechar janela">
+          ✕
+        </button>
+      </div>
+
+      <!-- CORPO ROLÁVEL -->
+      <div style="flex: 1 1 auto; overflow-y: auto; padding-right: 4px;">
+        
+        <!-- PAINEL DE CONSOLIDAÇÃO EM TEMPO REAL -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
+          <div style="background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px 14px;">
+            <span style="font-size: 0.74rem; text-transform: uppercase; color: #94A3B8; font-weight: 700;">Demandas Selecionadas</span>
+            <div style="font-size: 1.55rem; font-weight: 800; color: #00F0FF; margin-top: 4px;" id="etpCardQtdDods">0 DODs</div>
+            <small style="font-size: 0.72rem; color: #64748B;">Documentos de formalização</small>
+          </div>
+          <div style="background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px 14px;">
+            <span style="font-size: 0.74rem; text-transform: uppercase; color: #94A3B8; font-weight: 700;">Instituições Atendidas</span>
+            <div style="font-size: 1.55rem; font-weight: 800; color: #38BDF8; margin-top: 4px;" id="etpCardQtdInst">0 unidades</div>
+            <small style="font-size: 0.72rem; color: #64748B;">Escolas e órgãos municipais</small>
+          </div>
+          <div style="background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px 14px;">
+            <span style="font-size: 0.74rem; text-transform: uppercase; color: #94A3B8; font-weight: 700;">Qtd Total Consolidada</span>
+            <div style="font-size: 1.55rem; font-weight: 800; color: #10B981; margin-top: 4px;" id="etpCardQtdTotal">0 un</div>
+            <small style="font-size: 0.72rem; color: #64748B;">Soma consolidada do lote</small>
+          </div>
+          <div style="background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px 14px;">
+            <span style="font-size: 0.74rem; text-transform: uppercase; color: #94A3B8; font-weight: 700;">Economia Consolidada</span>
+            <div style="font-size: 1.55rem; font-weight: 800; color: #F59E0B; margin-top: 4px;" id="etpCardEconomia">R$ 0,00</div>
+            <small style="font-size: 0.72rem; color: #10B981;">Ganho em escala + dimensionamento</small>
+          </div>
+        </div>
+
+        <!-- TABELA DE SELEÇÃO DE DODS APTOS -->
+        <div style="background: #0B111D; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
+          <div style="padding: 12px 16px; background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; font-size: 0.88rem; color: #F1F5F9;">
+              Selecione as Demandas Validadas para Unificação em ETP:
+            </span>
+            <button type="button" class="btn-ghost" style="padding: 4px 10px; font-size: 0.76rem;" onclick="app.selecionarTodosDodsEtp()">
+              Selecionar Todas Disponíveis
+            </button>
+          </div>
+          
+          <div style="max-height: 260px; overflow-y: auto;">
+            <table class="dark-table" style="width: 100%; border-collapse: collapse; font-size: 0.86rem;">
+              <thead>
+                <tr style="background: rgba(15,23,42,0.9); border-bottom: 1px solid rgba(255,255,255,0.08); color: #94A3B8;">
+                  <th style="width: 44px; text-align: center; padding: 10px;">SELECIONAR</th>
+                  <th style="width: 140px; padding: 10px;">DOD Nº</th>
+                  <th style="padding: 10px;">INSTITUIÇÃO PÚBLICA</th>
+                  <th style="padding: 10px;">SOLICITANTE</th>
+                  <th style="padding: 10px;">EQUIPAMENTO</th>
+                  <th style="width: 70px; text-align: center; padding: 10px;">QTD</th>
+                  <th style="width: 120px; text-align: right; padding: 10px;">VALOR EST.</th>
+                  <th style="width: 140px; text-align: center; padding: 10px;">SITUAÇÃO</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyDodsAgrupamento">
+                <!-- Preenchido via app.carregarTabelaAgrupamentoEtp() -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- CAMPOS DE IDENTIFICAÇÃO DO ETP CONSOLIDADO -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+          <div class="field-group" style="margin: 0;">
+            <label class="field-label" style="color: #F1F5F9; font-weight: 700;">Título da Contratação Consolidada:</label>
+            <input type="text" id="inputTituloEtpAgrupado" class="dark-input" placeholder="Ex: Aquisição Unificada de Notebooks para Escolas Municipais A, B e C">
+          </div>
+          <div class="field-group" style="margin: 0;">
+            <label class="field-label" style="color: #F1F5F9; font-weight: 700;">Técnico Responsável pela Consolidação (TI):</label>
+            <input type="text" id="inputTecnicoEtpAgrupado" class="dark-input" value="Téc. Roberto Valente - Diretoria Geral de TIC">
+          </div>
+        </div>
+
+        <div class="field-group" style="margin-bottom: 16px;">
+          <label class="field-label" style="color: #F1F5F9; font-weight: 700;">Justificativa Consolidada da Contratação (Art. 18 Lei 14.133/2021):</label>
+          <textarea id="txtObjetivoEtpAgrupado" class="dark-input" rows="3" placeholder="Descreva a motivação de agrupar as demandas e as vantagens econômicas e operacionais para o Município de Lages..."></textarea>
+        </div>
+
+      </div>
+
+      <!-- RODAPÉ DE AÇÕES -->
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; flex-shrink: 0; margin-top: 10px;">
+        <div style="font-size: 0.82rem; color: #94A3B8;">
+          <span style="color: #10B981; font-weight: 700;">● Rastreabilidade Garantida:</span> Cada DOD manterá vínculo com este ETP no banco de dados.
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn-ghost" onclick="app.fecharModalAgruparEtp()">Cancelar</button>
+          <button type="button" class="btn-primary-neon" style="font-weight: 800; padding: 10px 24px; background: linear-gradient(135deg, #00F0FF, #0284C7); color: #000; border: none;" onclick="app.executarAgrupamentoEtp()">
+            ✨ Gerar ETP Consolidado Único &rarr;
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 

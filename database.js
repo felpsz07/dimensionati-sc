@@ -479,7 +479,34 @@ function initDatabase() {
       "ALTER TABLE demandas ADD COLUMN ajustes_solicitados TEXT;",
       "ALTER TABLE demandas ADD COLUMN motivo_reprovacao TEXT;",
       "ALTER TABLE demandas ADD COLUMN responsavel_analise TEXT;",
-      "ALTER TABLE demandas ADD COLUMN etp_numero TEXT DEFAULT NULL;"
+      "ALTER TABLE demandas ADD COLUMN etp_numero TEXT DEFAULT NULL;",
+      "ALTER TABLE demandas ADD COLUMN instituicao_id INTEGER REFERENCES instituicoes(id);",
+      "ALTER TABLE demandas ADD COLUMN etp_id INTEGER REFERENCES etps(id);",
+      "ALTER TABLE usuarios ADD COLUMN instituicao_id INTEGER REFERENCES instituicoes(id);",
+      "ALTER TABLE etps ADD COLUMN tipo_necessidade TEXT DEFAULT 'computador';",
+      "ALTER TABLE etps ADD COLUMN titulo TEXT DEFAULT 'Estudo Técnico Preliminar';",
+      "ALTER TABLE etps ADD COLUMN objetivo_consolidado TEXT;",
+      "ALTER TABLE etps ADD COLUMN quantidade_total INTEGER DEFAULT 1;",
+      "ALTER TABLE etps ADD COLUMN custo_unitario_estimado REAL DEFAULT 0;",
+      "ALTER TABLE etps ADD COLUMN custo_total_estimado REAL DEFAULT 0;",
+      "ALTER TABLE etps ADD COLUMN economia_estimada_total REAL DEFAULT 0;",
+      "ALTER TABLE etps ADD COLUMN conteudo_etp TEXT;",
+      "ALTER TABLE etps ADD COLUMN gerado_por TEXT;",
+      "ALTER TABLE etps ADD COLUMN gerado_em DATETIME DEFAULT CURRENT_TIMESTAMP;",
+      "ALTER TABLE etps ADD COLUMN status TEXT DEFAULT 'Validado pelo TI';",
+      "ALTER TABLE etps ADD COLUMN validado_por TEXT;",
+      "ALTER TABLE etps ADD COLUMN validado_em DATETIME;",
+      "ALTER TABLE etp_dods ADD COLUMN etp_protocolo TEXT;",
+      "ALTER TABLE etp_dods ADD COLUMN dod_protocolo TEXT;",
+      "ALTER TABLE etp_dods ADD COLUMN instituicao_nome TEXT;",
+      "ALTER TABLE etp_dods ADD COLUMN custo_total REAL DEFAULT 0;",
+      "ALTER TABLE etp_dods ADD COLUMN solicitante_nome TEXT;",
+      "ALTER TABLE etp_dods ADD COLUMN cargo TEXT;",
+      "ALTER TABLE etp_dods ADD COLUMN motivo_necessidade TEXT;",
+      "ALTER TABLE etp_dods ADD COLUMN data_vinculacao DATETIME DEFAULT CURRENT_TIMESTAMP;",
+      "ALTER TABLE etp_instituicoes ADD COLUMN instituicao_nome TEXT;",
+      "ALTER TABLE etp_instituicoes ADD COLUMN quantidade_total INTEGER DEFAULT 1;",
+      "ALTER TABLE etp_instituicoes ADD COLUMN custo_total REAL DEFAULT 0;"
     ];
 
     for (const sql of novasColunasDemandas) {
@@ -526,6 +553,63 @@ function initDatabase() {
         tipo_usuario TEXT,
         detalhes TEXT,
         status_resultante TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS instituicoes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT NOT NULL,
+        tipo TEXT NOT NULL,
+        secretaria TEXT NOT NULL,
+        municipio TEXT NOT NULL DEFAULT 'Lages',
+        ativo INTEGER NOT NULL DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS etps (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        protocolo TEXT UNIQUE NOT NULL,
+        titulo TEXT NOT NULL,
+        objetivo_consolidado TEXT NOT NULL,
+        tipo_necessidade TEXT NOT NULL DEFAULT 'computador',
+        quantidade_total INTEGER NOT NULL,
+        custo_unitario_estimado REAL NOT NULL,
+        custo_total_estimado REAL NOT NULL,
+        economia_estimada_total REAL NOT NULL,
+        conteudo_etp TEXT,
+        gerado_por TEXT NOT NULL,
+        gerado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+        status TEXT NOT NULL DEFAULT 'Validado pelo TI',
+        validado_por TEXT,
+        validado_em DATETIME
+      );
+
+      CREATE TABLE IF NOT EXISTS etp_dods (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        etp_id INTEGER NOT NULL,
+        etp_protocolo TEXT NOT NULL,
+        demanda_id INTEGER NOT NULL,
+        dod_protocolo TEXT NOT NULL,
+        instituicao_id INTEGER NOT NULL,
+        instituicao_nome TEXT NOT NULL,
+        quantidade INTEGER NOT NULL,
+        custo_total REAL NOT NULL,
+        solicitante_nome TEXT NOT NULL,
+        cargo TEXT,
+        motivo_necessidade TEXT,
+        data_vinculacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (etp_id) REFERENCES etps(id),
+        FOREIGN KEY (demanda_id) REFERENCES demandas(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS etp_instituicoes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        etp_id INTEGER NOT NULL,
+        instituicao_id INTEGER NOT NULL,
+        instituicao_nome TEXT NOT NULL,
+        quantidade_total INTEGER NOT NULL,
+        custo_total REAL NOT NULL,
+        FOREIGN KEY (etp_id) REFERENCES etps(id),
+        FOREIGN KEY (instituicao_id) REFERENCES instituicoes(id)
       );
     `);
 
@@ -589,6 +673,33 @@ function initDatabase() {
           );
         }
       }
+    }
+    // Seed de Instituições se tabela estiver vazia
+    try {
+      const totalInst = db.prepare('SELECT COUNT(*) as c FROM instituicoes').get().c;
+      if (totalInst === 0) {
+        const insertInst = db.prepare(`
+          INSERT OR REPLACE INTO instituicoes (id, nome, tipo, secretaria, municipio, ativo)
+          VALUES (?, ?, ?, ?, ?, 1)
+        `);
+        const instituicoesIniciais = [
+          [1, 'Escola Municipal A', 'escola', 'Secretaria Municipal de Educação', 'Lages'],
+          [2, 'Escola Municipal B', 'escola', 'Secretaria Municipal de Educação', 'Lages'],
+          [3, 'Escola Municipal C', 'escola', 'Secretaria Municipal de Educação', 'Lages'],
+          [4, 'Secretaria Municipal de Educação (SME)', 'secretaria', 'Secretaria Municipal de Educação', 'Lages'],
+          [5, 'Secretaria Municipal de Saúde (SMS)', 'secretaria', 'Secretaria Municipal de Saúde', 'Lages'],
+          [6, 'Unidade de Saúde A (UBS Centro)', 'unidade_saude', 'Secretaria Municipal de Saúde', 'Lages'],
+          [7, 'Unidade de Saúde B (UBS Coral)', 'unidade_saude', 'Secretaria Municipal de Saúde', 'Lages'],
+          [8, 'Secretaria de Planejamento e Obras (SEPLAN)', 'secretaria', 'Secretaria de Planejamento e Obras', 'Lages'],
+          [9, 'Secretaria da Fazenda e Finanças', 'secretaria', 'Secretaria da Fazenda', 'Lages'],
+          [10, 'Diretoria Geral de TIC (Prefeitura de Lages)', 'secretaria', 'Prefeitura do Município de Lages', 'Lages']
+        ];
+        for (const inst of instituicoesIniciais) {
+          insertInst.run(...inst);
+        }
+      }
+    } catch (instErr) {
+      console.warn('Aviso seed instituicoes:', instErr.message);
     }
   } catch (e) {
     console.warn('Aviso atualização perfis e migrações:', e.message);
