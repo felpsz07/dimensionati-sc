@@ -1691,28 +1691,28 @@
   <!-- MODAL: AGRUPAR DEMANDAS PARA ETP ÚNICO CONSOLIDADO         -->
   <!-- ========================================================= -->
   <div class="modal-overlay" id="modalAgruparEtp">
-    <div class="modal-content modal-drawer-xl" style="max-width: 1100px; padding: 26px; background: #0E1624; border: 1px solid var(--dark-border); border-radius: 14px; box-shadow: 0 25px 60px rgba(0,0,0,0.85); color: #F1F5F9; max-height: 90vh; display: flex; flex-direction: column;">
+    <div class="modal-content modal-agrupar-etp-dark">
       
-      <!-- CABEÇALHO DO MODAL -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px; margin-bottom: 18px; flex-shrink: 0;">
+      <!-- CABEÇALHO DO MODAL (ESCURO MINIMALISTA COM ALTO CONTRASTE) -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px; margin-bottom: 18px; flex-shrink: 0;">
         <div style="display: flex; align-items: center; gap: 14px;">
-          <div style="width: 46px; height: 46px; border-radius: 10px; background: linear-gradient(135deg, rgba(0,240,255,0.2), rgba(16,185,129,0.2)); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: 1px solid rgba(0,240,255,0.3);">
+          <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, rgba(0,240,255,0.22), rgba(16,185,129,0.22)); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; border: 1px solid rgba(0,240,255,0.35); box-shadow: 0 4px 15px rgba(0,240,255,0.15);">
             📑
           </div>
           <div>
-            <div class="drawer-badge-ti" style="display: inline-block; margin-bottom: 4px; background: rgba(0,240,255,0.12); color: #00F0FF; border: 1px solid rgba(0,240,255,0.3); font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 700;">
+            <div style="display: inline-block; margin-bottom: 5px; background: rgba(0,240,255,0.14); color: #00F0FF; border: 1px solid rgba(0,240,255,0.35); font-size: 0.72rem; padding: 3px 10px; border-radius: 4px; font-weight: 800; letter-spacing: 0.05em;">
               PLANEJAMENTO CONSOLIDADO • LEI 14.133/2021 ART. 18
             </div>
-            <h2 style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin: 0;">
+            <h2 style="font-size: 1.45rem; font-weight: 800; color: #FFFFFF !important; margin: 0; letter-spacing: -0.02em;">
               Agrupar Demandas para ETP Único
             </h2>
-            <p style="font-size: 0.85rem; color: #94A3B8; margin: 4px 0 0 0;">
+            <p style="font-size: 0.86rem; color: #94A3B8; margin: 4px 0 0 0; line-height: 1.4;">
               Várias instituições municipais podem possuir a mesma necessidade. O DimensionaTI consolida os quantitativos, unifica as especificações e gera um único ETP com ganho de escala e rastreabilidade total.
             </p>
           </div>
         </div>
 
-        <button type="button" class="btn-doc-action btn-doc-close" onclick="app.fecharModalAgruparEtp()" title="Fechar janela">
+        <button type="button" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #FFFFFF; width: 38px; height: 38px; border-radius: 8px; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onclick="app.fecharModalAgruparEtp()" title="Fechar janela" onmouseover="this.style.background='rgba(239,68,68,0.25)'; this.style.borderColor='#EF4444';" onmouseout="this.style.background='rgba(255,255,255,0.06)'; this.style.borderColor='rgba(255,255,255,0.15)';">
           ✕
         </button>
       </div>
@@ -1721,26 +1721,26 @@
       <div style="flex: 1 1 auto; overflow-y: auto; padding-right: 4px;">
         
         <!-- PAINEL DE CONSOLIDAÇÃO EM TEMPO REAL -->
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
-          <div style="background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px 14px;">
-            <span style="font-size: 0.74rem; text-transform: uppercase; color: #94A3B8; font-weight: 700;">Demandas Selecionadas</span>
-            <div style="font-size: 1.55rem; font-weight: 800; color: #00F0FF; margin-top: 4px;" id="etpCardQtdDods">0 DODs</div>
-            <small style="font-size: 0.72rem; color: #64748B;">Documentos de formalização</small>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px;">
+          <div style="background: #111A28; border: 1px solid rgba(255,255,255,0.09); border-radius: 10px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: #94A3B8; font-weight: 700; letter-spacing: 0.04em;">Demandas Selecionadas</span>
+            <div style="font-size: 1.6rem; font-weight: 800; color: #00F0FF; margin-top: 5px;" id="etpCardQtdDods">0 DODs</div>
+            <small style="font-size: 0.74rem; color: #64748B;">Documentos de formalização</small>
           </div>
-          <div style="background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px 14px;">
-            <span style="font-size: 0.74rem; text-transform: uppercase; color: #94A3B8; font-weight: 700;">Instituições Atendidas</span>
-            <div style="font-size: 1.55rem; font-weight: 800; color: #38BDF8; margin-top: 4px;" id="etpCardQtdInst">0 unidades</div>
-            <small style="font-size: 0.72rem; color: #64748B;">Escolas e órgãos municipais</small>
+          <div style="background: #111A28; border: 1px solid rgba(255,255,255,0.09); border-radius: 10px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: #94A3B8; font-weight: 700; letter-spacing: 0.04em;">Instituições Atendidas</span>
+            <div style="font-size: 1.6rem; font-weight: 800; color: #38BDF8; margin-top: 5px;" id="etpCardQtdInst">0 unidades</div>
+            <small style="font-size: 0.74rem; color: #64748B;">Escolas e órgãos municipais</small>
           </div>
-          <div style="background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px 14px;">
-            <span style="font-size: 0.74rem; text-transform: uppercase; color: #94A3B8; font-weight: 700;">Qtd Total Consolidada</span>
-            <div style="font-size: 1.55rem; font-weight: 800; color: #10B981; margin-top: 4px;" id="etpCardQtdTotal">0 un</div>
-            <small style="font-size: 0.72rem; color: #64748B;">Soma consolidada do lote</small>
+          <div style="background: #111A28; border: 1px solid rgba(255,255,255,0.09); border-radius: 10px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: #94A3B8; font-weight: 700; letter-spacing: 0.04em;">Qtd Total Consolidada</span>
+            <div style="font-size: 1.6rem; font-weight: 800; color: #10B981; margin-top: 5px;" id="etpCardQtdTotal">0 un</div>
+            <small style="font-size: 0.74rem; color: #64748B;">Soma consolidada do lote</small>
           </div>
-          <div style="background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px 14px;">
-            <span style="font-size: 0.74rem; text-transform: uppercase; color: #94A3B8; font-weight: 700;">Economia Consolidada</span>
-            <div style="font-size: 1.55rem; font-weight: 800; color: #F59E0B; margin-top: 4px;" id="etpCardEconomia">R$ 0,00</div>
-            <small style="font-size: 0.72rem; color: #10B981;">Ganho em escala + dimensionamento</small>
+          <div style="background: #111A28; border: 1px solid rgba(255,255,255,0.09); border-radius: 10px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: #94A3B8; font-weight: 700; letter-spacing: 0.04em;">Economia Consolidada</span>
+            <div style="font-size: 1.6rem; font-weight: 800; color: #F59E0B; margin-top: 5px;" id="etpCardEconomia">R$ 0,00</div>
+            <small style="font-size: 0.74rem; color: #10B981; font-weight: 600;">Ganho em escala + dimensionamento</small>
           </div>
         </div>
 

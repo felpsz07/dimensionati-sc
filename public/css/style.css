@@ -4909,3 +4909,46 @@ body {
   margin-bottom: 12px;
   border-radius: 4px;
 }
+
+
+/* Modal de Agrupamento de Demandas para ETP Unico (Dark Theme SaaS) */
+.modal-agrupar-etp-dark {
+  max-width: 1120px !important;
+  width: 95vw !important;
+  height: 90vh !important;
+  max-height: 90vh !important;
+  background: #0E1624 !important;
+  border: 1px solid rgba(0, 240, 255, 0.28) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.95), 0 0 35px rgba(0, 240, 255, 0.08) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 24px 28px !important;
+  color: #F1F5F9 !important;
+  overflow: hidden !important;
+}
+
+.modal-agrupar-etp-dark .field-label {
+  color: #F1F5F9 !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  display: block !important;
+  margin-bottom: 6px !important;
+}
+
+.modal-agrupar-etp-dark input.dark-input,
+.modal-agrupar-etp-dark textarea.dark-input {
+  background: #070B12 !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  border-radius: 8px !important;
+  padding: 10px 14px !important;
+  font-size: 0.9rem !important;
+}
+
+.modal-agrupar-etp-dark input.dark-input:focus,
+.modal-agrupar-etp-dark textarea.dark-input:focus {
+  border-color: #00F0FF !important;
+  box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.2) !important;
+  outline: none !important;
+}

@@ -4202,50 +4202,72 @@ const app = {
         }
       }
 
+      // Ordena por protocolo para manter DOD-0001, DOD-0002, DOD-0003 em ordem natural
+      this.dodsAptosCarregados.sort((a, b) => (a.protocolo || '').localeCompare(b.protocolo || ''));
+
       tbody.innerHTML = this.dodsAptosCarregados.map(d => {
         const isSelected = this.dodsSelecionadosParaEtp.has(d.protocolo);
         const jaVinculado = !d.disponivel_agrupamento;
         const etpNumero = d.etp_vinculado_numero || d.etp_numero;
+        const ehNotebook = (d.tipo_necessidade === 'notebook' || (d.respostas_diagnostico && d.respostas_diagnostico.includes('notebook')) || d.quantidade_usuarios > 1);
+
+        let trStyle = 'border-bottom: 1px solid rgba(255,255,255,0.07); transition: all 0.15s ease; cursor: pointer;';
+        if (jaVinculado) {
+          trStyle += ' opacity: 0.5; background: rgba(0,0,0,0.25); cursor: not-allowed;';
+        } else if (isSelected) {
+          trStyle += ' background: rgba(0, 240, 255, 0.08); border-left: 3px solid #00F0FF;';
+        } else {
+          trStyle += ' border-left: 3px solid transparent;';
+        }
 
         return `
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); ${jaVinculado ? 'opacity: 0.55; background: rgba(0,0,0,0.2);' : ''}">
-            <td style="text-align: center; padding: 10px;">
+          <tr style="${trStyle}" onclick="${jaVinculado ? '' : 'app.toggleSelecaoDodEtp(\'' + d.protocolo + '\')'}">
+            <td style="text-align: center; padding: 12px 10px;" onclick="event.stopPropagation();">
               <input type="checkbox" 
                      ${isSelected ? 'checked' : ''} 
                      ${jaVinculado ? 'disabled title="Já vinculado ao ' + etpNumero + '"' : ''} 
                      onchange="app.toggleSelecaoDodEtp('${d.protocolo}')"
-                     style="cursor: ${jaVinculado ? 'not-allowed' : 'pointer'}; width: 17px; height: 17px; accent-color: #00F0FF;">
+                     style="cursor: ${jaVinculado ? 'not-allowed' : 'pointer'}; width: 18px; height: 18px; accent-color: #00F0FF;">
             </td>
-            <td style="padding: 10px; font-weight: 700; color: #F1F5F9; font-family: monospace;">
+            <td style="padding: 12px 10px; font-weight: 800; color: #FFFFFF; font-family: monospace; font-size: 0.92rem;">
               ${d.protocolo}
             </td>
-            <td style="padding: 10px;">
-              <div style="font-weight: 700; color: #FFFFFF;">${d.instituicao_nome || d.orgao}</div>
-              <small style="color: #64748B;">${d.instituicao_secretaria || d.orgao}</small>
+            <td style="padding: 12px 10px;">
+              <div style="font-weight: 800; color: #F1F5F9; font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+                <span style="color: #00F0FF;">🏫</span>
+                <span>${d.instituicao_nome || d.orgao}</span>
+              </div>
+              <small style="color: #64748B; font-size: 0.78rem;">${d.instituicao_secretaria || d.orgao}</small>
             </td>
-            <td style="padding: 10px;">
-              <div style="color: #E2E8F0;">${d.usuario_nome || 'Servidor'}</div>
-              <small style="color: #64748B;">${d.cargo || 'Diretora'}</small>
+            <td style="padding: 12px 10px;">
+              <div style="color: #E2E8F0; font-weight: 600;">${d.usuario_nome || 'Servidor'}</div>
+              <small style="color: #94A3B8; font-size: 0.78rem;">${d.cargo || 'Diretora'}</small>
             </td>
-            <td style="padding: 10px; color: #94A3B8;">
-              ${d.perfil_esc_nome || (d.tipo_necessidade === 'computador' ? 'Notebook Corporativo' : 'Hardware')}
+            <td style="padding: 12px 10px;">
+              <span style="font-size: 0.82rem; background: rgba(255,255,255,0.06); color: #E2E8F0; padding: 3px 8px; border-radius: 4px; font-weight: 600;">
+                ${ehNotebook ? '💻 Notebook Corporativo' : '🖥️ Desktop Corporativo'}
+              </span>
             </td>
-            <td style="text-align: center; padding: 10px; font-weight: 800; color: #00F0FF;">
+            <td style="text-align: center; padding: 12px 10px; font-weight: 800; color: #00F0FF; font-size: 1.05rem;">
               ${d.quantidade_usuarios}
             </td>
-            <td style="text-align: right; padding: 10px; font-weight: 700; color: #E2E8F0;">
+            <td style="text-align: right; padding: 12px 10px; font-weight: 800; color: #F1F5F9; font-size: 0.9rem;">
               R$ ${(d.custo_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </td>
-            <td style="text-align: center; padding: 10px;">
+            <td style="text-align: center; padding: 12px 10px;">
               ${jaVinculado ? `
-                <span style="font-size: 0.73rem; background: rgba(245, 158, 11, 0.15); color: #FBBF24; padding: 3px 8px; border-radius: 4px; font-weight: 700;">
+                <span style="font-size: 0.74rem; background: rgba(245, 158, 11, 0.15); color: #FBBF24; padding: 4px 8px; border-radius: 4px; font-weight: 700; border: 1px solid rgba(245, 158, 11, 0.3);">
                   🔒 ${etpNumero || 'Vinculado a ETP'}
                 </span>
+              ` : (isSelected ? `
+                <span style="font-size: 0.74rem; background: rgba(0, 240, 255, 0.18); color: #00F0FF; padding: 4px 8px; border-radius: 4px; font-weight: 800; border: 1px solid rgba(0, 240, 255, 0.4);">
+                  ★ Selecionado
+                </span>
               ` : `
-                <span style="font-size: 0.73rem; background: rgba(16, 185, 129, 0.15); color: #10B981; padding: 3px 8px; border-radius: 4px; font-weight: 700;">
+                <span style="font-size: 0.74rem; background: rgba(16, 185, 129, 0.15); color: #10B981; padding: 4px 8px; border-radius: 4px; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.25);">
                   ✓ Disponível
                 </span>
-              `}
+              `)}
             </td>
           </tr>
         `;
