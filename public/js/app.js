@@ -2967,8 +2967,49 @@ const app = {
 
   fecharModalEtpCompleto() {
     document.getElementById('modalEtpCompleto')?.classList.remove('active');
+    this.fecharCaixaEmailEtp();
   },
 
+  abrirCaixaEmailEtp() {
+    const box = document.getElementById('boxEncaminharEmailEtp');
+    if (!box) return;
+    box.style.display = 'block';
+    const inp = document.getElementById('inputEmailDestinoEtp');
+    if (inp) {
+      if (this.usuarioLogado && !inp.value) inp.value = this.usuarioLogado.email;
+      inp.focus();
+    }
+  },
+
+  fecharCaixaEmailEtp() {
+    const box = document.getElementById('boxEncaminharEmailEtp');
+    if (box) box.style.display = 'none';
+  },
+
+  enviarEtpPorEmail() {
+    const inp = document.getElementById('inputEmailDestinoEtp');
+    const msg = document.getElementById('emailEtpFeedbackMsg');
+    const email = inp ? inp.value.trim() : '';
+
+    if (!email || !email.includes('@')) {
+      alert('Informe um e-mail válido.');
+      return;
+    }
+
+    if (msg) {
+      msg.style.display = 'block';
+      msg.innerText = '✓ ETP encaminhado com sucesso para ' + email + '!';
+    }
+
+    const prot = this.etpAtual?.protocolo || 'DOD-2026';
+    const etpNum = this.etpAtual?.etp_numero || prot.replace('DOD-', 'ETP-');
+    const subj = encodeURIComponent('Estudo Técnico Preliminar - ' + etpNum + ' (Vinculado ao ' + prot + ')');
+    const body = encodeURIComponent('Prezados,\n\nSegue o Estudo Técnico Preliminar (ETP nº ' + etpNum + ') elaborado para a Prefeitura do Município de Lages / SC, em observância ao Decreto Municipal nº 20.682/2023 e à Lei Federal nº 14.133/2021.\n\nDemanda Vinculada: ' + prot + '\nÓrgão: ' + (this.etpAtual?.orgao || 'Prefeitura de Lages') + '\nUnidade: ' + (this.etpAtual?.setor || 'Setor Requisitante'));
+    
+    setTimeout(() => {
+      window.open('mailto:' + email + '?subject=' + subj + '&body=' + body, '_blank');
+    }, 600);
+  },
   modoEdicaoEtp: false,
 
   toggleEdicaoEtp() {

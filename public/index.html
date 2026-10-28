@@ -1208,22 +1208,22 @@
       
       <div class="doc-top-bar no-print">
         <div>
-          <h3 style="font-size: 1.15rem; font-weight: 800; color: #0F172A;">
+          <h3 style="font-size: 1.18rem; font-weight: 800; color: #0F172A; margin: 0;">
             📄 Documento de Formalização da Demanda (DOD - Município de Lages)
           </h3>
-          <p style="font-size: 0.85rem; color: #64748B;">Modelo Oficial de Lages/SC • Decreto Municipal nº 20.682/2023 • Lei Federal nº 14.133/2021</p>
+          <p style="font-size: 0.85rem; color: #64748B; margin: 3px 0 0 0;">Modelo Oficial de Lages/SC • Decreto Municipal nº 20.682/2023 • Lei Federal nº 14.133/2021</p>
         </div>
-        <div style="display: flex; gap: 8px;">
-          <button type="button" class="btn-ghost" style="color: #0F172A; border-color: #CBD5E1;" id="btnToggleEdicaoDod" onclick="app.toggleEdicaoDod()">
+        <div class="doc-action-btns">
+          <button type="button" class="btn-doc-action btn-doc-edit" id="btnToggleEdicaoDod" onclick="app.toggleEdicaoDod()">
             ✏️ Editar DOD
           </button>
-          <button type="button" class="btn-ghost" style="color: #0F172A;" onclick="app.abrirCaixaEmail()">
-            ✉️ E-mail
+          <button type="button" class="btn-doc-action btn-doc-email" onclick="app.abrirCaixaEmail()">
+            ✉️ Enviar por E-mail
           </button>
-          <button type="button" class="btn-primary-neon" style="color: #0A0E14; padding: 8px 18px; font-size: 0.9rem; font-weight: 700;" onclick="app.imprimirDocumento()">
+          <button type="button" class="btn-doc-action btn-doc-print" onclick="app.imprimirDocumento()">
             🖨️ Imprimir DOD Oficial
           </button>
-          <button type="button" class="btn-ghost" style="color: #0F172A;" onclick="app.fecharModalEtp()">
+          <button type="button" class="btn-doc-action btn-doc-close" onclick="app.fecharModalEtp()" title="Fechar janela">
             ✕
           </button>
         </div>
@@ -1462,25 +1462,38 @@
       <div class="doc-top-bar no-print">
         <div>
           <div class="drawer-badge-ti" style="display: inline-block; margin-bottom: 4px;">ESTUDO TÉCNICO PRELIMINAR • MUNICÍPIO DE LAGES / SC</div>
-          <h3 style="font-size: 1.15rem; font-weight: 800; color: #0F172A; margin: 0;">
+          <h3 style="font-size: 1.18rem; font-weight: 800; color: #0F172A; margin: 0;">
             Estudo Técnico Preliminar da Contratação (ETP)
           </h3>
-          <p style="font-size: 0.82rem; color: #64748B; margin: 2px 0 0 0;">
+          <p style="font-size: 0.85rem; color: #64748B; margin: 3px 0 0 0;">
             Modelo Oficial de Lages/SC • Decreto Municipal nº 20.682/2023 • Lei Federal nº 14.133/2021
           </p>
         </div>
 
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <button type="button" class="btn-ghost" style="color: #0F172A; border-color: #CBD5E1;" id="btnToggleEdicaoEtp" onclick="app.toggleEdicaoEtp()">
+        <div class="doc-action-btns">
+          <button type="button" class="btn-doc-action btn-doc-edit" id="btnToggleEdicaoEtp" onclick="app.toggleEdicaoEtp()">
             ✏️ Editar ETP (TI)
           </button>
-          <button type="button" class="btn-primary-neon" style="color: #0A0E14; padding: 7px 18px; font-size: 0.88rem; font-weight: 700;" onclick="app.imprimirEtp()">
+          <button type="button" class="btn-doc-action btn-doc-email" onclick="app.abrirCaixaEmailEtp()">
+            ✉️ Enviar por E-mail
+          </button>
+          <button type="button" class="btn-doc-action btn-doc-print" onclick="app.imprimirEtp()">
             🖨️ Imprimir ETP Oficial
           </button>
-          <button type="button" class="btn-ghost" style="color: #0F172A;" onclick="app.fecharModalEtpCompleto()">
+          <button type="button" class="btn-doc-action btn-doc-close" onclick="app.fecharModalEtpCompleto()" title="Fechar janela">
             ✕
           </button>
         </div>
+      </div>
+
+      <!-- ENCAMINHAR ETP POR EMAIL -->
+      <div id="boxEncaminharEmailEtp" class="no-print" style="display: none; background: #F8FAFC; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 14px; margin-bottom: 20px;">
+        <p style="font-size: 0.85rem; color: #475569; margin-bottom: 8px; font-weight: 700;">Encaminhar Estudo Técnico Preliminar (ETP) por e-mail:</p>
+        <div style="display: flex; gap: 10px;">
+          <input type="email" id="inputEmailDestinoEtp" class="dark-input" style="background: #FFFFFF; color: #0F172A; border: 1px solid #CBD5E1; border-radius: 8px; flex: 1; padding: 9px 14px; font-size: 0.92rem;" placeholder="licitacoes@lages.sc.gov.br">
+          <button type="button" class="btn-primary-neon" style="color: #0A0E14; padding: 9px 22px; font-weight: 700; border-radius: 8px;" onclick="app.enviarEtpPorEmail()">Enviar</button>
+        </div>
+        <div id="emailEtpFeedbackMsg" style="display: none; margin-top: 8px; font-size: 0.85rem; font-weight: 600; color: #059669;"></div>
       </div>
 
       <!-- CORPO DO ETP PREENCHIDO COM 12 SEÇÕES -->
