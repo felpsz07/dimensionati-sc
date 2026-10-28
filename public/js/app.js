@@ -1649,11 +1649,19 @@ const app = {
   // ==========================================
   async abrirMinuta(protocolo) {
     try {
+      this.fecharTodosMenusAcoes();
       const res = await fetch(`/api/demandas/${protocolo}`);
+      if (!res.ok) {
+        throw new Error(`Servidor retornou status ${res.status}`);
+      }
       const data = await res.json();
-      this.renderizarModalEtp(data.demanda, data.perfilEsc);
+      if (!data || !data.demanda) {
+        throw new Error('Demanda não localizada.');
+      }
+      this.renderizarModalEtp(data.demanda, data.perfilEsc || data.perfilRec);
     } catch (e) {
-      alert('Erro ao carregar minuta.');
+      console.error('Erro ao abrir DOD:', e);
+      alert('Erro ao carregar minuta do DOD: ' + e.message);
     }
   },
 
@@ -1674,9 +1682,31 @@ const app = {
     return `${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} reais`;
   },
 
+  // Extrai lista de softwares de forma segura (lidando com string JSON, Array ou texto)
+  obterListaSoftwares(demanda, fallback) {
+    if (!demanda) return fallback || ['Gestão Escolar & Rotina Administrativa'];
+    const raw = demanda.softwares || demanda.programasUtilizados;
+    if (Array.isArray(raw)) return raw;
+    if (typeof raw === 'string') {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+        return [raw];
+      } catch (e) {
+        return [raw];
+      }
+    }
+    return fallback || ['Gestão Escolar & Rotina Administrativa'];
+  },
+
   renderizarModalEtp(demanda, perfil) {
     const modal = document.getElementById('modalEtp');
     const corpo = document.getElementById('corpoDocumentoEtp');
+
+    if (!modal || !corpo) {
+      console.error('Elementos #modalEtp ou #corpoDocumentoEtp não localizados no DOM.');
+      return;
+    }
 
     this.fecharCaixaEmail();
 
@@ -1695,15 +1725,38 @@ const app = {
     const protocolo = demanda.protocolo || 'REQ-2026-0000';
     const qtd = demanda.quantidade_usuarios || demanda.quantidade || 1;
 
+    // Extrai dados estruturados salvos
+    let respDiag = {};
+    let recsPosto = {};
+    try { 
+      respDiag = typeof demanda.respostas_diagnostico === 'string' 
+        ? JSON.parse(demanda.respostas_diagnostico) 
+        : (demanda.respostas_diagnostico || {}); 
+    } catch(e){}
+
+    try { 
+      recsPosto = typeof demanda.recursos_existentes === 'string' 
+        ? JSON.parse(demanda.recursos_existentes) 
+        : (demanda.recursos_existentes || {}); 
+    } catch(e){}
+
     // Detectar configurações selecionadas pelo usuário
-    const ehNotebook = (demanda.formato_equipamento === 'notebook' || this.demanda.formatoEquipamento === 'notebook');
-    const tipoNec = this.demanda.tipoNecessidade || 'computador';
-    const sitAtual = this.demanda.situacaoAtual || 'estragou';
-    const monOpt = this.demanda.opcaoMonitor || 'none';
-    const tecOpt = (this.demanda.opcaoTeclado !== false);
-    const mouseOpt = (this.demanda.opcaoMouse !== false);
-    const webcamOpt = (this.demanda.opcaoWebcam !== false);
-    const segundoMon = (this.demanda.segundoMonitor === true);
+    const ehNotebook = (
+      demanda.formato_equipamento === 'notebook' || 
+      respDiag.formatoEquipamento === 'notebook' ||
+      respDiag.precisaMobilidade === true ||
+      this.demanda.formatoEquipamento === 'notebook' ||
+      (demanda.perfil_escolhido_id === 1 && String(setorServ).toLowerCase().includes('escola'))
+    );
+    const tipoNec = demanda.tipo_necessidade || respDiag.tipoNecessidade || this.demanda.tipoNecessidade || 'computador';
+    const sitAtual = respDiag.situacaoAtual || this.demanda.situacaoAtual || 'estragou';
+    const monOpt = recsPosto.monitor || this.demanda.opcaoMonitor || 'none';
+    const tecOpt = (recsPosto.teclado !== false && this.demanda.temTeclado !== false);
+    const mouseOpt = (recsPosto.mouse !== false && this.demanda.temMouse !== false);
+    const webcamOpt = (recsPosto.webcam !== false && this.demanda.temWebcam !== false);
+    const segundoMon = (recsPosto.segundoMonitor === true || this.demanda.segundoMonitor === true);
+
+    const softwaresLista = this.obterListaSoftwares(demanda, respDiag.programasUtilizados || this.demanda.programasUtilizados);
 
     // 1. Objeto / Descrição da solução (conforme Nota do DOD de SC: especificação sucinta da necessidade)
     let objetoTexto = '';
@@ -2089,7 +2142,7 @@ const app = {
             </tr>
             <tr>
               <td style="padding: 6px 10px; border: 1px solid #000; font-weight: 700; background: #F8FAFC;">Softwares / Ferramentas em Uso:</td>
-              <td style="padding: 6px 10px; border: 1px solid #000;">${(demanda.softwares || this.demanda.programasUtilizados || ['Gestão Escolar & Rotina Administrativa']).join(' • ')}</td>
+              <td style="padding: 6px 10px; border: 1px solid #000;">${softwaresLista.join(' • ')}</td>
             </tr>
             <tr>
               <td style="padding: 6px 10px; border: 1px solid #000; font-weight: 700; background: #F8FAFC;">Situação do Equipamento Anterior:</td>
@@ -2639,7 +2692,7 @@ const app = {
         <div class="info-item-row">
           <span class="info-item-label">Sistemas e Softwares Diários:</span>
           <div class="info-item-value">
-            ${(d.softwares || resp.programasUtilizados || ['Gestão Escolar & Rotina Administrativa']).map(s => `<span class="tag-software" style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; margin-right: 4px; display: inline-block; margin-bottom: 4px;">${s}</span>`).join('')}
+            ${this.obterListaSoftwares(d, resp.programasUtilizados).map(s => `<span class="tag-software" style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; margin-right: 4px; display: inline-block; margin-bottom: 4px;">${s}</span>`).join('')}
           </div>
         </div>
         <div class="info-item-row">
