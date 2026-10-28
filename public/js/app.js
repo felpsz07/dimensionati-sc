@@ -713,8 +713,8 @@ const app = {
                 <button type="button" class="acoes-menu-item" onclick="app.abrirMinuta('${d.protocolo}')">
                   <span class="item-icon">📄</span>
                   <div class="item-label">
-                    <strong>Visualizar Ficha Técnica</strong>
-                    <small>DOD oficial para impressão A4</small>
+                    <strong>Visualizar DOD Oficial</strong>
+                    <small>Documento de Formalização da Demanda (SC)</small>
                   </div>
                 </button>
                 <div class="menu-divider"></div>
@@ -1464,349 +1464,390 @@ const app = {
     const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
     const mes = meses[new Date().getMonth()];
 
-    const numContrato = demanda.protocolo.replace('ETP-', 'CT-') + '/' + ano;
-    const processoAdm = `Processo Administrativo nº ${demanda.protocolo.replace('ETP-', '00')}/${ano}-PML`;
-    const pregaoNum = `Pregão Eletrônico SRP nº 042/${ano}`;
+    const nomeServ = demanda.usuario_nome || demanda.usuarioNome || (this.usuarioLogado ? this.usuarioLogado.nome : 'Profa. Angelita de Souza');
+    const matServ = demanda.usuario_matricula || demanda.usuarioMatricula || (this.usuarioLogado ? this.usuarioLogado.matricula : '48921-SC');
+    const cargoServ = demanda.cargo || (this.usuarioLogado ? this.usuarioLogado.cargo : 'Diretora de Escola Municipal');
+    const orgaoServ = demanda.orgao || (this.usuarioLogado ? this.usuarioLogado.orgao : 'Prefeitura Municipal de Lages — Secretaria Municipal de Educação');
+    const setorServ = demanda.setor || demanda.setorNome || (this.usuarioLogado ? this.usuarioLogado.setor : 'Escolas Municipais (SME)');
+    const emailServ = (this.usuarioLogado && this.usuarioLogado.email) ? this.usuarioLogado.email : 'angelita.souza@educacao.lages.sc.gov.br';
+    const telServ = '(49) 3019-8600 / (49) 3221-1000';
+    const protocolo = demanda.protocolo || 'REQ-2026-0000';
+    const qtd = demanda.quantidade_usuarios || demanda.quantidade || 1;
 
-    let catmat = perfil.id === 3 ? '482914' : perfil.id === 2 ? '471209' : '463821';
-    let catmatNome = perfil.id === 3 
-      ? 'Estação de Trabalho Workstation (Engenharia / Alto Desempenho)' 
-      : perfil.id === 2 
-      ? 'Microcomputador Desktop Tipo II (Análise de Dados / Dual Head)' 
-      : 'Microcomputador Desktop Padrão (Administrativo / Atendimento)';
+    // Detectar configurações selecionadas pelo usuário
+    const ehNotebook = (demanda.formato_equipamento === 'notebook' || this.demanda.formatoEquipamento === 'notebook');
+    const tipoNec = this.demanda.tipoNecessidade || 'computador';
+    const sitAtual = this.demanda.situacaoAtual || 'estragou';
+    const monOpt = this.demanda.opcaoMonitor || 'none';
+    const tecOpt = (this.demanda.opcaoTeclado !== false);
+    const mouseOpt = (this.demanda.opcaoMouse !== false);
+    const webcamOpt = (this.demanda.opcaoWebcam !== false);
+    const segundoMon = (this.demanda.segundoMonitor === true);
 
-    const valUnit = demanda.custo_unitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-    const valTot = demanda.custo_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-    const valTotExtenso = this.valorPorExtenso(demanda.custo_total);
-
-    const nomeServ = (demanda.usuario_nome || 'Maria Eduarda Alencar').toUpperCase();
-    const matServ = demanda.usuario_matricula || 'MAT-48921/PML';
-    const cargoServ = demanda.cargo || 'Servidor Público Responsável';
-    const orgaoServ = (demanda.orgao || 'Prefeitura do Município de Lages - Secretaria Municipal de Educação').toUpperCase();
-    const setorServ = demanda.setor || 'Escolas Municipais (SME)';
-
-    let rotinasFormatadas = '';
-    try {
-      const parsed = Array.isArray(demanda.softwares) ? demanda.softwares : JSON.parse(demanda.softwares || '[]');
-      rotinasFormatadas = parsed.join('; ');
-    } catch (e) {
-      rotinasFormatadas = demanda.softwares || '';
+    // 1. Objeto / Descrição da solução (conforme Nota do DOD de SC: especificação sucinta da necessidade)
+    let objetoTexto = '';
+    if (tipoNec === 'computador') {
+      objetoTexto = `Aquisição de equipamento computacional corporativo (${ehNotebook ? 'Notebook Corporativo Portátil' : 'Computador de Mesa / Desktop'}), acompanhado de sistema operacional corporativo Windows 11 Pro 64-bit e suporte técnico integral no local de trabalho (on-site) em Lages/SC, destinado a atender às necessidades operacionais, pedagógicas e administrativas da unidade requisitante (${setorServ}), visando a assegurar a continuidade dos serviços públicos escolares, acesso ao Diário de Classe, redação de documentos pedagógicos e tramitação de processos administrativos no SGPe.`;
+    } else if (tipoNec === 'monitor') {
+      objetoTexto = `Aquisição de monitores de vídeo de alta resolução com ajuste ergonômico NR-17 para expansão de postos de trabalho e conforto visual nas atividades de gestão da unidade requisitante (${setorServ}).`;
+    } else if (tipoNec === 'impressora') {
+      objetoTexto = `Aquisição de equipamento de impressão multifuncional corporativo para atendimento às demandas de impressão de provas, relatórios pedagógicos e expedientes administrativos da unidade escolar (${setorServ}).`;
+    } else {
+      objetoTexto = `Prestação de serviços de manutenção técnica especializada e suporte presencial em equipamentos de informática da unidade escolar (${setorServ}), visando à recuperação de máquinas danificadas e ao pleno atendimento das atividades pedagógicas.`;
     }
 
-    const ehNotebook = (this.demanda.formatoEquipamento === 'notebook');
-    const nomeEquipamentoFormatado = ehNotebook 
-      ? 'Notebook Corporativo Portátil com Tela 15.6" Full HD' 
-      : 'Microcomputador Desktop Corporativo (Gabinete de Mesa)';
+    // 2. Quantidades estimadas (Tabela oficial do DOD de Santa Catarina)
+    let linhasTabelaQuantidades = '';
 
-    let monitorTxt = ehNotebook 
-      ? 'Tela 15.6" Full HD (1920x1080) WVA anti-reflexo com webcam HD e microfone digital integrados'
-      : '1x Monitor 23.8" IPS Full HD ergonômico NR-17 com ajuste de altura';
-
-    if (!ehNotebook && this.demanda.opcaoMonitor === 'none') {
-      monitorTxt = '<strong style="color: #047857;">DISPENSADO DO FORNECIMENTO:</strong> Reaproveitamento integral de monitores em perfeito estado já existentes no setor de ' + setorServ + ' (Art. 11 da Lei 14.133/2021).';
-    } else if (!ehNotebook && this.demanda.opcaoMonitor === '2x') {
-      monitorTxt = '2x Monitores IPS Full HD com suporte articulado a pistão (Dual-Head)';
+    if (ehNotebook) {
+      linhasTabelaQuantidades += `
+        <tr>
+          <td style="padding: 8px 10px; border: 1px solid #000000; vertical-align: top;">
+            <strong>Item 1: Notebook Corporativo Portátil</strong><br>
+            <span style="font-size: 8.5pt; color: #1E293B;">
+              Processador com arquitetura x86-64 bits (${perfil?.processador || 'Quad-Core Moderno'}), memória RAM ${perfil?.ram || '8 GB'}, armazenamento ${perfil?.armazenamento || 'SSD 256GB NVMe'}, tela de 15.6" Full HD anti-reflexo com webcam e microfone digital integrados, teclado ABNT2 com teclado numérico dedicado, bateria com autonomia mínima de 6 horas, fonte/carregador bivolt original e sistema operacional Windows 11 Pro 64-bit homologado.
+            </span>
+          </td>
+          <td style="padding: 8px 10px; border: 1px solid #000000; text-align: center; vertical-align: middle; font-weight: 800; font-size: 9.5pt;">
+            ${qtd} ${qtd === 1 ? 'unidade' : 'unidades'}
+          </td>
+        </tr>
+      `;
+    } else {
+      linhasTabelaQuantidades += `
+        <tr>
+          <td style="padding: 8px 10px; border: 1px solid #000000; vertical-align: top;">
+            <strong>Item 1: Microcomputador Desktop Corporativo (Gabinete de Mesa)</strong><br>
+            <span style="font-size: 8.5pt; color: #1E293B;">
+              Gabinete corporativo compacto, processador com arquitetura x86-64 bits (${perfil?.processador || 'Quad-Core Moderno'}), memória RAM ${perfil?.ram || '8 GB'}, armazenamento ${perfil?.armazenamento || 'SSD 256GB NVMe'}, conexões de rede Gigabit Ethernet, portas USB 3.2 e sistema operacional Windows 11 Pro 64-bit homologado.
+            </span>
+          </td>
+          <td style="padding: 8px 10px; border: 1px solid #000000; text-align: center; vertical-align: middle; font-weight: 800; font-size: 9.5pt;">
+            ${qtd} ${qtd === 1 ? 'unidade' : 'unidades'}
+          </td>
+        </tr>
+      `;
     }
 
-    let periTxt = ehNotebook
-      ? 'Teclado ABNT2 com teclado numérico integrado, touchpad multitoque, fonte/carregador bivolt original e trava Kensington'
-      : 'Kit Teclado e Mouse USB ABNT2 padrão corporativo com fio';
-
-    if (!ehNotebook && this.demanda.incluiPerifericos === false) {
-      periTxt = '<strong style="color: #047857;">DISPENSADO DO FORNECIMENTO:</strong> Reaproveitamento de kits de teclado e mouse já existentes na escola/órgão.';
+    if (monOpt === '1x' || monOpt === '2x') {
+      linhasTabelaQuantidades += `
+        <tr>
+          <td style="padding: 8px 10px; border: 1px solid #000000; vertical-align: top;">
+            <strong>Item 2: Monitor de Vídeo 23.8" IPS Full HD</strong><br>
+            <span style="font-size: 8.5pt; color: #1E293B;">
+              Resolução nativa 1920x1080, tecnologia IPS com amplo ângulo de visão, base ergonômica com regulagem vertical de altura (Norma NR-17), conexões HDMI e DisplayPort, acompanhado de cabos de força e dados.
+            </span>
+          </td>
+          <td style="padding: 8px 10px; border: 1px solid #000000; text-align: center; vertical-align: middle; font-weight: 800; font-size: 9.5pt;">
+            ${qtd * (monOpt === '2x' ? 2 : 1)} ${qtd === 1 && monOpt !== '2x' ? 'unidade' : 'unidades'}
+          </td>
+        </tr>
+      `;
+    } else {
+      linhasTabelaQuantidades += `
+        <tr>
+          <td style="padding: 8px 10px; border: 1px solid #000000; vertical-align: top;">
+            <strong>Item 2: Monitor de Vídeo</strong><br>
+            <span style="font-size: 8.5pt; color: #15803D; font-weight: 700;">
+              ✓ DISPENSADO DO FORNECIMENTO: Reaproveitamento integral de monitores de vídeo em perfeito estado de funcionamento já existentes na mesa de trabalho da unidade escolar (Art. 11 da Lei nº 14.133/2021).
+            </span>
+          </td>
+          <td style="padding: 8px 10px; border: 1px solid #000000; text-align: center; vertical-align: middle; font-weight: 700; font-size: 8.5pt; color: #15803D;">
+            0<br><small>(Já existente)</small>
+          </td>
+        </tr>
+      `;
     }
 
-    if (this.demanda.incluiNobreak) {
-      periTxt += ' • Nobreak Senoidal com regulação automática de voltagem';
+    if (tecOpt === false || mouseOpt === false) {
+      linhasTabelaQuantidades += `
+        <tr>
+          <td style="padding: 8px 10px; border: 1px solid #000000; vertical-align: top;">
+            <strong>Item 3: Kit Teclado e Mouse Óptico USB</strong><br>
+            <span style="font-size: 8.5pt; color: #1E293B;">
+              Teclado padrão ABNT2 com teclado numérico dedicado, teclas gravadas a laser de alta durabilidade e mouse óptico ergonômico USB com scroll.
+            </span>
+          </td>
+          <td style="padding: 8px 10px; border: 1px solid #000000; text-align: center; vertical-align: middle; font-weight: 800; font-size: 9.5pt;">
+            ${qtd} ${qtd === 1 ? 'conjunto' : 'conjuntos'}
+          </td>
+        </tr>
+      `;
+    } else {
+      linhasTabelaQuantidades += `
+        <tr>
+          <td style="padding: 8px 10px; border: 1px solid #000000; vertical-align: top;">
+            <strong>Item 3: Teclado e Mouse</strong><br>
+            <span style="font-size: 8.5pt; color: #15803D; font-weight: 700;">
+              ✓ DISPENSADO DO FORNECIMENTO: Reaproveitamento de periféricos em boas condições disponíveis na unidade escolar.
+            </span>
+          </td>
+          <td style="padding: 8px 10px; border: 1px solid #000000; text-align: center; vertical-align: middle; font-weight: 700; font-size: 8.5pt; color: #15803D;">
+            0<br><small>(Já existente)</small>
+          </td>
+        </tr>
+      `;
     }
+
+    // 3. Justificativa (As 4 dimensões obrigatórias do modelo SC)
+    let motTxt = '';
+    if (sitAtual === 'estragou') {
+      motTxt = `O equipamento computacional anterior da diretoria/secretaria da escola danificou-se (não liga/estragou), inviabilizando a execução tempestiva das atividades rotineiras da gestão escolar, tais como lançamento de frequências e notas no Diário de Classe, redação e impressão de avaliações pedagógicas, atendimento a pais de alunos e tramitação de solicitações no sistema de processos SGPe.`;
+    } else if (sitAtual === 'lento') {
+      motTxt = `O computador atualmente em operação na unidade escolar possui configuração defasada e apresenta lentidão excessiva e travamentos constantes durante a execução simultânea das ferramentas de gestão educacional (Diário de Classe, navegadores e SGPe), prejudicando o fluxo de trabalho e o atendimento à comunidade.`;
+    } else {
+      motTxt = `Trata-se de estruturação de novo posto de trabalho na unidade escolar (${setorServ}) para suporte à coordenação pedagógica e gestão acadêmica, não havendo máquina disponível para remanejamento no local.`;
+    }
+
+    const critTxt = `O quantitativo de ${qtd} equipamento(s) foi rigorosamente dimensionado com base no número de servidores que exercem a função no posto de trabalho requisitado, assegurando a proporcionalidade do pedido e a otimização dos recursos públicos, em estrita observância ao Art. 18 da Lei Federal nº 14.133/2021.`;
+
+    const benefTxt = `Corpo docente, equipe diretiva da unidade de ensino, servidores da Secretaria Municipal de Educação e, diretamente, a comunidade escolar, os alunos e seus responsáveis atendidos pelos serviços administrativos da escola.`;
+
+    const resTxt = `Garantir a continuidade e a regularidade das atividades educacionais e administrativas, eliminar o tempo de espera no atendimento presencial, evitar perdas de prazos no envio de relatórios e dados do Censo Escolar e conferir confiabilidade ao registro de informações acadêmicas.`;
+
+    // 6. Informações adicionais
+    const infoAdicionaisTxt = `
+      <p style="margin: 0 0 6px 0;">
+        • <strong>Requisitos Mínimos e Cláusula de Compatibilidade de TIC:</strong> O equipamento deve possuir arquitetura de hardware x86-64 bits com sistema operacional corporativo Windows 11 Pro 64-bit homologado pela rede municipal. É expressamente vedado o fornecimento de netbooks de baixa potência, aparelhos móveis do tipo tablet ou equipamentos com sistema operacional Android/ChromeOS, por serem comprovadamente incompatíveis com os sistemas Diário de Classe, SGPe e aplicações da Secretaria Municipal de Educação.
+      </p>
+      <p style="margin: 0 0 6px 0;">
+        • <strong>Garantia Técnica no Local:</strong> Cobertura de garantia e assistência técnica on-site de no mínimo 36 (trinta e seis) meses com atendimento presencial na unidade escolar em Lages/SC.
+      </p>
+      <p style="margin: 0;">
+        • <strong>Aproveitamento Sustentável:</strong> Os periféricos e telas em bom estado disponíveis na mesa de trabalho foram catalogados e preservados, dispensando nova aquisição e reduzindo despesas para o Município.
+      </p>
+    `;
+
+    // 7. Anexos
+    const anexosTxt = `
+      <ul style="margin: 0; padding-left: 20px; line-height: 1.5;">
+        <li><strong>Anexo I:</strong> Diagnóstico Preliminar de Necessidade e Levantamento de Rotina gerado pelo Sistema DimensionaTI (Protocolo: <code>${protocolo}</code>);</li>
+        <li><strong>Anexo II:</strong> Declaração de Recursos Existentes no Posto de Trabalho e Aproveitamento de Periféricos (Conformidade com o Art. 11 da Lei nº 14.133/2021).</li>
+      </ul>
+    `;
 
     corpo.innerHTML = `
-      <div class="gov-contract-doc">
-
-        <!-- CABEÇALHO SUPERIOR OFICIAL PML / TIC -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; font-size: 8pt; color: #4B5563;">
-          <div>MUNICÍPIO DE LAGES • ESTADO DE SANTA CATARINA</div>
-          <div style="font-weight: 800; color: #111827;">REQUISIÇÃO TÉCNICA DE TIC Nº ${demanda.protocolo.replace('ETP-', 'REQ-TIC-')}/${ano}</div>
+      <div class="dod-sc-container">
+        
+        <!-- CABEÇALHO OFICIAL DO MUNICÍPIO / ESTADO DE SANTA CATARINA -->
+        <div class="dod-header-brasao">
+          <div style="font-weight: 800; font-size: 11pt; text-transform: uppercase; color: #0F172A;">ESTADO DE SANTA CATARINA</div>
+          <div style="font-weight: 700; font-size: 10pt; text-transform: uppercase; color: #1E293B;">PREFEITURA MUNICIPAL DE LAGES • SECRETARIA MUNICIPAL DE EDUCAÇÃO</div>
+          <div style="font-size: 8.5pt; color: #64748B; margin-top: 2px;">DIRETORIA GERAL DE TECNOLOGIA DA INFORMAÇÃO E COMUNICAÇÕES (TIC)</div>
+          <div style="font-size: 8.5pt; font-weight: 800; color: #047857; margin-top: 4px;">PROTOCOLO DA DEMANDA Nº ${protocolo}</div>
         </div>
 
-        <div class="gov-contract-header">
-          <h2 style="font-size: 1.15rem; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; color: #000000; margin-bottom: 2px;">
-            DOCUMENTO DE OFICIALIZAÇÃO DA DEMANDA (DOD)
-          </h2>
-          <div style="font-weight: 700; font-size: 9.5pt; color: #1F2937;">
-            REQUISIÇÃO E ESPECIFICAÇÃO TÉCNICA PADRONIZADA DE INFORMÁTICA<br>
-            Lei Federal nº 14.133, de 1º de abril de 2021 (Art. 18, § 1º)<br>
-            Diretoria Geral de Tecnologia da Informação e Comunicações (TIC)
-          </div>
+        <table class="dod-official-table">
+          <!-- TÍTULO DO FORMULÁRIO -->
+          <tr>
+            <th colspan="4" class="dod-title-cell">
+              DOCUMENTO DE FORMALIZAÇÃO DA DEMANDA
+            </th>
+          </tr>
 
-          <div style="margin-top: 14px; padding: 10px; background: #F8FAFC; border: 1px solid #CBD5E1; text-align: center;">
-            <div style="font-weight: 900; font-size: 10pt; color: #0F172A;">${orgaoServ}</div>
-            <div style="font-size: 8.5pt; color: #475569; margin-top: 2px;">Setor Solicitante: <strong>${setorServ}</strong> • (${processoAdm})</div>
-            <div style="font-size: 8.5pt; font-weight: 700; color: #0F172A; margin-top: 6px;">
-              SOLICITAÇÃO DE FORNECIMENTO DE EQUIPAMENTO DE INFORMÁTICA HOMOLOGADO PARA GESTÃO OPERACIONAL
-            </div>
-          </div>
-        </div>
+          <!-- IDENTIFICAÇÃO DO REQUISITANTE E DO RESPONSÁVEL -->
+          <tr>
+            <td colspan="4" class="dod-field-cell">
+              <strong>Requisitante:</strong> ${orgaoServ} — ${setorServ}
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2" class="dod-field-cell" style="width: 70%;">
+              <strong>Responsável pela Demanda:</strong> ${nomeServ}
+            </td>
+            <td colspan="2" class="dod-field-cell" style="width: 30%;">
+              <strong>Matrícula:</strong> ${matServ}
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2" class="dod-field-cell">
+              <strong>E-mail:</strong> ${emailServ}
+            </td>
+            <td colspan="2" class="dod-field-cell">
+              <strong>Telefone:</strong> ${telServ}
+            </td>
+          </tr>
 
-        <!-- IDENTIFICAÇÃO DO SOLICITANTE -->
-        <p class="gov-clause-p">
-          Por meio deste instrumento, a servidora responsável <strong>${nomeServ}</strong>, ocupante do cargo de <strong>${cargoServ}</strong>, matrícula funcional nº <strong>${matServ}</strong>, lotada no(a) <strong>${setorServ}</strong>, formaliza perante a Diretoria de Tecnologia da Informação da Prefeitura de Lages a requisição de equipamento de informática em substituição/atendimento de posto de trabalho, de acordo com as especificações técnicas delimitadas a seguir:
-        </p>
+          <!-- ESPAÇADOR CONFORME MODELO SC -->
+          <tr class="dod-blank-row">
+            <td colspan="4" style="height: 6px; background: #FFFFFF; border-left: 1px solid #000000; border-right: 1px solid #000000; border-top: none; border-bottom: none;"></td>
+          </tr>
 
-        <!-- 1. OBJETO E ESPECIFICAÇÃO TÉCNICA -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">1. OBJETO E ESPECIFICAÇÃO TÉCNICA (FICHA PARA O SETOR DE TI)</div>
-          <p class="gov-clause-p">
-            1.1. Fornecimento de equipamento computacional padronizado, dimensionado com base no levantamento das rotinas reais de trabalho: <em>${rotinasFormatadas || 'Gestão escolar, diário de classe, Google Sala de Aula, SGPe e documentos pedagógicos'}</em>.
-          </p>
-          <p class="gov-clause-p">
-            1.2. <strong>Cláusula Anti-Subdimensionamento (Proteção ao Usuário):</strong> O equipamento deve possuir estritamente arquitetura computacional x86-64 bits com sistema operacional corporativo Windows 11 Pro 64-bit homologado pela rede municipal. É expressamente vedado o fornecimento de netbooks de baixa potência, aparelhos móveis do tipo tablet ou dispositivos com sistema operacional Android/ChromeOS, por serem comprovadamente incompatíveis com as aplicações de gestão da Prefeitura e da Secretaria Municipal de Educação.
-          </p>
+          <!-- 1. OBJETO / DESCRIÇÃO DA SOLUÇÃO -->
+          <tr>
+            <td colspan="4" class="dod-section-header">
+              1. Objeto/ Descrição da solução
+            </td>
+          </tr>
+          <tr>
+            <td colspan="4" class="dod-content-cell">
+              <p style="margin: 0; line-height: 1.5; text-align: justify;">
+                ${objetoTexto}
+              </p>
+            </td>
+          </tr>
 
-          <table class="gov-table">
-            <thead>
-              <tr>
-                <th style="width: 6%; text-align: center;">ITEM</th>
-                <th style="width: 50%;">ESPECIFICAÇÃO PADRONIZADA PARA ATENDIMENTO (TIC)</th>
-                <th style="width: 14%; text-align: center;">CATMAT</th>
-                <th style="width: 10%; text-align: center;">FORMATO</th>
-                <th style="width: 8%; text-align: center;">QTD.</th>
-                <th style="width: 12%; text-align: center;">SISTEMA OPERACIONAL</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="text-align: center;"><strong>1</strong></td>
-                <td>
-                  <strong>${nomeEquipamentoFormatado} - ${perfil.nome.split(':')[0]}</strong><br>
-                  <small>
-                    • <strong>Processador:</strong> ${perfil.processador}<br>
-                    • <strong>Memória RAM:</strong> ${perfil.ram}<br>
-                    • <strong>Armazenamento:</strong> ${perfil.armazenamento}<br>
-                    • <strong>Controlador Gráfico:</strong> ${perfil.gpu}<br>
-                    • <strong>Tela / Monitor:</strong> ${monitorTxt}<br>
-                    • <strong>Periféricos e Conectividade:</strong> ${periTxt}
-                  </small>
-                </td>
-                <td style="text-align: center;">
-                  <strong>${catmat}</strong><br>
-                  <span style="font-size: 7pt; color: #4B5563;">${catmatNome}</span>
-                </td>
-                <td style="text-align: center;"><strong>${ehNotebook ? 'Notebook' : 'Desktop'}</strong></td>
-                <td style="text-align: center;"><strong>${demanda.quantidade_usuarios}</strong></td>
-                <td style="text-align: center; font-weight: 700; color: #047857;">Windows 11 Pro (x86-64)</td>
-              </tr>
-            </tbody>
-          </table>
+          <!-- 2. QUANTIDADES ESTIMADAS -->
+          <tr>
+            <td colspan="4" class="dod-section-header">
+              2. Quantidades estimadas
+            </td>
+          </tr>
+          <tr>
+            <td colspan="4" style="padding: 0; border: 1px solid #000000;">
+              <table class="dod-subtable" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr>
+                    <th style="width: 80%; text-align: left; background: #F1F5F9; border: 1px solid #000000; padding: 6px 10px; font-weight: 800; font-size: 8.5pt;">
+                      DESCRIÇÃO RESUMIDA
+                    </th>
+                    <th style="width: 20%; text-align: center; background: #F1F5F9; border: 1px solid #000000; padding: 6px 10px; font-weight: 800; font-size: 8.5pt;">
+                      QUANTIDADE
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${linhasTabelaQuantidades}
+                </tbody>
+              </table>
+            </td>
+          </tr>
 
-          <!-- REQUISITOS OBRIGATÓRIOS DO FORNECIMENTO -->
-          <div class="tech-spec-box">
-            <strong>REQUISITOS MÍNIMOS OBRIGATÓRIOS PARA HOMOLOGAÇÃO PELO TI:</strong><br>
-            • <strong>Desempenho Homologado:</strong> Processador compatível com índice PassMark mínimo de 8.500 pontos, garantindo agilidade na abertura simultânea de abas do SGPe e relatórios em PDF sem travamentos.<br>
-            • <strong>Segurança em Hardware:</strong> Chip TPM 2.0 ativo de fábrica com suporte a inicialização segura (UEFI Secure Boot).<br>
-            • <strong>Garantia Técnica no Local:</strong> Garantia integral de <strong>36 (trinta e seis) meses on-site</strong> com atendimento e suporte técnico presencial na unidade de ensino em Lages/SC.
-          </div>
-        </div>
+          <!-- 3. JUSTIFICATIVA DA NECESSIDADE DA AQUISIÇÃO -->
+          <tr>
+            <td colspan="4" class="dod-section-header">
+              3. Justificativa da necessidade da aquisição, considerando o Planejamento Estratégico (se for o caso)
+            </td>
+          </tr>
+          <tr>
+            <td colspan="4" class="dod-content-cell">
+              <div style="line-height: 1.5; text-align: justify;">
+                <p style="margin: 0 0 8px 0;">
+                  <strong>• Motivo / finalidade / necessidade da aquisição (relevância para as atividades da Unidade):</strong><br>
+                  ${motTxt}
+                </p>
+                <p style="margin: 0 0 8px 0;">
+                  <strong>• Critério de definição dos quantitativos:</strong><br>
+                  ${critTxt}
+                </p>
+                <p style="margin: 0 0 8px 0;">
+                  <strong>• Beneficiários diretos:</strong><br>
+                  ${benefTxt}
+                </p>
+                <p style="margin: 0;">
+                  <strong>• Resultados pretendidos:</strong><br>
+                  ${resTxt}
+                </p>
+              </div>
+            </td>
+          </tr>
 
-        <!-- 2. DESPACHO DA DIRETORIA DE TECNOLOGIA DA INFORMAÇÃO -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">2. PARECER E ENCAMINHAMENTO DA DIRETORIA DE TI</div>
-          <p class="gov-clause-p">
-            2.1. A presente demanda foi verificada e compatibilizada com o Catálogo Municipal de TIC de Lages/SC. Constatou-se conformidade técnica plena entre a rotina de trabalho informada pela servidora e o equipamento dimensionado, restando afastados tanto o superdimensionamento (gastos excessivos) quanto o subdimensionamento (entrega de máquinas inadequadas).
-          </p>
-          <p class="gov-clause-p">
-            2.2. Encaminhe-se ao Almoxarifado Central / Setor de Compras para providências de entrega e instalação do equipamento no local de trabalho da solicitante.
-          </p>
-        </div>
+          <!-- 4. PREVISÃO DE DATA -->
+          <tr>
+            <td colspan="4" class="dod-section-header">
+              4. Previsão de data em que devem ser adquiridos os materiais e/ou serviços
+            </td>
+          </tr>
+          <tr>
+            <td colspan="4" class="dod-content-cell">
+              <p style="margin: 0; line-height: 1.5;">
+                <strong>Previsão do período em que será realizada a aquisição:</strong> Imediato / 1º Semestre de ${ano}.<br>
+                <strong>Tempo que atenderá a necessidade:</strong> Ciclo operacional estimado em 36 (trinta e seis) meses de vida útil com cobertura contínua de suporte técnico e reposição.
+              </p>
+            </td>
+          </tr>
 
-          <!-- REQUISITOS TÉCNICOS DETALHADOS ANTI-ENTREGA DE PRODUTO INFERIOR -->
-          <div class="tech-spec-box">
-            <strong>REQUISITOS MÍNIMOS OBRIGATÓRIOS DO FORNECEDOR (CLÁUSULA ANTI-ENTREGA DE PRODUTO INFERIOR):</strong><br>
-            • <strong>Placa-mãe OEM Corporativa:</strong> Desenvolvida pelo fabricante do equipamento ou com BIOS customizada contendo logo institucional da marca, chip TPM 2.0 de segurança em hardware ativo e UEFI 2.8+ com Secure Boot habilitado de fábrica.<br>
-            • <strong>Fonte de Alimentação:</strong> Fonte bivolt automática de alta eficiência com certificação mínima <strong>80 Plus Bronze</strong> (eficiência superior a 85%) e PFC Ativo.<br>
-            • <strong>Monitor Ergonômico (NR-17):</strong> Painel IPS com base articulada e ajuste vertical de altura (mínimo 100mm), inclinação e rotação, atendendo à Norma Regulamentadora NR-17 do Ministério do Trabalho.<br>
-            • <strong>Garantia e Assistência On-Site em Lages/SC:</strong> Garantia técnica integral de <strong>36 (trinta e seis) meses on-site</strong>, com prazo de atendimento no município de Lages de no máximo 48 horas úteis e substituição de peças defeituosas por novas originais.
-          </div>
+          <!-- 5. PREVISÃO NO PLANO ANUAL DE COMPRAS -->
+          <tr>
+            <td colspan="4" class="dod-section-header">
+              5. O objeto a ser adquirido está previsto no Plano Anual de Compras?
+            </td>
+          </tr>
+          <tr>
+            <td colspan="4" class="dod-content-cell">
+              <div style="display: flex; gap: 40px; font-weight: 700; font-size: 9.5pt;">
+                <span>( X ) Sim</span>
+                <span>( &nbsp; ) Não</span>
+              </div>
+            </td>
+          </tr>
 
-          <p class="gov-clause-p" style="margin-top: 8px;">
-            1.3. Vinculam esta contratação, independentemente de transcrição: o Termo de Referência; o Edital da Licitação; a Proposta do contratado; e eventuais anexos dos documentos supracitados.
-          </p>
-        </div>
+          <!-- 6. INFORMAÇÕES ADICIONAIS -->
+          <tr>
+            <td colspan="4" class="dod-section-header">
+              6. Informações adicionais
+            </td>
+          </tr>
+          <tr>
+            <td colspan="4" class="dod-content-cell">
+              <div style="line-height: 1.5; text-align: justify;">
+                ${infoAdicionaisTxt}
+              </div>
+            </td>
+          </tr>
 
-        <!-- 2. CLÁUSULA SEGUNDA – VIGÊNCIA E PRORROGAÇÃO -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">2. CLÁUSULA SEGUNDA – VIGÊNCIA E PRORROGAÇÃO</div>
-          <p class="gov-clause-p">
-            2.1. O prazo de vigência da contratação é de <strong>12 (doze) meses</strong> contados da data de assinatura deste instrumento, na forma do art. 105 da Lei nº 14.133, de 2021, prorrogável exclusivamente para fins de vigência da garantia técnica de 36 (trinta e seis) meses dos equipamentos.
-          </p>
-        </div>
+          <!-- 7. ANEXOS -->
+          <tr>
+            <td colspan="4" class="dod-section-header">
+              7. Anexos
+            </td>
+          </tr>
+          <tr>
+            <td colspan="4" class="dod-content-cell">
+              ${anexosTxt}
+            </td>
+          </tr>
 
-        <!-- 3. CLÁUSULA TERCEIRA – MODELOS DE EXECUÇÃO E GESTÃO CONTRATUAIS -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">3. CLÁUSULA TERCEIRA – MODELOS DE EXECUÇÃO E GESTÃO CONTRATUAIS</div>
-          <p class="gov-clause-p">
-            3.1. O regime de execução contratual, os modelos de gestão e de fiscalização, assim como os prazos de entrega fixados em até <strong>30 (trinta) dias corridos</strong> no município de Lages/SC, observação e recebimento do objeto constam detalhados no Termo de Referência.
-          </p>
-        </div>
+          <!-- ASSINATURAS DO MODELO DE SANTA CATARINA -->
+          <tr>
+            <td colspan="4" style="padding: 24px 18px 16px 18px; border: 1px solid #000000; background: #FFFFFF;">
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; font-size: 8.5pt;">
+                <!-- RESPONSÁVEL PELA FORMALIZAÇÃO DA DEMANDA -->
+                <div>
+                  <div style="font-weight: 800; text-transform: uppercase; margin-bottom: 6px;">
+                    Responsável pela Formalização da Demanda
+                  </div>
+                  <div><strong>Nome:</strong> ${nomeServ}</div>
+                  <div><strong>Matrícula:</strong> ${matServ}</div>
+                  <div><strong>Função:</strong> ${cargoServ}</div>
+                  <div style="margin-top: 24px; border-top: 1px solid #000000; padding-top: 4px;">
+                    <strong>Assinatura:</strong> _________________________________________
+                  </div>
+                </div>
 
-        <!-- 4. CLÁUSULA QUARTA – SUBCONTRATAÇÃO -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">4. CLÁUSULA QUARTA – SUBCONTRATAÇÃO</div>
-          <p class="gov-clause-p">
-            4.1. Não será admitida a subcontratação do fornecimento principal dos equipamentos de tecnologia da informação.
-          </p>
-        </div>
+                <!-- CHEFIA IMEDIATA -->
+                <div>
+                  <div style="font-weight: 800; text-transform: uppercase; margin-bottom: 6px;">
+                    Chefia Imediata
+                  </div>
+                  <div><strong>Nome:</strong> Diretoria Administrativa / Secretaria</div>
+                  <div><strong>Matrícula:</strong> ____________________________________</div>
+                  <div><strong>Função:</strong> Secretário(a) / Diretor(a) Responsável</div>
+                  <div style="margin-top: 24px; border-top: 1px solid #000000; padding-top: 4px;">
+                    <strong>Assinatura:</strong> _________________________________________
+                  </div>
+                </div>
+              </div>
 
-        <!-- 5. CLÁUSULA QUINTA – PREÇO -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">5. CLÁUSULA QUINTA – PREÇO</div>
-          <p class="gov-clause-p">
-            5.2. O valor total da contratação é de <strong>R$ ${valTot} (${valTotExtenso})</strong>.
-          </p>
-          <p class="gov-clause-p">
-            5.3. No valor acima estão incluídas todas as despesas ordinárias diretas e indiretas decorrentes da execução do objeto, inclusive tributos, encargos sociais, trabalhistas, previdenciários, fiscais, frete até o município de Lages/SC, seguro e garantia integral de 3 anos.
-          </p>
-        </div>
+              <!-- DE ACORDO -->
+              <div style="margin-top: 24px; padding-top: 12px; border-top: 1px dashed #94A3B8; font-size: 8.5pt;">
+                <div style="font-weight: 800; text-transform: uppercase; margin-bottom: 2px;">
+                  De acordo:
+                </div>
+                <div style="color: #334155;">
+                  Diretoria de Tecnologia da Informação e Comunicações (TIC) — Prefeitura de Lages / SC<br>
+                  <span style="font-size: 8pt; color: #64748B;">Recebimento formal e encaminhamento para fase preparatória (ETP e Termo de Referência).</span>
+                </div>
+              </div>
 
-        <!-- 6. CLÁUSULA SEXTA – PAGAMENTO -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">6. CLÁUSULA SEXTA – PAGAMENTO</div>
-          <p class="gov-clause-p">
-            6.1. O pagamento será realizado em até <strong>30 (trinta) dias corridos</strong> após a emissão do Termo de Recebimento Definitivo e conferência física pela Diretoria de TIC da Prefeitura de Lages.
-          </p>
-        </div>
+            </td>
+          </tr>
+        </table>
 
-        <!-- 7. CLÁUSULA SÉTIMA – REAJUSTE -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">7. CLÁUSULA SÉTIMA – REAJUSTE</div>
-          <p class="gov-clause-p">
-            7.1. Os preços são fixos e irreajustáveis no período de 12 (doze) meses da proposta, aplicando-se o índice IPCA/IBGE caso haja prorrogação legal autorizada.
-          </p>
-        </div>
-
-        <!-- 8. CLÁUSULA OITAVA – OBRIGAÇÕES DO CONTRATANTE -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">8. CLÁUSULA OITAVA – OBRIGAÇÕES DO CONTRATANTE</div>
-          <p class="gov-clause-p">
-            8.1. São obrigações do Contratante: receber o objeto no prazo e condições fixadas; fiscalizar a conformidade dos equipamentos com as especificações blindadas do edital; efetuar o pagamento tempestivo; e notificar formalmente a Contratada sobre quaisquer inconformidades.
-          </p>
-        </div>
-
-        <!-- 9. CLÁUSULA NONA – OBRIGAÇÕES DO CONTRATADO -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">9. CLÁUSULA NONA – OBRIGAÇÕES DO CONTRATADO</div>
-          <p class="gov-clause-p">
-            9.1. O Contratado obriga-se a entregar equipamentos novos, de primeiro uso, lacrados de fábrica; prestar assistência técnica presencial no município de Lages/SC; disponibilizar manuais em português; cumprir as normas de proteção ao trabalho e NR-17; e observar estritamente a <strong>Lei nº 13.709/2018 (LGPD)</strong>.
-          </p>
-        </div>
-
-        <!-- 10. CLÁUSULA DÉCIMA – GARANTIA DE EXECUÇÃO -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">10. CLÁUSULA DÉCIMA – GARANTIA DE EXECUÇÃO</div>
-          <p class="gov-clause-p">
-            10.1. Não haverá exigência de garantia contratual da execução com base nos estudos preliminares, prevalecendo a garantia técnica de fábrica de 36 meses.
-          </p>
-        </div>
-
-        <!-- 11. CLÁUSULA DÉCIMA PRIMEIRA – INFRAÇÕES E SANÇÕES ADMINISTRATIVAS -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">11. CLÁUSULA DÉCIMA PRIMEIRA – INFRAÇÕES E SANÇÕES ADMINISTRATIVAS</div>
-          <p class="gov-clause-p">
-            11.1. O cometimento de infrações administrativas sujeitará a Contratada às sanções previstas no art. 156 da Lei nº 14.133, de 2021, garantida a prévia defesa e o contraditório.
-          </p>
-        </div>
-
-        <!-- 12. CLÁUSULA DÉCIMA SEGUNDA – DA EXTINÇÃO CONTRATUAL -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">12. CLÁUSULA DÉCIMA SEGUNDA – DA EXTINÇÃO CONTRATUAL</div>
-          <p class="gov-clause-p">
-            12.1. O contrato será extinto quando cumpridas integralmente as obrigações de ambas as partes, ou nos termos do art. 137 da Lei nº 14.133/2021.
-          </p>
-        </div>
-
-        <!-- 13. CLÁUSULA DÉCIMA TERCEIRA – ALTERAÇÕES -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">13. CLÁUSULA DÉCIMA TERCEIRA – ALTERAÇÕES</div>
-          <p class="gov-clause-p">
-            13.1. Eventuais alterações contratuais reger-se-ão pela disciplina dos arts. 124 e seguintes da Lei nº 14.133, de 2021, com o limite legal de até 25% de acréscimo ou supressão.
-          </p>
-        </div>
-
-        <!-- 14. CLÁUSULA DÉCIMA QUARTA – DOTAÇÃO ORÇAMENTÁRIA -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">14. CLÁUSULA DÉCIMA QUARTA – DOTAÇÃO ORÇAMENTÁRIA</div>
-          <p class="gov-clause-p">
-            14.1. As despesas correrão à conta de recursos específicos do Orçamento do Município de Lages, Elemento de Despesa 44.90.52 (Equipamentos e Material Permanente de TIC).
-          </p>
-        </div>
-
-        <!-- 15. CLÁUSULA DÉCIMA QUINTA – DOS CASOS OMISSOS -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">15. CLÁUSULA DÉCIMA QUINTA – DOS CASOS OMISSOS</div>
-          <p class="gov-clause-p">
-            15.1. Os casos omissos serão decididos segundo as disposições da Lei nº 14.133, de 2021 e princípios gerais de direito público.
-          </p>
-        </div>
-
-        <!-- 16. CLÁUSULA DÉCIMA SEXTA – PUBLICAÇÃO -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">16. CLÁUSULA DÉCIMA SEXTA – PUBLICAÇÃO</div>
-          <p class="gov-clause-p">
-            16.1. Incumbirá ao contratante divulgar o presente instrumento no <strong>Portal Nacional de Contratações Públicas (PNCP)</strong>, na forma do art. 94 da Lei 14.133/2021.
-          </p>
-        </div>
-
-        <!-- 17. CLÁUSULA DÉCIMA SÉTIMA – FORO -->
-        <div class="gov-clause">
-          <div class="gov-clause-title">17. CLÁUSULA DÉCIMA SÉTIMA – FORO</div>
-          <p class="gov-clause-p">
-            17.1. Fica eleito o Foro da <strong>Comarca de Lages / SC</strong> para dirimir controvérsias decorrentes deste contrato administrativo.
-          </p>
-        </div>
-
-        <!-- CERTIFICAÇÃO PREVENTIVA TCE/SC -->
-        <div style="background: #F9FAFB; border: 1px solid #D1D5DB; padding: 10px 14px; margin-top: 14px; font-size: 8pt; break-inside: avoid;">
-          <strong>CERTIFICAÇÃO DE AUDITORIA PREVENTIVA TCE/SC (DIMENSIONATI):</strong><br>
-          Índice de Risco de Superdimensionamento (IRS): <strong>${demanda.irs}% (${demanda.nivel_risco})</strong> • Dimensionamento aprovado para <strong>${cargoServ}</strong> em <strong>Lages/SC</strong> com <strong>${perfil.ram}</strong> sem sobrecusto ao erário.
-        </div>
-
-        <!-- DATA E ASSINATURAS -->
-        <div style="margin-top: 24px; text-align: right; font-weight: 700; font-size: 9.5pt; break-inside: avoid;">
-          Lages/SC, ${dia} de ${mes} de ${ano}.
-        </div>
-
-        <div class="gov-signatures-block" style="break-inside: avoid;">
-          <div>
-            <div class="gov-sig-line">
-              <strong>${nomeServ}</strong><br>
-              ${cargoServ}<br>
-              <small>Matrícula nº ${matServ} • ${orgaoServ}</small><br>
-              <strong>Representante legal do CONTRATANTE</strong>
-            </div>
-          </div>
-          <div>
-            <div class="gov-sig-line">
-              <strong>EMPRESA VENCEDORA DO CERTAME</strong><br>
-              Representante Legal da CONTRATADA<br>
-              <small>Assinatura Digital ICP-Brasil (Conforme Lei nº 14.063/2020)</small><br>
-              <strong>Representante legal do CONTRATADO</strong>
-            </div>
-          </div>
-        </div>
-
-        <div style="margin-top: 20px; font-size: 8pt; color: #4B5563; break-inside: avoid;">
-          <p><strong>TESTEMUNHAS:</strong></p>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 6px;">
-            <div>1- ____________________________________ CPF: _______________________</div>
-            <div>2- ____________________________________ CPF: _______________________</div>
-          </div>
-        </div>
-
-        <!-- RODAPÉ INSTITUCIONAL PADRÃO AGU / SGD / SEGES -->
-        <div style="margin-top: 28px; padding-top: 10px; border-top: 1px solid #9CA3AF; font-size: 7pt; color: #6B7280; text-align: center; line-height: 1.35; break-inside: avoid;">
-          Câmara Nacional de Modelos de Licitações e Contratos da Consultoria-Geral da União<br>
-          Termo de contrato modelo para Pregão Eletrônico para contratação de compras/Solução de Tecnologia da Informação e Comunicação<br>
-          Aprovado pela Secretaria de Governo Digital • Identidade visual pela Secretaria de Gestão • Atualização: AGO/2025
+        <!-- NOTA EXPLICATIVA DO RODAPÉ SC -->
+        <div class="dod-footer-note">
+          * As Notas Explicativas exibidas no modelo oficial de Documento de Formalização da Demanda (DOD) do Estado de Santa Catarina foram integralmente atendidas e consolidadas para instrução processual do pedido, em conformidade com o Art. 12, VII e Art. 18, I da Lei Federal nº 14.133/2021.
         </div>
 
       </div>
@@ -1814,7 +1855,6 @@ const app = {
 
     modal.classList.add('active');
   },
-
   fecharModalEtp() {
     document.getElementById('modalEtp').classList.remove('active');
     this.fecharCaixaEmail();
@@ -1893,9 +1933,94 @@ const app = {
     body {
       background: #FFFFFF !important;
       color: #000000 !important;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Times New Roman", serif;
+      font-family: Arial, Helvetica, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
       padding: 12px;
+    }
+    .dod-sc-container {
+      width: 100%;
+      margin: 0 auto;
+      background: #FFFFFF;
+      color: #000000;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .dod-header-brasao {
+      text-align: center;
+      border-bottom: 2px solid #000000;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+    }
+    .dod-official-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1.5px solid #000000;
+      font-size: 9pt;
+      color: #000000;
+      background: #FFFFFF;
+      page-break-inside: auto;
+    }
+    .dod-title-cell {
+      background: #F1F5F9 !important;
+      color: #000000;
+      font-weight: 900;
+      font-size: 11pt;
+      text-align: center;
+      padding: 10px;
+      border: 1.5px solid #000000;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .dod-field-cell {
+      border: 1px solid #000000;
+      padding: 7px 10px;
+      font-size: 9pt;
+      vertical-align: top;
+      color: #000000;
+    }
+    .dod-section-header {
+      background: #F1F5F9 !important;
+      color: #000000;
+      font-weight: 800;
+      font-size: 9.5pt;
+      padding: 8px 10px;
+      border: 1px solid #000000;
+      text-align: left;
+    }
+    .dod-content-cell {
+      border: 1px solid #000000;
+      padding: 10px 12px;
+      font-size: 9pt;
+      vertical-align: top;
+      text-align: justify;
+      color: #000000;
+    }
+    .dod-subtable {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8.5pt;
+      color: #000000;
+    }
+    .dod-subtable th {
+      background: #E2E8F0 !important;
+      color: #000000;
+      border: 1px solid #000000;
+      padding: 7px 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 8.5pt;
+    }
+    .dod-subtable td {
+      border: 1px solid #000000;
+      padding: 8px 10px;
+      color: #000000;
+    }
+    .dod-footer-note {
+      font-size: 8pt;
+      color: #4B5563;
+      margin-top: 10px;
+      font-style: italic;
+      line-height: 1.4;
+      text-align: justify;
     }
     .gov-contract-doc {
       font-family: "Times New Roman", Times, Georgia, serif;
@@ -2037,7 +2162,7 @@ const app = {
   },
 
   imprimirDocumento() {
-    this.executarImpressaoLimpa('corpoDocumentoEtp', 'Termo de Contrato Administrativo TIC - Lei 14.133');
+    this.executarImpressaoLimpa('corpoDocumentoEtp', 'Documento de Formalização da Demanda (DOD - SC)');
   },
 
   // ==========================================

@@ -1821,6 +1821,105 @@ body {
   margin-bottom: 24px;
 }
 
+/* ========================================================== */
+/* FORMULÁRIO OFICIAL: DOD DE SANTA CATARINA                  */
+/* ========================================================== */
+.dod-sc-container {
+  max-width: 820px;
+  margin: 0 auto;
+  background: #FFFFFF;
+  color: #000000;
+  font-family: Arial, Helvetica, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding: 10px 14px;
+}
+
+.dod-header-brasao {
+  text-align: center;
+  border-bottom: 2px solid #000000;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+
+.dod-official-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1.5px solid #000000;
+  font-size: 9pt;
+  color: #000000;
+  background: #FFFFFF;
+}
+
+.dod-title-cell {
+  background: #F1F5F9;
+  color: #000000;
+  font-weight: 900;
+  font-size: 11pt;
+  text-align: center;
+  padding: 10px;
+  border: 1.5px solid #000000;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dod-field-cell {
+  border: 1px solid #000000;
+  padding: 7px 10px;
+  font-size: 9pt;
+  vertical-align: top;
+  color: #000000;
+}
+
+.dod-section-header {
+  background: #F1F5F9;
+  color: #000000;
+  font-weight: 800;
+  font-size: 9.5pt;
+  padding: 8px 10px;
+  border: 1px solid #000000;
+  text-align: left;
+}
+
+.dod-content-cell {
+  border: 1px solid #000000;
+  padding: 10px 12px;
+  font-size: 9pt;
+  vertical-align: top;
+  text-align: justify;
+  color: #000000;
+}
+
+.dod-subtable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8.5pt;
+  color: #000000;
+}
+
+.dod-subtable th {
+  background: #E2E8F0;
+  color: #000000;
+  border: 1px solid #000000;
+  padding: 7px 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 8.5pt;
+}
+
+.dod-subtable td {
+  border: 1px solid #000000;
+  padding: 8px 10px;
+  color: #000000;
+}
+
+.dod-footer-note {
+  font-size: 8pt;
+  color: #4B5563;
+  margin-top: 10px;
+  font-style: italic;
+  line-height: 1.4;
+  text-align: justify;
+}
+
 .gov-contract-doc {
   font-family: "Times New Roman", Times, Georgia, serif;
   color: #111827;
@@ -3531,18 +3630,43 @@ body {
     margin: 0 !important;
   }
 
+  .dod-sc-container,
   .gov-contract-doc,
   .tce-report-doc {
-    font-size: 9.5pt !important;
+    font-size: 9pt !important;
     line-height: 1.45 !important;
     color: #000000 !important;
     background: #FFFFFF !important;
     width: 100% !important;
     display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Tabela oficial de DOD de SC na impressão */
+  .dod-official-table {
+    border: 1.5px solid #000000 !important;
+    width: 100% !important;
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+  }
+
+  .dod-official-table th,
+  .dod-official-table td {
+    border: 1px solid #000000 !important;
+    color: #000000 !important;
+  }
+
+  .dod-title-cell,
+  .dod-section-header,
+  .dod-subtable th {
+    background: #F1F5F9 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   /* Quebras de página suaves e organizadas */
-  .gov-clause, .gov-contract-header, .tech-spec-box, .tce-box-veredicto {
+  .gov-clause, .gov-contract-header, .tech-spec-box, .tce-box-veredicto, .dod-header-brasao {
     page-break-inside: auto;
     break-inside: auto;
   }
@@ -3552,7 +3676,7 @@ body {
     break-inside: avoid !important;
   }
 
-  table, .gov-table, .tce-table-compare {
+  table, .gov-table, .tce-table-compare, .dod-official-table {
     page-break-inside: auto !important;
     break-inside: auto !important;
     width: 100% !important;

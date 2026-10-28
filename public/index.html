@@ -1074,24 +1074,24 @@
 
 
   <!-- ========================================================= -->
-  <!-- MODAL: MINUTA OFICIAL DE CONTRATO (IMPRESSÃO A4)          -->
+  <!-- MODAL: DOCUMENTO DE FORMALIZAÇÃO DA DEMANDA (DOD - SC)    -->
   <!-- ========================================================= -->
   <div class="modal-overlay" id="modalEtp">
     <div class="modal-content">
       
       <div class="doc-top-bar no-print">
         <div>
-          <h3 style="font-size: 1.05rem; font-weight: 800; color: #0F172A;">
-            📜 Minuta Oficial Padronizada de TIC (Lei nº 14.133/2021)
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: #0F172A;">
+            📄 Documento de Formalização da Demanda (DOD - SC)
           </h3>
-          <p style="font-size: 0.78rem; color: #64748B;">Padrão Gov.br / AGU / TCE-SC com Cláusulas de Blindagem Técnica</p>
+          <p style="font-size: 0.85rem; color: #64748B;">Modelo Oficial do Estado de Santa Catarina • Lei Federal nº 14.133/2021</p>
         </div>
         <div style="display: flex; gap: 8px;">
           <button type="button" class="btn-ghost" style="color: #0F172A;" onclick="app.abrirCaixaEmail()">
             ✉️ E-mail
           </button>
-          <button type="button" class="btn-primary-neon" style="color: #0A0E14; padding: 6px 16px; font-size: 0.82rem;" onclick="app.imprimirDocumento()">
-            🖨️ Imprimir
+          <button type="button" class="btn-primary-neon" style="color: #0A0E14; padding: 8px 18px; font-size: 0.9rem; font-weight: 700;" onclick="app.imprimirDocumento()">
+            🖨️ Imprimir DOD Oficial
           </button>
           <button type="button" class="btn-ghost" style="color: #0F172A;" onclick="app.fecharModalEtp()">
             ✕
@@ -1101,7 +1101,7 @@
 
       <!-- ENCAMINHAR EMAIL -->
       <div id="boxEncaminharEmail" class="no-print" style="display: none; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px; margin-bottom: 20px;">
-        <p style="font-size: 0.8rem; color: #64748B; margin-bottom: 8px;">Enviar minuta para compras/licitações:</p>
+        <p style="font-size: 0.8rem; color: #64748B; margin-bottom: 8px;">Enviar DOD para compras / diretoria de TIC:</p>
         <div style="display: flex; gap: 8px;">
           <input type="email" id="inputEmailDestino" class="dark-input" style="background: #FFFFFF; color: #0F172A; border-color: #CBD5E1; flex: 1;" placeholder="licitacoes@lages.sc.gov.br">
           <button type="button" class="btn-primary-neon" style="color: #0A0E14;" onclick="app.enviarPorEmail()">Enviar</button>
@@ -1109,7 +1109,7 @@
         <div id="emailFeedbackMsg" style="display: none; margin-top: 8px; font-size: 0.8rem; font-weight: 600; color: #059669;"></div>
       </div>
 
-      <!-- FOLHA ENQUADRADA DO CONTRATO -->
+      <!-- FOLHA OFICIAL DO DOD PREENCHIDO (MODELO SANTA CATARINA) -->
       <div id="corpoDocumentoEtp"></div>
     </div>
   </div>
