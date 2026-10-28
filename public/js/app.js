@@ -1629,22 +1629,19 @@ const app = {
     corpo.innerHTML = `
       <div class="dod-sc-container">
         
-        <!-- CABEÇALHO OFICIAL DO MUNICÍPIO / ESTADO DE SANTA CATARINA -->
-        <div class="dod-header-brasao">
-          <div style="font-weight: 800; font-size: 11pt; text-transform: uppercase; color: #0F172A;">ESTADO DE SANTA CATARINA</div>
-          <div style="font-weight: 700; font-size: 10pt; text-transform: uppercase; color: #1E293B;">PREFEITURA MUNICIPAL DE LAGES • SECRETARIA MUNICIPAL DE EDUCAÇÃO</div>
-          <div style="font-size: 8.5pt; color: #64748B; margin-top: 2px;">DIRETORIA GERAL DE TECNOLOGIA DA INFORMAÇÃO E COMUNICAÇÕES (TIC)</div>
-          <div style="font-size: 8.5pt; font-weight: 800; color: #047857; margin-top: 4px;">PROTOCOLO DA DEMANDA Nº ${protocolo}</div>
+        <!-- CABEÇALHO OFICIAL DO GOVERNO DO ESTADO DE SANTA CATARINA (MODELO CENTRAL DE COMPRAS) -->
+        <div class="dod-header-oficial-sc">
+          <img src="${(typeof window !== 'undefined' && window.CABECALHO_DOD_SC_SRC) ? window.CABECALHO_DOD_SC_SRC : '/img/cabecalho-dod-sc.png'}" 
+               alt="Governo do Estado de Santa Catarina - Secretaria de Estado da Administração - Diretoria de Gestão de Licitações e Contratos - Central Estratégica de Compras Públicas - DOCUMENTO DE FORMALIZAÇÃO DA DEMANDA" 
+               class="dod-img-cabecalho" />
+          
+          <div class="dod-sub-bar-protocolo">
+            <span>MUNICÍPIO DE LAGES • SECRETARIA MUNICIPAL DE EDUCAÇÃO</span>
+            <span>PROTOCOLO: <strong>${protocolo}</strong></span>
+          </div>
         </div>
 
         <table class="dod-official-table">
-          <!-- TÍTULO DO FORMULÁRIO -->
-          <tr>
-            <th colspan="4" class="dod-title-cell">
-              DOCUMENTO DE FORMALIZAÇÃO DA DEMANDA
-            </th>
-          </tr>
-
           <!-- IDENTIFICAÇÃO DO REQUISITANTE E DO RESPONSÁVEL -->
           <tr>
             <td colspan="4" class="dod-field-cell">
@@ -1943,6 +1940,30 @@ const app = {
       background: #FFFFFF;
       color: #000000;
       font-family: Arial, Helvetica, sans-serif;
+    }
+    .dod-header-oficial-sc {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .dod-img-cabecalho {
+      width: 100%;
+      max-width: 820px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    .dod-sub-bar-protocolo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 8pt;
+      color: #475569;
+      padding: 4px 6px 6px 6px;
+      border-bottom: 1px solid #CBD5E1;
+      margin-bottom: 8px;
     }
     .dod-header-brasao {
       text-align: center;
