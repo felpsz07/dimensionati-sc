@@ -1893,11 +1893,11 @@ const app = {
       <div class="lages-doc-container">
         <!-- CABEÇALHO OFICIAL DE LAGES -->
         <div class="lages-header-logos" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <img src="/img/brasao_lages.png" class="lages-logo-brasao" alt="Munic?pio de Lages" style="height:52px;max-height:52px;width:auto;max-width:80px;object-fit:contain;">
+          <img src="/img/brasao_lages.png" class="lages-logo-brasao" alt="Município de Lages" style="height:52px;max-height:52px;width:auto;max-width:80px;object-fit:contain;">
           <div class="lages-header-titles" style="flex:1;text-align:center;padding:0 10px;">
-            <div class="lages-title-city">MUNIC?PIO DE LAGES</div>
+            <div class="lages-title-city">MUNICÍPIO DE LAGES</div>
             <div class="lages-title-state">ESTADO DE SANTA CATARINA</div>
-            <div class="lages-title-secretaria">SECRETARIA MUNICIPAL DE ADMINISTRA??O E FAZENDA ? DIRETORIA DE LICITA??ES E CONTRATOS</div>
+            <div class="lages-title-secretaria">SECRETARIA MUNICIPAL DE ADMINISTRAÇÃO E FAZENDA • DIRETORIA DE LICITAÇÕES E CONTRATOS</div>
           </div>
           <img src="/img/bandeira_lages.png" class="lages-logo-bandeira" alt="Bandeira de Lages" style="height:44px;max-height:44px;width:auto;max-width:80px;object-fit:contain;">
         </div>
@@ -2167,7 +2167,7 @@ const app = {
     }
 
     /* ========================================================== */
-    /* PADR?O OFICIAL MUNIC?PIO DE LAGES/SC (DOD E ETP)           */
+    /* PADRÃO OFICIAL MUNICÍPIO DE LAGES/SC (DOD E ETP)           */
     /* ========================================================== */
     .lages-doc-container {
       width: 100% !important;
@@ -3337,11 +3337,11 @@ const app = {
       <div class="lages-doc-container">
         <!-- CABEÇALHO OFICIAL DE LAGES -->
         <div class="lages-header-logos" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <img src="/img/brasao_lages.png" class="lages-logo-brasao" alt="Munic?pio de Lages" style="height:52px;max-height:52px;width:auto;max-width:80px;object-fit:contain;">
+          <img src="/img/brasao_lages.png" class="lages-logo-brasao" alt="Município de Lages" style="height:52px;max-height:52px;width:auto;max-width:80px;object-fit:contain;">
           <div class="lages-header-titles" style="flex:1;text-align:center;padding:0 10px;">
-            <div class="lages-title-city">MUNIC?PIO DE LAGES</div>
+            <div class="lages-title-city">MUNICÍPIO DE LAGES</div>
             <div class="lages-title-state">ESTADO DE SANTA CATARINA</div>
-            <div class="lages-title-secretaria">SECRETARIA MUNICIPAL DE ADMINISTRA??O E FAZENDA ? DIRETORIA DE TECNOLOGIA DA INFORMA??O E COMUNICA??ES</div>
+            <div class="lages-title-secretaria">SECRETARIA MUNICIPAL DE ADMINISTRAÇÃO E FAZENDA • DIRETORIA DE TECNOLOGIA DA INFORMAÇÃO E COMUNICAÇÕES</div>
           </div>
           <img src="/img/bandeira_lages.png" class="lages-logo-bandeira" alt="Bandeira de Lages" style="height:44px;max-height:44px;width:auto;max-width:80px;object-fit:contain;">
         </div>

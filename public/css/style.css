@@ -4377,7 +4377,8 @@ body {
 .modal-drawer-lg {
   max-width: 1040px !important;
   width: 95vw !important;
-  max-height: 92vh !important;
+  height: 90vh !important;
+  max-height: 90vh !important;
   display: flex !important;
   flex-direction: column !important;
   padding: 0 !important;
@@ -4391,20 +4392,33 @@ body {
 .modal-drawer-xl {
   max-width: 1100px !important;
   width: 96vw !important;
+  height: 94vh !important;
   max-height: 94vh !important;
   display: flex !important;
   flex-direction: column !important;
   padding: 0 !important;
   background: #FFFFFF !important;
   border-radius: var(--radius-lg) !important;
-  overflow-y: auto !important;
+  overflow: hidden !important;
+}
+
+.modal-drawer-xl .doc-top-bar {
+  flex-shrink: 0;
+}
+
+.modal-drawer-xl #corpoEtpCompleto {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 30px;
 }
 
 .drawer-header-bar {
+  flex-shrink: 0;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 20px 24px 16px 24px;
+  padding: 18px 24px 14px 24px;
   background: #111A27;
   border-bottom: 1px solid var(--dark-border);
 }
@@ -4448,17 +4462,27 @@ body {
   margin: 6px 0 0 0;
 }
 
-/* Abas do Painel de Análise TI */
+/* Abas do Painel de An?lise TI - Fixadas, nunca encolhem e sem scrollbar invasiva */
 .drawer-tabs-nav {
+  flex-shrink: 0;
   display: flex;
   background: #0B111A;
   border-bottom: 1px solid var(--dark-border);
   padding: 0 16px;
   gap: 4px;
   overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.drawer-tabs-nav::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .drawer-tab-btn {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -4486,8 +4510,10 @@ body {
 }
 
 .drawer-body-content {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 24px;
 }
 
@@ -4499,12 +4525,18 @@ body {
   display: block;
 }
 
-/* Barra de Ações do TI Fixada no Rodapé */
+.dod-preview-wrapper {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Barra de A??es do TI Fixada no Rodap? */
 .drawer-actions-footer {
+  flex-shrink: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
+  padding: 14px 24px;
   background: #111A27;
   border-top: 1px solid var(--dark-border);
   gap: 16px;
@@ -4523,7 +4555,6 @@ body {
   flex-wrap: wrap;
 }
 
-/* Botões de Ação do TI */
 .btn-action-warn {
   background: rgba(245, 158, 11, 0.15);
   border: 1px solid rgba(245, 158, 11, 0.4);
