@@ -269,8 +269,8 @@
             </button>
           </div>
 
-          <!-- CARDS OPERACIONAIS DE FLUXO / GESTÃO DO TI -->
-          <div class="ti-metrics-row" id="cardsOperacionaisTi">
+          <!-- CARDS OPERACIONAIS DE FLUXO / GESTÃO DO TI (Métricas em background) -->
+          <div class="ti-metrics-row" id="cardsOperacionaisTi" style="display: none;">
             <div class="ti-metric-card" onclick="app.setAbaStatus('aguardando_analise')" title="Solicitações recebidas aguardando triagem do TI">
               <div class="ti-metric-icon">⏳</div>
               <div class="ti-metric-body">
@@ -308,51 +308,52 @@
             </div>
           </div>
 
-          <!-- LINHA 2: BARRA INTEGRADA DE PESQUISA, ABAS E STATUS DO USUÁRIO -->
+          <!-- LINHA 2: BARRA DE PESQUISA E IDENTIFICAÇÃO DO PERFIL -->
           <div class="header-controls-row">
-            <!-- BUSCA PROFISSIONAL -->
+            <!-- BUSCA PROFISSIONAL AMPLIADA E VISÍVEL -->
             <div class="search-pro-box">
-              <svg class="search-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <svg class="search-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
               <input type="text" id="inputBusca" class="search-pro-field" placeholder="Buscar por protocolo, órgão ou solicitante..." oninput="app.filtrarTabela()">
             </div>
 
-            <!-- GRUPO DIREITO: ABAS DE STATUS E IDENTIFICAÇÃO DO PERFIL -->
+            <!-- IDENTIFICAÇÃO DO PERFIL DO USUÁRIO -->
             <div class="controls-right-group">
-              <!-- ABAS DE STATUS COM CONTADORES -->
-              <div class="status-tabs-container">
-                <button type="button" class="status-tab-btn active" id="tabStatusAguardando" onclick="app.setAbaStatus('aguardando_analise')">
-                  <span class="tab-label">Aguardando TI</span>
-                  <span class="tab-count-badge" id="badgeQtdAguardando">0</span>
-                </button>
-                <button type="button" class="status-tab-btn" id="tabStatusAjustes" onclick="app.setAbaStatus('ajustes')">
-                  <span class="tab-label">Com Ajustes</span>
-                  <span class="tab-count-badge badge-warn" id="badgeQtdAjustes">0</span>
-                </button>
-                <button type="button" class="status-tab-btn" id="tabStatusValidados" onclick="app.setAbaStatus('validados')">
-                  <span class="tab-label">DODs Validados</span>
-                  <span class="tab-count-badge badge-success" id="badgeQtdValidados">0</span>
-                </button>
-                <button type="button" class="status-tab-btn" id="tabStatusEtp" onclick="app.setAbaStatus('etp_gerado')">
-                  <span class="tab-label">ETP Gerado</span>
-                  <span class="tab-count-badge badge-accent" id="badgeQtdEtp">0</span>
-                </button>
-                <button type="button" class="status-tab-btn" id="tabStatusCanceladas" onclick="app.setAbaStatus('canceladas')">
-                  <span class="tab-label">Canceladas</span>
-                  <span class="tab-count-badge badge-cancel" id="badgeQtdCanceladas">0</span>
-                </button>
-                <button type="button" class="status-tab-btn" id="tabStatusTodas" onclick="app.setAbaStatus('todas')">
-                  <span class="tab-label">Todas</span>
-                  <span class="tab-count-badge" id="badgeQtdTodas">0</span>
-                </button>
-              </div>
-
-              <!-- IDENTIFICAÇÃO DO PERFIL DO USUÁRIO -->
               <span id="badgePapelUsuario" class="user-role-pill">
                 SERVIDOR SOLICITANTE
               </span>
+            </div>
+          </div>
+
+          <!-- LINHA 3: ABAS DE STATUS VISÍVEIS, DESTACADAS E NÃO BAGUNÇADAS -->
+          <div class="status-tabs-wrapper">
+            <div class="status-tabs-container">
+              <button type="button" class="status-tab-btn active" id="tabStatusAguardando" onclick="app.setAbaStatus('aguardando_analise')">
+                <span class="tab-label">Aguardando TI</span>
+                <span class="tab-count-badge" id="badgeQtdAguardando">0</span>
+              </button>
+              <button type="button" class="status-tab-btn" id="tabStatusAjustes" onclick="app.setAbaStatus('ajustes')">
+                <span class="tab-label">Com Ajustes</span>
+                <span class="tab-count-badge badge-warn" id="badgeQtdAjustes">0</span>
+              </button>
+              <button type="button" class="status-tab-btn" id="tabStatusValidados" onclick="app.setAbaStatus('validados')">
+                <span class="tab-label">DODs Validados</span>
+                <span class="tab-count-badge badge-success" id="badgeQtdValidados">0</span>
+              </button>
+              <button type="button" class="status-tab-btn" id="tabStatusEtp" onclick="app.setAbaStatus('etp_gerado')">
+                <span class="tab-label">ETP Gerado</span>
+                <span class="tab-count-badge badge-accent" id="badgeQtdEtp">0</span>
+              </button>
+              <button type="button" class="status-tab-btn" id="tabStatusCanceladas" onclick="app.setAbaStatus('canceladas')">
+                <span class="tab-label">Canceladas</span>
+                <span class="tab-count-badge badge-cancel" id="badgeQtdCanceladas">0</span>
+              </button>
+              <button type="button" class="status-tab-btn" id="tabStatusTodas" onclick="app.setAbaStatus('todas')">
+                <span class="tab-label">Todas as Requisições</span>
+                <span class="tab-count-badge" id="badgeQtdTodas">0</span>
+              </button>
             </div>
           </div>
         </div>
@@ -363,13 +364,13 @@
             <table class="dark-table enterprise-table">
               <thead>
                 <tr>
-                  <th style="width: 140px;">Nº REQUISIÇÃO</th>
-                  <th style="min-width: 180px;">ÓRGÃO / SETOR</th>
-                  <th style="min-width: 160px;">SOLICITANTE</th>
-                  <th style="width: 60px; text-align: center;">QTD</th>
-                  <th style="min-width: 190px;">EQUIPAMENTO SOLICITADO</th>
-                  <th style="width: 145px; text-align: center;">STATUS TI</th>
-                  <th style="width: 110px; text-align: right;">AÇÕES</th>
+                  <th style="width: 175px;">Nº REQUISIÇÃO</th>
+                  <th style="min-width: 220px;">ÓRGÃO / SETOR</th>
+                  <th style="min-width: 230px;">SOLICITANTE</th>
+                  <th style="width: 80px; text-align: center;">QTD</th>
+                  <th style="min-width: 240px;">EQUIPAMENTO SOLICITADO</th>
+                  <th style="width: 195px; text-align: center;">STATUS TI</th>
+                  <th style="width: 125px; text-align: right;">AÇÕES</th>
                 </tr>
               </thead>
               <tbody id="tbodyLicitacoes">

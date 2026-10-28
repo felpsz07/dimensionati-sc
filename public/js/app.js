@@ -723,7 +723,7 @@ const app = {
         descEquip = 'Nível 3 • Engenharia (SEPLAN)';
       }
 
-      const isDropUp = totalRows >= 3 && index === totalRows - 1;
+      const isDropUp = totalRows >= 3 && index >= totalRows - 2;
 
       return `
         <tr class="table-row-item ${(ehCancelado || ehReprovado) ? 'row-canceled' : ''}">
@@ -736,19 +736,19 @@ const app = {
             ` : ''}
           </td>
           <td class="col-orgao">
-            <div class="text-primary-strong">${d.setor || 'Escolas Municipais (SME)'}</div>
-            <div class="text-secondary-muted">${d.orgao || 'Prefeitura de Lages - SME'}</div>
+            <div class="text-primary-strong orgao-setor">${d.setor || 'Escolas Municipais (SME)'}</div>
+            <div class="text-secondary-muted orgao-nome">${d.orgao || 'Prefeitura de Lages - SME'}</div>
           </td>
           <td class="col-solicitante">
-            <div class="text-primary-strong">${d.usuario_nome || 'Servidor Solicitante'}</div>
-            <div class="text-secondary-muted">${d.cargo || 'Diretora de Escola'}</div>
+            <div class="text-primary-strong solicitante-nome">${d.usuario_nome || 'Servidor Solicitante'}</div>
+            <div class="text-secondary-muted solicitante-cargo">${d.cargo || 'Diretora de Escola'}</div>
           </td>
           <td class="col-qtd" style="text-align: center;">
             <span class="qty-pill-badge">${d.quantidade_usuarios}</span>
           </td>
           <td class="col-equipamento">
-            <div class="text-primary-strong">${nomeEquip}</div>
-            <div class="text-secondary-muted">${descEquip}</div>
+            <div class="text-primary-strong equip-nome">${nomeEquip}</div>
+            <div class="text-secondary-muted equip-desc">${descEquip}</div>
           </td>
           <td class="col-status" style="text-align: center;">
             <span class="badge-status-chip ${stClass}">
