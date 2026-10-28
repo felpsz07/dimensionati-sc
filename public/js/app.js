@@ -1841,14 +1841,14 @@ const app = {
     corpo.innerHTML = `
       <div class="lages-doc-container">
         <!-- CABEÇALHO OFICIAL DE LAGES -->
-        <div class="lages-header-logos">
-          <img src="/img/brasao_lages.png" class="lages-logo-brasao" alt="Município de Lages">
-          <div class="lages-header-titles">
-            <div class="lages-title-city">MUNICÍPIO DE LAGES</div>
+        <div class="lages-header-logos" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <img src="/img/brasao_lages.png" class="lages-logo-brasao" alt="Munic?pio de Lages" style="height:52px;max-height:52px;width:auto;max-width:80px;object-fit:contain;">
+          <div class="lages-header-titles" style="flex:1;text-align:center;padding:0 10px;">
+            <div class="lages-title-city">MUNIC?PIO DE LAGES</div>
             <div class="lages-title-state">ESTADO DE SANTA CATARINA</div>
-            <div class="lages-title-secretaria">SECRETARIA MUNICIPAL DE ADMINISTRAÇÃO E FAZENDA • DIRETORIA DE LICITAÇÕES E CONTRATOS</div>
+            <div class="lages-title-secretaria">SECRETARIA MUNICIPAL DE ADMINISTRA??O E FAZENDA ? DIRETORIA DE LICITA??ES E CONTRATOS</div>
           </div>
-          <img src="/img/bandeira_lages.png" class="lages-logo-bandeira" alt="Bandeira de Lages">
+          <img src="/img/bandeira_lages.png" class="lages-logo-bandeira" alt="Bandeira de Lages" style="height:44px;max-height:44px;width:auto;max-width:80px;object-fit:contain;">
         </div>
         <div class="lages-header-divider"></div>
 
@@ -2093,11 +2093,12 @@ const app = {
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>${titulo || 'Documento Oficial - Município de Lages / TCE-SC'}</title>
+  <base href="${window.location.origin}/">
+  <title>${titulo || 'Documento Oficial - Munic?pio de Lages / TCE-SC'}</title>
   <style>
     @page {
       size: A4 portrait;
-      margin: 12mm 10mm;
+      margin: 15mm 12mm 15mm 12mm;
     }
     * {
       box-sizing: border-box;
@@ -2109,44 +2110,202 @@ const app = {
       color: #000000 !important;
       font-family: Arial, Helvetica, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
-      padding: 12px;
+      padding: 0;
+      font-size: 8.5pt;
+      line-height: 1.45;
     }
+
+    /* ========================================================== */
+    /* PADR?O OFICIAL MUNIC?PIO DE LAGES/SC (DOD E ETP)           */
+    /* ========================================================== */
+    .lages-doc-container {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+      border: none !important;
+      background: #FFFFFF !important;
+      color: #000000 !important;
+      font-family: Arial, Helvetica, sans-serif !important;
+    }
+    .lages-header-logos {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      margin-bottom: 6px !important;
+      width: 100% !important;
+    }
+    .lages-logo-brasao {
+      height: 52px !important;
+      max-height: 52px !important;
+      width: auto !important;
+      max-width: 80px !important;
+      object-fit: contain !important;
+      display: block !important;
+    }
+    .lages-logo-bandeira {
+      height: 44px !important;
+      max-height: 44px !important;
+      width: auto !important;
+      max-width: 80px !important;
+      object-fit: contain !important;
+      display: block !important;
+    }
+    .lages-header-titles {
+      flex: 1 !important;
+      text-align: center !important;
+      padding: 0 10px !important;
+    }
+    .lages-title-city {
+      font-size: 13pt !important;
+      font-weight: 900 !important;
+      color: #000000 !important;
+      letter-spacing: 0.5px !important;
+      line-height: 1.1 !important;
+    }
+    .lages-title-state {
+      font-size: 9pt !important;
+      font-weight: 700 !important;
+      color: #222222 !important;
+      margin-top: 2px !important;
+      line-height: 1.1 !important;
+    }
+    .lages-title-secretaria {
+      font-size: 7.5pt !important;
+      font-weight: 600 !important;
+      color: #444444 !important;
+      margin-top: 3px !important;
+      line-height: 1.2 !important;
+      text-transform: uppercase !important;
+    }
+    .lages-header-divider {
+      width: 100% !important;
+      height: 1.5px !important;
+      background: #000000 !important;
+      margin: 6px 0 10px 0 !important;
+      border: none !important;
+    }
+    .lages-doc-main-title {
+      font-size: 11pt !important;
+      font-weight: 900 !important;
+      text-align: center !important;
+      text-transform: uppercase !important;
+      margin: 8px 0 4px 0 !important;
+      color: #000000 !important;
+    }
+    .lages-doc-subtitle {
+      font-size: 8pt !important;
+      text-align: center !important;
+      color: #444444 !important;
+      margin-bottom: 10px !important;
+    }
+    .lages-modalidade-box {
+      display: flex !important;
+      justify-content: space-around !important;
+      border: 1px solid #000000 !important;
+      padding: 5px 8px !important;
+      font-size: 8pt !important;
+      font-weight: 700 !important;
+      margin-bottom: 12px !important;
+      background: #FFFFFF !important;
+      color: #000000 !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+    .lages-section-card {
+      border: 1px solid #000000 !important;
+      margin-bottom: 10px !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+      background: #FFFFFF !important;
+    }
+    .lages-section-header {
+      background: #E2E8F0 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      border-bottom: 1px solid #000000 !important;
+      padding: 5px 8px !important;
+      font-weight: 800 !important;
+      font-size: 8.5pt !important;
+      text-transform: uppercase !important;
+      color: #000000 !important;
+    }
+    .lages-section-body {
+      padding: 7px 9px !important;
+      font-size: 8.5pt !important;
+      line-height: 1.45 !important;
+      text-align: justify !important;
+      color: #000000 !important;
+    }
+    .lages-table-orcamento {
+      width: 100% !important;
+      border-collapse: collapse !important;
+      font-size: 8pt !important;
+      margin-top: 6px !important;
+    }
+    .lages-table-orcamento th,
+    .lages-table-orcamento td {
+      border: 1px solid #000000 !important;
+      padding: 4px 6px !important;
+      color: #000000 !important;
+    }
+    .lages-table-orcamento th {
+      background: #E2E8F0 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      font-weight: 800 !important;
+      text-align: left !important;
+    }
+    .lages-assinaturas-grid-4 {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 20px 24px !important;
+      margin-top: 24px !important;
+      font-size: 8pt !important;
+      text-align: center !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+    .lages-assinatura-box {
+      padding-top: 18px !important;
+      border-top: 1px solid #000000 !important;
+      color: #000000 !important;
+    }
+    .lages-doc-footer-legal {
+      display: flex !important;
+      justify-content: space-between !important;
+      font-size: 7pt !important;
+      color: #555555 !important;
+      border-top: 1px solid #999999 !important;
+      padding-top: 5px !important;
+      margin-top: 16px !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+    .dod-editable-field, .etp-editable-field {
+      border: none !important;
+      background: transparent !important;
+      padding: 0 !important;
+      outline: none !important;
+      color: #000000 !important;
+    }
+    .badge-etp-sub, .etp-tag-pill {
+      border: 1px solid #777777 !important;
+      padding: 1px 4px !important;
+      font-size: 7.5pt !important;
+      color: #000000 !important;
+      border-radius: 3px !important;
+    }
+
+    /* LEGADO / TCE / RELAT?RIOS */
     .dod-sc-container {
       width: 100%;
       margin: 0 auto;
       background: #FFFFFF;
       color: #000000;
       font-family: Arial, Helvetica, sans-serif;
-    }
-    .dod-header-oficial-sc {
-      width: 100%;
-      text-align: center;
-      margin-bottom: 6px;
-    }
-    .dod-img-cabecalho {
-      width: 100%;
-      max-width: 820px;
-      height: auto;
-      display: block;
-      margin: 0 auto;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-    .dod-sub-bar-protocolo {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 8pt;
-      color: #475569;
-      padding: 4px 6px 6px 6px;
-      border-bottom: 1px solid #CBD5E1;
-      margin-bottom: 8px;
-    }
-    .dod-header-brasao {
-      text-align: center;
-      border-bottom: 2px solid #000000;
-      padding-bottom: 10px;
-      margin-bottom: 12px;
     }
     .dod-official-table {
       width: 100%;
@@ -2211,14 +2370,6 @@ const app = {
       border: 1px solid #000000;
       padding: 8px 10px;
       color: #000000;
-    }
-    .dod-footer-note {
-      font-size: 8pt;
-      color: #4B5563;
-      margin-top: 10px;
-      font-style: italic;
-      line-height: 1.4;
-      text-align: justify;
     }
     .gov-contract-doc {
       font-family: "Times New Roman", Times, Georgia, serif;
@@ -2344,11 +2495,33 @@ const app = {
 <body>
   ${el.innerHTML}
   <script>
-    window.onload = function() {
+    function dispararImpressao() {
       setTimeout(function() {
+        window.focus();
         window.print();
-      }, 250);
-    };
+      }, 200);
+    }
+    if (document.images && document.images.length > 0) {
+      var carregadas = 0;
+      var total = document.images.length;
+      for (var i = 0; i < total; i++) {
+        if (document.images[i].complete) {
+          carregadas++;
+        } else {
+          document.images[i].addEventListener('load', function() {
+            carregadas++;
+            if (carregadas >= total) dispararImpressao();
+          });
+          document.images[i].addEventListener('error', function() {
+            carregadas++;
+            if (carregadas >= total) dispararImpressao();
+          });
+        }
+      }
+      if (carregadas >= total) dispararImpressao();
+    } else {
+      window.onload = dispararImpressao;
+    }
   <\/script>
 </body>
 </html>`);
@@ -3112,14 +3285,14 @@ const app = {
     corpo.innerHTML = `
       <div class="lages-doc-container">
         <!-- CABEÇALHO OFICIAL DE LAGES -->
-        <div class="lages-header-logos">
-          <img src="/img/brasao_lages.png" class="lages-logo-brasao" alt="Município de Lages">
-          <div class="lages-header-titles">
-            <div class="lages-title-city">MUNICÍPIO DE LAGES</div>
+        <div class="lages-header-logos" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <img src="/img/brasao_lages.png" class="lages-logo-brasao" alt="Munic?pio de Lages" style="height:52px;max-height:52px;width:auto;max-width:80px;object-fit:contain;">
+          <div class="lages-header-titles" style="flex:1;text-align:center;padding:0 10px;">
+            <div class="lages-title-city">MUNIC?PIO DE LAGES</div>
             <div class="lages-title-state">ESTADO DE SANTA CATARINA</div>
-            <div class="lages-title-secretaria">SECRETARIA MUNICIPAL DE ADMINISTRAÇÃO E FAZENDA • DIRETORIA DE TECNOLOGIA DA INFORMAÇÃO E COMUNICAÇÕES</div>
+            <div class="lages-title-secretaria">SECRETARIA MUNICIPAL DE ADMINISTRA??O E FAZENDA ? DIRETORIA DE TECNOLOGIA DA INFORMA??O E COMUNICA??ES</div>
           </div>
-          <img src="/img/bandeira_lages.png" class="lages-logo-bandeira" alt="Bandeira de Lages">
+          <img src="/img/bandeira_lages.png" class="lages-logo-bandeira" alt="Bandeira de Lages" style="height:44px;max-height:44px;width:auto;max-width:80px;object-fit:contain;">
         </div>
         <div class="lages-header-divider"></div>
 
