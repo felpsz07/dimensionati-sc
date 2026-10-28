@@ -964,6 +964,27 @@ body {
   white-space: nowrap;
 }
 
+.badge-etp-sub {
+  margin-top: 5px;
+  display: block;
+}
+
+.etp-tag-pill {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+  color: #38BDF8;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 0.76rem;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
 /* BADGE DE QUANTIDADE COMPACTO */
 .qty-pill-badge {
   display: inline-flex;

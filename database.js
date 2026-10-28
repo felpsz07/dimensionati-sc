@@ -232,7 +232,7 @@ function initDatabase() {
 
     const demandasSeed = [
       [
-        'ETP-2026-0023',
+        'DOD-2026-0023',
         1,
         'Profa. Maria Eduarda Alencar',
         'MAT-48921/PML',
@@ -255,7 +255,7 @@ function initDatabase() {
         '2026-10-26 14:15:00'
       ],
       [
-        'ETP-2026-0022',
+        'DOD-2026-0022',
         4,
         'Dra. Camila Ramos',
         'MAT-55319/PML',
@@ -278,7 +278,7 @@ function initDatabase() {
         '2026-10-26 11:30:00'
       ],
       [
-        'ETP-2026-0021',
+        'DOD-2026-0021',
         2,
         'Eng. Carlos Eduardo Silveira',
         'MAT-31204/PML',
@@ -301,7 +301,7 @@ function initDatabase() {
         '2026-10-25 16:45:00'
       ],
       [
-        'ETP-2026-0020',
+        'DOD-2026-0020',
         5,
         'Marcos Vinicius Furtado',
         'MAT-28104/PML',
@@ -324,7 +324,7 @@ function initDatabase() {
         '2026-10-25 09:20:00'
       ],
       [
-        'ETP-2026-0019',
+        'DOD-2026-0019',
         3,
         'João Pedro Andrade',
         'MAT-19402/PML',
@@ -347,7 +347,7 @@ function initDatabase() {
         '2026-10-24 15:10:00'
       ],
       [
-        'ETP-2026-0018',
+        'DOD-2026-0018',
         1,
         'Carlos Alberto Mendes',
         'MAT-11029/PML',
@@ -478,7 +478,8 @@ function initDatabase() {
       "ALTER TABLE demandas ADD COLUMN etp_gerado_em DATETIME;",
       "ALTER TABLE demandas ADD COLUMN ajustes_solicitados TEXT;",
       "ALTER TABLE demandas ADD COLUMN motivo_reprovacao TEXT;",
-      "ALTER TABLE demandas ADD COLUMN responsavel_analise TEXT;"
+      "ALTER TABLE demandas ADD COLUMN responsavel_analise TEXT;",
+      "ALTER TABLE demandas ADD COLUMN etp_numero TEXT DEFAULT NULL;"
     ];
 
     for (const sql of novasColunasDemandas) {
@@ -487,6 +488,29 @@ function initDatabase() {
       } catch (err) {
         // Coluna já existe
       }
+    }
+
+    // Migração de protocolos: Requisições/DODs recebem prefixo DOD-2026-XXXX;
+    // O prefixo ETP-2026-XXXX fica reservado apenas para quando o ETP for gerado!
+    try {
+      // Para as demandas que já geraram ETP, registra o etp_numero
+      db.exec(`
+        UPDATE demandas 
+        SET etp_numero = protocolo 
+        WHERE (status = 'ETP gerado' OR etp_gerado = 1) AND etp_numero IS NULL;
+
+        -- Converte o identificador da requisição/DOD para DOD-
+        UPDATE demandas 
+        SET protocolo = 'DOD-' || SUBSTR(protocolo, 5) 
+        WHERE protocolo LIKE 'ETP-%';
+
+        -- Atualiza histórico correspondente
+        UPDATE historico_demandas 
+        SET protocolo = 'DOD-' || SUBSTR(protocolo, 5) 
+        WHERE protocolo LIKE 'ETP-%';
+      `);
+    } catch (migErr) {
+      console.warn('Aviso migração DOD/ETP prefixo:', migErr.message);
     }
 
     // Cria tabela de rastreabilidade e histórico de auditoria

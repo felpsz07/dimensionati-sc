@@ -34,7 +34,7 @@ const app = {
     perfilRecomendado: null,
     perfilEscolhido: null,
     analiseTrava: null,
-    protocolo: 'REQ-2026-0000',
+    protocolo: 'DOD-2026-0000',
     custo_unitario: 1850.00,
     custo_total: 1850.00
   },
@@ -729,6 +729,11 @@ const app = {
         <tr class="table-row-item ${(ehCancelado || ehReprovado) ? 'row-canceled' : ''}">
           <td class="col-protocolo">
             <span class="badge-protocolo">${d.protocolo}</span>
+            ${(d.etp_numero || d.etp_gerado === 1) ? `
+              <div class="badge-etp-sub" title="Estudo Técnico Preliminar Gerado">
+                <span class="etp-tag-pill">📑 ${d.etp_numero || d.protocolo.replace('DOD-', 'ETP-')}</span>
+              </div>
+            ` : ''}
           </td>
           <td class="col-orgao">
             <div class="text-primary-strong">${d.setor || 'Escolas Municipais (SME)'}</div>
@@ -977,7 +982,7 @@ const app = {
   // ==========================================
   abrirWizardNovo() {
     const num = Math.floor(1000 + Math.random() * 9000);
-    this.demanda.protocolo = `REQ-2026-${num}`;
+    this.demanda.protocolo = `DOD-2026-${num}`;
 
     // Sincroniza com dados cadastrados do usuário logado
     if (this.usuarioLogado) {
@@ -1722,7 +1727,7 @@ const app = {
     const setorServ = demanda.setor || demanda.setorNome || (this.usuarioLogado ? this.usuarioLogado.setor : 'Escolas Municipais (SME)');
     const emailServ = (this.usuarioLogado && this.usuarioLogado.email) ? this.usuarioLogado.email : 'angelita.souza@educacao.lages.sc.gov.br';
     const telServ = '(49) 3019-8600 / (49) 3221-1000';
-    const protocolo = demanda.protocolo || 'REQ-2026-0000';
+    const protocolo = demanda.protocolo || 'DOD-2026-0000';
     const qtd = demanda.quantidade_usuarios || demanda.quantidade || 1;
 
     // Extrai dados estruturados salvos
@@ -1911,7 +1916,7 @@ const app = {
           
           <div class="dod-sub-bar-protocolo">
             <span>MUNICÍPIO DE LAGES • SECRETARIA MUNICIPAL DE EDUCAÇÃO</span>
-            <span>PROTOCOLO: <strong>${protocolo}</strong></span>
+            <span>PROTOCOLO DOD: <strong>${protocolo}</strong></span>
           </div>
         </div>
 
@@ -2257,7 +2262,7 @@ const app = {
       msg.innerText = `✓ Minuta encaminhada com sucesso para ${email}!`;
     }
 
-    const prot = this.demanda.protocolo || 'ETP-2026';
+    const prot = this.demanda.protocolo || 'DOD-2026';
     const subj = encodeURIComponent(`Minuta de Contrato TIC Blindada - ${prot}`);
     const body = encodeURIComponent(`Segue a minuta oficial gerada para a Prefeitura de Lages/SC.\n\nProtocolo: ${prot}\nValor: R$ ${this.demanda.custo_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`);
     
@@ -3193,10 +3198,10 @@ const app = {
             SECRETARIA DE ADMINISTRAÇÃO E FAZENDA • DIRETORIA DE TECNOLOGIA DA INFORMAÇÃO E COMUNICAÇÕES
           </div>
           <h1 class="etp-doc-title">
-            ESTUDO TÉCNICO PRELIMINAR DA CONTRATAÇÃO (ETP)
+            ESTUDO TÉCNICO PRELIMINAR DA CONTRATAÇÃO (ETP) Nº ${d.etp_numero || d.protocolo.replace('DOD-', 'ETP-')}
           </h1>
           <p class="etp-doc-sub">
-            Art. 18, Inciso I e § 1º da Lei Federal nº 14.133/2021 • Protocolo: <strong>${protocolo}</strong>
+            Art. 18, Inciso I e § 1º da Lei Federal nº 14.133/2021 • Demanda Vinculada (DOD): <strong>${protocolo}</strong>
           </p>
         </div>
 
@@ -3599,7 +3604,7 @@ const app = {
     if (numCaso === 1) {
       // Caso 1: Superdimensionamento Escolar Grave
       const demandaSim = {
-        protocolo: 'ETP-2026-HACK01',
+        protocolo: 'DOD-2026-HACK01',
         orgao: 'Secretaria Municipal de Educação de Lages (SME)',
         setor: 'Escolas Municipais de Ensino Fundamental',
         usuario_nome: 'Gestão Escolar Municipal',
@@ -3639,7 +3644,7 @@ const app = {
     } else if (numCaso === 2) {
       // Caso 2: Risco de Subdimensionamento em Obras
       const demandaSim = {
-        protocolo: 'ETP-2026-HACK02',
+        protocolo: 'DOD-2026-HACK02',
         orgao: 'Secretaria de Planejamento e Obras (SEPLAN)',
         setor: 'Engenharia Civil e Pavimentação Asfáltica',
         usuario_nome: 'Eng. Rodolfo Silveira',
@@ -3679,7 +3684,7 @@ const app = {
     } else {
       // Caso 3: Eficiência Máxima e Conformidade Plena na Saúde
       const demandaSim = {
-        protocolo: 'ETP-2026-HACK03',
+        protocolo: 'DOD-2026-HACK03',
         orgao: 'Secretaria Municipal de Saúde de Lages (SMS)',
         setor: 'Unidades Básicas de Saúde (UBS)',
         usuario_nome: 'Dra. Camila Ramos',
@@ -3781,7 +3786,7 @@ const app = {
         </div>
         
         <div style="background: #F8FAFC; border: 1px solid #CBD5E1; border-left: 4px solid #0F172A; padding: 12px 16px; margin-bottom: 18px;">
-          <div style="font-weight: 800; font-size: 10pt; color: #0F172A;">PARECER PRELIMINAR DE AUDITORIA PREVENTIVA Nº ${demanda.protocolo.replace('ETP-', 'PAR-TCE-')}/${ano}</div>
+          <div style="font-weight: 800; font-size: 10pt; color: #0F172A;">PARECER PRELIMINAR DE AUDITORIA PREVENTIVA Nº ${demanda.protocolo.replace('ETP-', 'PAR-TCE-').replace('DOD-', 'PAR-TCE-')}/${ano}</div>
           <div style="font-size: 8.5pt; color: #475569; margin-top: 4px; line-height: 1.4;">
             <strong>Jurisdicionado:</strong> Município de Lages / SC • <strong>Unidade Gestora:</strong> ${demanda.orgao}<br>
             <strong>Setor Beneficiado:</strong> ${demanda.setor} • <strong>Responsável:</strong> ${demanda.usuario_nome || 'Servidor Solicitante'} (${demanda.cargo || 'Cargo Público'})<br>

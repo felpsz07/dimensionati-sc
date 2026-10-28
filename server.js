@@ -250,7 +250,9 @@ app.post('/api/demandas', (req, res) => {
 
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     const anoAtual = new Date().getFullYear();
-    const protocolo = `ETP-${anoAtual}-${randomSuffix}`;
+    // Protocolo oficial da solicitação do servidor: Documento de Formalização da Demanda (DOD)
+    // O identificador ETP-2026-XXXX é atribuído EXCLUSIVAMENTE após a validação do TI e geração do ETP!
+    const protocolo = `DOD-${anoAtual}-${randomSuffix}`;
 
     const justificativaAutomatica = `Diagnóstico de rotina gerado automaticamente pelo DimensionaTI SC para ${cargo || 'servidor'} na unidade ${setor}. Documento de Formalização da Demanda (DOD) estruturado em conformidade com o Art. 18 da Lei Federal nº 14.133/2021 aguardando validação técnica do TI.`;
 
@@ -374,12 +376,12 @@ app.get('/api/demandas', (req, res) => {
   }
 });
 
-// 8. Obter demanda por protocolo
+// 8. Obter demanda por protocolo ou número de ETP
 app.get('/api/demandas/:id', (req, res) => {
   try {
     const { id } = req.params;
     let demanda = isNaN(id) 
-      ? db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(id)
+      ? db.prepare('SELECT * FROM demandas WHERE protocolo = ? OR etp_numero = ?').get(id, id)
       : db.prepare('SELECT * FROM demandas WHERE id = ?').get(id);
 
     if (!demanda) {
@@ -644,7 +646,7 @@ app.post('/api/demandas/:protocolo/gerar-etp', (req, res) => {
     const { protocolo } = req.params;
     const { usuarioNome = 'Técnico de TIC', usuarioCargo = 'Equipe de Planejamento da Contratação', etpConteudo = null } = req.body;
 
-    const dem = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    const dem = db.prepare('SELECT * FROM demandas WHERE protocolo = ? OR etp_numero = ?').get(protocolo, protocolo);
     if (!dem) return res.status(404).json({ error: 'Demanda não encontrada.' });
 
     if (dem.dod_validado !== 1) {
@@ -653,6 +655,10 @@ app.post('/api/demandas/:protocolo/gerar-etp', (req, res) => {
       });
     }
 
+    const randomEtpSuffix = Math.floor(1000 + Math.random() * 9000);
+    const anoAtual = new Date().getFullYear();
+    // Gera identificador oficial do Estudo Técnico Preliminar (ETP) vinculado ao DOD
+    const etpNumero = dem.etp_numero || `ETP-${anoAtual}-${randomEtpSuffix}`;
     const geradorFormatado = `${usuarioNome} (${usuarioCargo})`;
     const conteudoParaSalvar = etpConteudo ? JSON.stringify(etpConteudo) : (dem.etp_conteudo || '{}');
 
@@ -660,25 +666,26 @@ app.post('/api/demandas/:protocolo/gerar-etp', (req, res) => {
       UPDATE demandas 
       SET status = 'ETP gerado',
           etp_gerado = 1,
+          etp_numero = ?,
           etp_gerado_por = ?,
           etp_gerado_em = datetime('now', 'localtime'),
           etp_conteudo = ?
-      WHERE protocolo = ?
-    `).run(geradorFormatado, conteudoParaSalvar, protocolo);
+      WHERE protocolo = ? OR etp_numero = ?
+    `).run(etpNumero, geradorFormatado, conteudoParaSalvar, dem.protocolo, dem.protocolo);
 
     registrarHistorico(
       dem.id,
-      protocolo,
+      dem.protocolo,
       'ETP gerado com base no DOD validado',
       usuarioNome,
       usuarioCargo,
       'admin',
-      'Estudo Técnico Preliminar (ETP) elaborado com levantamento de 3 alternativas, análise comparativa de viabilidade técnica/econômica e conclusão.',
+      `Estudo Técnico Preliminar (ETP) oficial emitido sob o número ${etpNumero} com levantamento de 3 alternativas, análise comparativa de viabilidade técnica/econômica e conclusão. Vinculado ao DOD ${dem.protocolo}.`,
       'ETP gerado'
     );
 
-    const atualizada = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
-    res.json({ success: true, demanda: atualizada });
+    const atualizada = db.prepare('SELECT * FROM demandas WHERE id = ?').get(dem.id);
+    res.json({ success: true, demanda: atualizada, etpNumero });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
