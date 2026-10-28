@@ -697,23 +697,55 @@ app.put('/api/demandas/:protocolo/etp', (req, res) => {
     const { protocolo } = req.params;
     const { etpConteudo, usuarioNome = 'Técnico de TIC', usuarioCargo = 'Equipe de TIC' } = req.body;
 
-    const dem = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    const dem = db.prepare('SELECT * FROM demandas WHERE protocolo = ? OR etp_numero = ?').get(protocolo, protocolo);
     if (!dem) return res.status(404).json({ error: 'Demanda não encontrada.' });
 
     db.prepare(`
       UPDATE demandas 
       SET etp_conteudo = ?
-      WHERE protocolo = ?
-    `).run(typeof etpConteudo === 'string' ? etpConteudo : JSON.stringify(etpConteudo), protocolo);
+      WHERE id = ?
+    `).run(typeof etpConteudo === 'string' ? etpConteudo : JSON.stringify(etpConteudo), dem.id);
 
     registrarHistorico(
       dem.id,
-      protocolo,
+      dem.protocolo,
       'ETP revisado e atualizado pelo TI',
       usuarioNome,
       usuarioCargo,
       'admin',
-      'Alterações técnicas salvas no Estudo Técnico Preliminar.',
+      'Alterações técnicas salvas no Estudo Técnico Preliminar (Modelo Oficial de Lages).',
+      dem.status
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 8.10 Salvar Edição do DOD (Documento de Formalização de Demanda)
+app.put('/api/demandas/:protocolo/dod', (req, res) => {
+  try {
+    const { protocolo } = req.params;
+    const { dodConteudo, usuarioNome = 'Servidor/TI', usuarioCargo = 'Responsável' } = req.body;
+
+    const dem = db.prepare('SELECT * FROM demandas WHERE protocolo = ? OR etp_numero = ?').get(protocolo, protocolo);
+    if (!dem) return res.status(404).json({ error: 'Demanda não encontrada.' });
+
+    db.prepare(`
+      UPDATE demandas 
+      SET dod_conteudo = ?
+      WHERE id = ?
+    `).run(typeof dodConteudo === 'string' ? dodConteudo : JSON.stringify(dodConteudo), dem.id);
+
+    registrarHistorico(
+      dem.id,
+      dem.protocolo,
+      'DOD revisado e atualizado',
+      usuarioNome,
+      usuarioCargo,
+      'sistema',
+      'Alterações salvas no Documento de Formalização da Demanda (DOD - Modelo Oficial de Lages).',
       dem.status
     );
 

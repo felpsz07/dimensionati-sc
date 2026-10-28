@@ -1891,6 +1891,182 @@ body {
 }
 
 /* ========================================================== */
+/* CABEÇALHO E DOCUMENTOS OFICIAIS DO MUNICÍPIO DE LAGES/SC   */
+/* ========================================================== */
+.lages-doc-container {
+  max-width: 880px;
+  margin: 0 auto;
+  background: #FFFFFF;
+  color: #0F172A;
+  font-family: Arial, Helvetica, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding: 36px 44px;
+  border-radius: 6px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+  line-height: 1.5;
+}
+
+.lages-header-logos {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 6px;
+}
+
+.lages-logo-brasao {
+  height: 64px;
+  width: auto;
+  object-fit: contain;
+}
+
+.lages-logo-bandeira {
+  height: 56px;
+  width: auto;
+  object-fit: contain;
+}
+
+.lages-header-titles {
+  flex: 1;
+  text-align: center;
+}
+
+.lages-title-city {
+  font-size: 13.5pt;
+  font-weight: 900;
+  color: #000000;
+  letter-spacing: 0.5px;
+}
+
+.lages-title-state {
+  font-size: 9.5pt;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.5px;
+}
+
+.lages-title-secretaria {
+  font-size: 8pt;
+  color: #475569;
+  font-weight: 600;
+  margin-top: 3px;
+}
+
+.lages-header-divider {
+  width: 100%;
+  height: 2px;
+  background: #000000;
+  margin: 8px 0 16px 0;
+}
+
+.lages-doc-main-title {
+  text-align: center;
+  font-size: 12pt;
+  font-weight: 900;
+  color: #000000;
+  text-transform: uppercase;
+  margin: 14px 0 10px 0;
+  letter-spacing: 0.3px;
+}
+
+.lages-doc-subtitle {
+  text-align: center;
+  font-size: 9pt;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 14px;
+}
+
+.lages-modalidade-box {
+  background: #F8FAFC;
+  border: 1px solid #000000;
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 9pt;
+  text-align: center;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.lages-section-card {
+  margin-bottom: 16px;
+  border: 1px solid #000000;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.lages-section-header {
+  background: #F1F5F9;
+  border-bottom: 1px solid #000000;
+  padding: 8px 12px;
+  font-weight: 800;
+  font-size: 9.5pt;
+  color: #000000;
+  text-transform: uppercase;
+}
+
+.lages-section-body {
+  padding: 10px 14px;
+  font-size: 9.5pt;
+  line-height: 1.55;
+  color: #000000;
+  text-align: justify;
+}
+
+.lages-editable-field[contenteditable="true"] {
+  background: #FEFCE8 !important;
+  border: 1px dashed #EAB308 !important;
+  padding: 6px 8px !important;
+  border-radius: 4px;
+  outline: none;
+}
+
+.lages-table-orcamento {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8.5pt;
+  margin-top: 8px;
+}
+
+.lages-table-orcamento th,
+.lages-table-orcamento td {
+  border: 1px solid #000000;
+  padding: 6px 10px;
+}
+
+.lages-table-orcamento th {
+  background: #F1F5F9;
+  font-weight: 800;
+  text-align: left;
+}
+
+.lages-assinaturas-grid-4 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px 24px;
+  margin-top: 26px;
+  font-size: 8.5pt;
+  text-align: center;
+}
+
+.lages-assinatura-box {
+  padding-top: 22px;
+  border-top: 1px solid #000000;
+}
+
+.lages-doc-footer-legal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 7.5pt;
+  color: #64748B;
+  border-top: 1px solid #CBD5E1;
+  padding-top: 8px;
+  margin-top: 26px;
+}
+
+/* ========================================================== */
 /* FORMULÁRIO OFICIAL: DOD DE SANTA CATARINA                  */
 /* ========================================================== */
 .dod-sc-container {
