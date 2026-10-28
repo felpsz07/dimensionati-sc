@@ -4,7 +4,8 @@ const app = {
   passoAtual: 1,
   totalPassos: 5,
   demandasCarregadas: [],
-  abaStatusAtual: 'transmitidas',
+  abaStatusAtual: 'aguardando_analise',
+  jaInicializouAbaSessao: false,
 
   lotacaoTemp: {
     setorNome: 'Escolas Municipais (SME)',
@@ -295,7 +296,34 @@ const app = {
     if (elS) elS.value = senha;
   },
 
+  temaAtual: localStorage.getItem('dimensionati_tema') || 'light',
+
+  aplicarTema(tema) {
+    this.temaAtual = tema === 'dark' ? 'dark' : 'light';
+    localStorage.setItem('dimensionati_tema', this.temaAtual);
+    if (this.temaAtual === 'dark') {
+      document.body.classList.add('theme-dark');
+      document.body.classList.remove('theme-light');
+    } else {
+      document.body.classList.add('theme-light');
+      document.body.classList.remove('theme-dark');
+    }
+    const ico = document.getElementById('themeToggleIcon');
+    const txt = document.getElementById('themeToggleText');
+    if (ico) ico.textContent = this.temaAtual === 'dark' ? '☀️' : '🌙';
+    if (txt) txt.textContent = this.temaAtual === 'dark' ? 'White' : 'Dark';
+  },
+
+  alternarTema() {
+    const novoTema = this.temaAtual === 'dark' ? 'light' : 'dark';
+    this.aplicarTema(novoTema);
+    if (document.getElementById('view-auditor')?.classList.contains('active')) {
+      this.carregarDashboardAuditor();
+    }
+  },
+
   async init() {
+    this.aplicarTema(this.temaAtual);
     await this.carregarPerfis();
     this.renderizarDotGrid();
     this.verificarSessao();
@@ -368,105 +396,331 @@ const app = {
       this.usuarioLogado = data.usuario;
       localStorage.setItem('dimensionati_sessao', JSON.stringify(data.usuario));
 
-      // Se já possui lotação/instituição definida (ex: Diretora ou Admin), entra direto no painel
-      if (data.usuario.setor && data.usuario.cargo) {
-        this.aplicarUsuario(data.usuario);
-        this.mostrarTela('screen-app');
-        this.navegar('licitacoes');
-      } else {
-        const wpNome = document.getElementById('wpNome');
-        const wpMat = document.getElementById('wpMatricula');
-        const wpCargo = document.getElementById('wpCargo');
-        if (wpNome) wpNome.value = data.usuario.nome || '';
-        if (wpMat) wpMat.value = data.usuario.matricula || '';
-        if (wpCargo) wpCargo.value = data.usuario.cargo || 'Servidor Público';
-
-        this.mostrarTela('screen-workplace');
-      }
+      // Sempre entra direto no painel principal (a lotação e matrícula já ficam vinculadas ao cadastro)
+      this.aplicarUsuario(data.usuario);
+      this.mostrarTela('screen-app');
+      this.navegar('licitacoes');
     } catch (err) {
       erro.textContent = 'Erro ao conectar ao servidor.';
     } finally {
-      btn.innerHTML = 'Entrar no painel <span class="arrow-icon">↗</span>';
+      btn.innerHTML = 'Entrar';
       btn.disabled = false;
     }
   },
 
   toggleSenha() {
     const el = document.getElementById('loginSenha');
-    el.type = el.type === 'password' ? 'text' : 'password';
+    if (el) el.type = el.type === 'password' ? 'text' : 'password';
   },
 
-  // ==========================================
-  // LOTAÇÃO
-  // ==========================================
-  selecionarLotacao(setor, orgao, cargo, elem) {
-    document.querySelectorAll('#wpGridSetores .dark-pill').forEach(p => p.classList.remove('active'));
-    if (elem) elem.classList.add('active');
-
-    this.lotacaoTemp = { setorNome: setor, orgao: orgao, cargo: cargo };
-    const wpCargo = document.getElementById('wpCargo');
-    if (wpCargo) wpCargo.value = cargo;
+  toggleSenhaCadastro() {
+    const el = document.getElementById('cadSenha');
+    const el2 = document.getElementById('cadConfirmaSenha');
+    if (el) {
+      const novoTipo = el.type === 'password' ? 'text' : 'password';
+      el.type = novoTipo;
+      if (el2) el2.type = novoTipo;
+    }
   },
 
-  async confirmarLotacao() {
-    const nome = document.getElementById('wpNome').value.trim();
-    const matricula = document.getElementById('wpMatricula').value.trim();
-    const cargo = document.getElementById('wpCargo').value.trim() || this.lotacaoTemp.cargo;
+  async alternarModoCadastro(mostrarCadastro) {
+    const boxLogin = document.getElementById('boxModoLogin');
+    const boxCad = document.getElementById('boxModoCadastro');
+    const card = document.getElementById('glassAuthCard');
+    const errLogin = document.getElementById('loginErrorMsg');
+    const errCad = document.getElementById('cadastroErrorMsg');
 
-    if (!nome) {
-      alert('Por favor, informe seu nome.');
-      document.getElementById('wpNome').focus();
+    if (errLogin) errLogin.textContent = '';
+    if (errCad) errCad.textContent = '';
+
+    if (mostrarCadastro) {
+      if (boxLogin) boxLogin.style.display = 'none';
+      if (boxCad) boxCad.style.display = 'block';
+      if (card) card.classList.add('register-mode');
+      await this.carregarInstituicoesSelectCadastro();
+      this.aoMudarPerfilCadastro();
+      setTimeout(() => document.getElementById('cadNome')?.focus(), 100);
+    } else {
+      if (boxCad) boxCad.style.display = 'none';
+      if (boxLogin) boxLogin.style.display = 'block';
+      if (card) card.classList.remove('register-mode');
+      setTimeout(() => document.getElementById('loginEmail')?.focus(), 100);
+    }
+  },
+
+  async carregarInstituicoesSelectCadastro() {
+    try {
+      const sel = document.getElementById('cadInstituicaoId');
+      if (!sel) return;
+      const res = await fetch('/api/instituicoes');
+      const lista = await res.json();
+      let html = '';
+      for (const inst of lista) {
+        if (inst.nome.includes('Diretoria Geral de TIC')) continue;
+        html += `<option value="${inst.id}">${inst.nome.replace(/\s*\(.*?\)/g, '')}</option>`;
+      }
+      html += '<option value="nova">+ Outra unidade...</option>';
+      sel.innerHTML = html;
+    } catch (e) {
+      console.error('Erro ao carregar instituições no cadastro:', e);
+    }
+  },
+
+  aoMudarPerfilCadastro() {
+    const tipo = document.getElementById('cadTipoUsuario')?.value;
+    const grpUsuario = document.getElementById('grupoDadosUsuarioCad');
+    const inpMat = document.getElementById('cadMatricula');
+
+    if (tipo === 'admin') {
+      if (grpUsuario) grpUsuario.style.display = 'none';
+      if (inpMat) inpMat.required = false;
+    } else {
+      if (grpUsuario) grpUsuario.style.display = 'block';
+      if (inpMat) inpMat.required = true;
+      this.aoMudarInstituicaoCadastro();
+    }
+  },
+
+  aoMudarInstituicaoCadastro() {
+    const val = document.getElementById('cadInstituicaoId')?.value;
+    const boxNova = document.getElementById('boxNovaInstituicaoCad');
+    if (boxNova) {
+      boxNova.style.display = (val === 'nova') ? 'block' : 'none';
+    }
+  },
+
+  async criarContaUsuario(e) {
+    if (e) e.preventDefault();
+    const nome = document.getElementById('cadNome')?.value.trim() || '';
+    const email = document.getElementById('cadEmail')?.value.trim() || '';
+    const tipoUsuario = document.getElementById('cadTipoUsuario')?.value || 'diretora';
+    const instituicaoId = document.getElementById('cadInstituicaoId')?.value || '1';
+    const novaInstituicaoNome = document.getElementById('cadNovaInstituicaoNome')?.value.trim() || '';
+    const matricula = document.getElementById('cadMatricula')?.value.trim() || '';
+    const senha = document.getElementById('cadSenha')?.value.trim() || '';
+    const confirma = document.getElementById('cadConfirmaSenha')?.value.trim() || '';
+    const errEl = document.getElementById('cadastroErrorMsg');
+    const btn = document.getElementById('btnCriarConta');
+
+    if (errEl) errEl.textContent = '';
+
+    if (!nome || nome.length < 2) {
+      if (errEl) errEl.textContent = 'Informe seu nome completo.';
+      return;
+    }
+    if (!email || !email.includes('@')) {
+      if (errEl) errEl.textContent = 'Informe um e-mail institucional válido.';
+      return;
+    }
+    if (tipoUsuario !== 'admin') {
+      if (instituicaoId === 'nova' && !novaInstituicaoNome) {
+        if (errEl) errEl.textContent = 'Informe o nome da sua unidade.';
+        return;
+      }
+      if (!matricula) {
+        if (errEl) errEl.textContent = 'Informe sua matrícula funcional.';
+        return;
+      }
+    }
+    if (senha.length < 4) {
+      if (errEl) errEl.textContent = 'A senha deve ter pelo menos 4 caracteres.';
+      return;
+    }
+    if (senha !== confirma) {
+      if (errEl) errEl.textContent = 'As senhas digitadas não conferem.';
       return;
     }
 
+    if (btn) {
+      btn.textContent = 'Criando conta...';
+      btn.disabled = true;
+    }
+
     try {
-      await fetch('/api/usuario/lotacao', {
+      const res = await fetch('/api/cadastro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          usuarioId: this.usuarioLogado.id,
           nome,
-          cargo,
-          orgao: this.lotacaoTemp.orgao,
-          setor: this.lotacaoTemp.setorNome,
-          matricula: matricula || this.usuarioLogado.matricula
+          email,
+          senha,
+          tipoUsuario,
+          instituicaoId,
+          novaInstituicaoNome,
+          matricula
         })
       });
-    } catch (e) {}
 
-    const sessao = {
-      ...this.usuarioLogado,
-      nome,
-      cargo,
-      orgao: this.lotacaoTemp.orgao,
-      setor: this.lotacaoTemp.setorNome,
-      matricula: matricula || this.usuarioLogado.matricula,
-      municipio: 'Lages'
+      const data = await res.json();
+      if (!res.ok) {
+        if (errEl) errEl.textContent = data.error || 'Não foi possível criar a conta.';
+        return;
+      }
+
+      // Login automático direto no painel principal (lotação e matrícula ficam salvas e fixadas)
+      this.usuarioLogado = data.usuario;
+      localStorage.setItem('dimensionati_sessao', JSON.stringify(data.usuario));
+      this.alternarModoCadastro(false);
+      this.aplicarUsuario(data.usuario);
+      this.mostrarTela('screen-app');
+      this.navegar('licitacoes');
+    } catch (err) {
+      if (errEl) errEl.textContent = 'Erro de conexão ao criar conta.';
+    } finally {
+      if (btn) {
+        btn.textContent = 'Cadastrar e Entrar';
+        btn.disabled = false;
+      }
+    }
+  },
+
+  // ==========================================
+  // PÁGINA DE CONFIGURAÇÕES E PERFIL DO USUÁRIO
+  // ==========================================
+  abrirConfiguracoesUsuario() {
+    this.navegar('configuracoes');
+  },
+
+  carregarConfiguracoesUsuario() {
+    const u = this.usuarioLogado;
+    if (!u) return;
+
+    const ehAdmin = u.tipo_usuario === 'admin' || (u.email && u.email.includes('admin'));
+    const nomeLimpo = (u.nome || 'Usuário').replace(/^(Profa?\.|Dra?\.|Eng\.|Srta?\.|Sr\.)\s*/i, '').trim();
+    const p = nomeLimpo.split(/\s+/);
+    let ini = 'US';
+    if (p.length >= 2) ini = (p[0][0] + p[p.length - 1][0]).toUpperCase();
+    else if (p.length === 1 && p[0]) ini = p[0].substring(0, 2).toUpperCase();
+
+    const elAvatar = document.getElementById('cfgAvatar');
+    const elNome = document.getElementById('cfgHeaderNome');
+    const elEmail = document.getElementById('cfgHeaderEmail');
+    const elBadge = document.getElementById('cfgHeaderBadge');
+    const blocoVinculo = document.getElementById('cfgBlocoVinculoFixo');
+    const inpLotacao = document.getElementById('cfgLotacaoFixa');
+    const inpMatricula = document.getElementById('cfgMatriculaFixa');
+    const inpNome = document.getElementById('cfgInputNome');
+    const inpEmail = document.getElementById('cfgInputEmail');
+    const inpNovaSenha = document.getElementById('cfgInputNovaSenha');
+    const inpConfSenha = document.getElementById('cfgInputConfirmaSenha');
+    const msgFeedback = document.getElementById('cfgFeedbackMsg');
+
+    if (elAvatar) elAvatar.innerText = ini;
+    if (elNome) elNome.innerText = u.nome || 'Usuário';
+    if (elEmail) elEmail.innerText = u.email || '';
+    if (elBadge) {
+      elBadge.innerText = ehAdmin ? 'ADMIN / TIC' : 'USUÁRIO';
+    }
+
+    if (ehAdmin) {
+      if (blocoVinculo) blocoVinculo.style.display = 'none';
+    } else {
+      if (blocoVinculo) blocoVinculo.style.display = 'block';
+      if (inpLotacao) inpLotacao.value = u.instituicao_nome || u.setor || 'Unidade Vinculada';
+      if (inpMatricula) inpMatricula.value = u.matricula || 'MAT-00000/PML';
+    }
+
+    if (inpNome) inpNome.value = u.nome || '';
+    if (inpEmail) inpEmail.value = u.email || '';
+    if (inpNovaSenha) inpNovaSenha.value = '';
+    if (inpConfSenha) inpConfSenha.value = '';
+    if (msgFeedback) msgFeedback.style.display = 'none';
+  },
+
+  async salvarConfiguracoesUsuario() {
+    const u = this.usuarioLogado;
+    if (!u) return;
+
+    const nome = document.getElementById('cfgInputNome')?.value.trim() || '';
+    const novaSenha = document.getElementById('cfgInputNovaSenha')?.value.trim() || '';
+    const confirmaSenha = document.getElementById('cfgInputConfirmaSenha')?.value.trim() || '';
+    const msgEl = document.getElementById('cfgFeedbackMsg');
+
+    const mostrarAviso = (texto, erro = false) => {
+      if (!msgEl) return;
+      msgEl.style.display = 'block';
+      msgEl.style.background = erro ? '#FEF2F2' : '#ECFDF5';
+      msgEl.style.color = erro ? '#DC2626' : '#059669';
+      msgEl.style.border = erro ? '1px solid #FECACA' : '1px solid #A7F3D0';
+      msgEl.innerText = texto;
     };
 
-    this.usuarioLogado = sessao;
-    localStorage.setItem('dimensionati_sessao', JSON.stringify(sessao));
+    if (!nome || nome.length < 2) {
+      mostrarAviso('Por favor, informe um nome válido.', true);
+      return;
+    }
 
-    this.aplicarUsuario(sessao);
-    this.mostrarTela('screen-app');
-    this.navegar('licitacoes');
+    if (novaSenha) {
+      if (novaSenha.length < 4) {
+        mostrarAviso('A nova senha deve ter pelo menos 4 caracteres.', true);
+        return;
+      }
+      if (novaSenha !== confirmaSenha) {
+        mostrarAviso('A confirmação de senha não confere.', true);
+        return;
+      }
+    }
+
+    try {
+      const res = await fetch('/api/usuario/configuracoes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          usuarioId: u.id,
+          nome,
+          novaSenha
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        mostrarAviso(data.error || 'Erro ao salvar configurações.', true);
+        return;
+      }
+
+      const sessaoAtualizada = {
+        ...this.usuarioLogado,
+        ...(data.usuario || {}),
+        nome
+      };
+      this.usuarioLogado = sessaoAtualizada;
+      localStorage.setItem('dimensionati_sessao', JSON.stringify(sessaoAtualizada));
+      this.aplicarUsuario(sessaoAtualizada);
+      this.carregarConfiguracoesUsuario();
+      mostrarAviso('✓ Configurações salvas com sucesso!');
+    } catch (e) {
+      mostrarAviso('Erro de conexão ao salvar configurações.', true);
+    }
+  },
+
+  ehUsuarioAdmin(u = this.usuarioLogado) {
+    if (!u) return false;
+    return u.tipo_usuario === 'admin' || Boolean(u.email && u.email.toLowerCase().includes('admin'));
   },
 
   aplicarUsuario(u) {
-    // Avatar iniciais
-    const p = (u.nome || 'Servidor').trim().split(' ');
+    // Avatar iniciais e primeiro nome sem prefixos de tratamento
+    const nomeLimpo = (u.nome || 'Servidor').replace(/^(Profa?\.|Dra?\.|Eng\.|Srta?\.|Sr\.)\s*/i, '').trim();
+    const p = nomeLimpo.split(/\s+/);
     let ini = 'ME';
     if (p.length >= 2) ini = (p[0][0] + p[p.length - 1][0]).toUpperCase();
-    else if (p.length === 1) ini = p[0].substring(0, 2).toUpperCase();
+    else if (p.length === 1 && p[0]) ini = p[0].substring(0, 2).toUpperCase();
+
+    const ehAdmin = this.ehUsuarioAdmin(u);
+    document.body.classList.toggle('is-user-admin', ehAdmin);
+    document.body.classList.toggle('is-user-common', !ehAdmin);
 
     const navAvatar = document.getElementById('navAvatar');
     const navNome = document.getElementById('navNome');
     const navSetor = document.getElementById('navSetor');
+    const navPill = document.getElementById('navUserPillBadge');
     if (navAvatar) navAvatar.innerText = ini;
-    if (navNome) navNome.innerText = (u.nome || 'Servidor').split(' ')[0];
-    if (navSetor) navSetor.innerText = u.setor || 'Lages';
-
-    const ehAdmin = u.tipo_usuario === 'admin' || (u.email && u.email.includes('admin'));
+    if (navNome) navNome.innerText = p[0] || 'Servidor';
+    if (navSetor) navSetor.innerText = ehAdmin ? 'Admin TI' : (u.instituicao_nome || u.setor || 'Unidade').replace(/\s*\(.*?\)/g, '');
+    if (navPill) {
+      navPill.style.cursor = 'pointer';
+      navPill.title = 'Configurações da Conta';
+    }
 
     // Tag institucional no Navbar Superior
     const navInstNome = document.getElementById('navInstituicaoNome');
@@ -477,9 +731,9 @@ const app = {
     if (navInstNome) navInstNome.innerText = nomeInst;
     if (navInstIco) navInstIco.innerText = ehAdmin ? '👑' : (u.tipo_usuario === 'diretora' ? '🏫' : '🏛️');
     if (navInstTag) {
-      navInstTag.style.borderColor = ehAdmin ? 'rgba(0, 240, 255, 0.4)' : 'rgba(16, 185, 129, 0.4)';
-      navInstTag.style.color = ehAdmin ? '#00F0FF' : '#10B981';
-      navInstTag.style.background = ehAdmin ? 'rgba(0, 240, 255, 0.08)' : 'rgba(16, 185, 129, 0.08)';
+      navInstTag.style.borderColor = '#BFDBFE';
+      navInstTag.style.color = '#1E40AF';
+      navInstTag.style.background = '#EFF6FF';
     }
 
     // Atualiza cabeçalho da visão de licitações
@@ -488,34 +742,52 @@ const app = {
     const badgePapel = document.getElementById('badgePapelUsuario');
     const btnAuditor = document.getElementById('btnNavAuditor');
     const btnAgruparEtp = document.getElementById('btnAbrirAgrupamentoEtp');
+    const btnEditEtp = document.getElementById('btnToggleEdicaoEtp');
     const filtrosAdminWrap = document.getElementById('filtrosAdminWrap');
     const bannerVinculo = document.getElementById('bannerVinculoInstitucional');
     const bannerNomeInst = document.getElementById('bannerNomeInstituicao');
 
+    // Limpa filtros de busca e seletores institucionais ao aplicar sessão do usuário
+    const inpBusca = document.getElementById('inputBusca');
+    const selSec = document.getElementById('filtroSecretariaAdmin');
+    const selInst = document.getElementById('filtroInstituicaoAdmin');
+    const btnLimpar = document.getElementById('btnLimparFiltrosAdmin');
+    if (inpBusca) inpBusca.value = '';
+    if (selSec) selSec.value = '';
+    if (selInst) selInst.value = '';
+    if (btnLimpar) btnLimpar.style.display = 'none';
+
+    this.jaInicializouAbaSessao = false;
+    this.abaStatusAtual = 'aguardando_analise';
+    document.querySelectorAll('.status-tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('tabStatusAguardando')?.classList.add('active');
+
     if (ehAdmin) {
-      if (tituloSecao) tituloSecao.innerText = 'Todas as Demandas Municipais (Gestão Central TIC - Acesso Global)';
+      if (tituloSecao) tituloSecao.innerText = 'Demandas';
       if (subSecao) subSecao.innerText = 'Painel Global de Auditoria, Análise Técnica de DODs e Agrupamento de ETPs de Lages / SC';
       if (badgePapel) {
-        badgePapel.innerText = '👑 ADMIN CENTRAL DE TIC';
-        badgePapel.style.background = 'rgba(0, 240, 255, 0.15)';
-        badgePapel.style.color = '#00F0FF';
+        badgePapel.innerText = 'ADMIN / DIRETORIA TIC';
+        badgePapel.style.background = '#EFF6FF';
+        badgePapel.style.color = '#1D4ED8';
       }
       if (btnAuditor) btnAuditor.style.display = 'inline-block';
       if (btnAgruparEtp) btnAgruparEtp.style.display = 'inline-flex';
+      if (btnEditEtp) btnEditEtp.style.display = 'inline-flex';
       if (filtrosAdminWrap) filtrosAdminWrap.style.display = 'flex';
       if (bannerVinculo) bannerVinculo.style.display = 'none';
 
-      this.carregarInstituicoesFiltro();
+      this.carregarInstituicoesFiltro(true);
     } else {
-      if (tituloSecao) tituloSecao.innerText = `Demandas: ${nomeInst}`;
+      if (tituloSecao) tituloSecao.innerText = 'Demandas';
       if (subSecao) subSecao.innerText = `Exibindo exclusivamente solicitações e DODs relacionados à ${nomeInst}.`;
       if (badgePapel) {
-        badgePapel.innerText = u.tipo_usuario === 'diretora' ? '👩‍🏫 DIRETORA / SOLICITANTE' : '👤 SERVIDOR SOLICITANTE';
-        badgePapel.style.background = 'rgba(16, 185, 129, 0.15)';
-        badgePapel.style.color = '#10B981';
+        badgePapel.innerText = u.tipo_usuario === 'diretora' ? 'DIRETORA / SOLICITANTE' : 'SERVIDOR SOLICITANTE';
+        badgePapel.style.background = '#F1F5F9';
+        badgePapel.style.color = '#334155';
       }
       if (btnAuditor) btnAuditor.style.display = 'none';
       if (btnAgruparEtp) btnAgruparEtp.style.display = 'none';
+      if (btnEditEtp) btnEditEtp.style.display = 'none';
       if (filtrosAdminWrap) filtrosAdminWrap.style.display = 'none';
       if (bannerVinculo) bannerVinculo.style.display = 'flex';
       if (bannerNomeInst) bannerNomeInst.innerText = nomeInst;
@@ -533,7 +805,22 @@ const app = {
 
   logout() {
     this.usuarioLogado = null;
+    this.demandasCarregadas = [];
+    this.jaInicializouAbaSessao = false;
+    this.abaStatusAtual = 'aguardando_analise';
     localStorage.removeItem('dimensionati_sessao');
+    const elE = document.getElementById('loginEmail');
+    const elS = document.getElementById('loginSenha');
+    const elErr = document.getElementById('loginErrorMsg');
+    const inpBusca = document.getElementById('inputBusca');
+    const selSec = document.getElementById('filtroSecretariaAdmin');
+    const selInst = document.getElementById('filtroInstituicaoAdmin');
+    if (elE) elE.value = '';
+    if (elS) elS.value = '';
+    if (elErr) elErr.textContent = '';
+    if (inpBusca) inpBusca.value = '';
+    if (selSec) selSec.value = '';
+    if (selInst) selInst.value = '';
     this.mostrarTela('screen-login');
   },
 
@@ -541,6 +828,9 @@ const app = {
   // NAVEGAÇÃO DE TELAS NO APP
   // ==========================================
   navegar(viewId) {
+    if (viewId === 'auditor' && !this.ehUsuarioAdmin()) {
+      viewId = 'licitacoes';
+    }
     document.querySelectorAll('.dark-view').forEach(v => v.classList.remove('active'));
     document.getElementById(`view-${viewId}`)?.classList.add('active');
 
@@ -551,6 +841,8 @@ const app = {
       this.carregarDemandas();
     } else if (viewId === 'auditor') {
       this.carregarAuditor();
+    } else if (viewId === 'configuracoes') {
+      this.carregarConfiguracoesUsuario();
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -559,10 +851,27 @@ const app = {
   // ==========================================
   // LISTAGEM DE LICITAÇÕES & CARDS OPERACIONAIS DO TI
   // ==========================================
-  async carregarDemandas() {
+  classificarStatusDemanda(d) {
+    const st = String(d?.status || '').toUpperCase().trim();
+    if (st === 'CANCELADO' || st === 'CANCELADA' || st === 'REPROVADO') {
+      return 'canceladas';
+    }
+    if (d?.etp_gerado === 1 || st === 'ETP GERADO') {
+      return 'etp_gerado';
+    }
+    if (d?.dod_validado === 1 || st === 'VALIDADO PELO TI') {
+      return 'validados';
+    }
+    if (st === 'AJUSTES SOLICITADOS') {
+      return 'ajustes';
+    }
+    return 'aguardando_analise';
+  },
+
+  async carregarDemandas(ajustarAbaSeVazia = false) {
     try {
       const u = this.usuarioLogado;
-      const ehAdmin = u && (u.tipo_usuario === 'admin' || (u.email && u.email.includes('admin')));
+      const ehAdmin = this.ehUsuarioAdmin(u);
       let url = ehAdmin 
         ? '/api/demandas?tipoUsuario=admin' 
         : `/api/demandas?tipoUsuario=${u?.tipo_usuario || 'diretora'}&usuarioId=${u?.id || ''}`;
@@ -572,66 +881,50 @@ const app = {
         const inst = document.getElementById('filtroInstituicaoAdmin')?.value;
         if (sec) url += `&secretaria=${encodeURIComponent(sec)}`;
         if (inst) url += `&instituicaoId=${encodeURIComponent(inst)}`;
+
+        const btnLimpar = document.getElementById('btnLimparFiltrosAdmin');
+        if (btnLimpar) {
+          btnLimpar.style.display = (sec || inst) ? 'inline-flex' : 'none';
+        }
       }
 
       const res = await fetch(url);
-      this.demandasCarregadas = await res.json();
-      await this.carregarEstatisticasTi();
-      await this.atualizarContadorDemandasAptasEtp();
+      const dados = await res.json();
+      this.demandasCarregadas = Array.isArray(dados) ? dados : [];
+
+      // Se for o carregamento inicial da sessão ou após trocar filtro de unidade/secretaria,
+      // e a aba atual ("Pendentes") tiver 0 itens enquanto existem demandas em outras abas,
+      // posiciona automaticamente em "Todos" para evitar tela vazia enganosa.
+      if (!this.jaInicializouAbaSessao || ajustarAbaSeVazia) {
+        this.jaInicializouAbaSessao = true;
+        const qtdNaAbaAtual = this.demandasCarregadas.filter(d => 
+          this.abaStatusAtual === 'todas' || this.classificarStatusDemanda(d) === this.abaStatusAtual
+        ).length;
+
+        if (qtdNaAbaAtual === 0 && this.demandasCarregadas.length > 0) {
+          this.abaStatusAtual = 'todas';
+        }
+      }
+
+      // Garante que o botão visual da aba reflita exatamente this.abaStatusAtual
+      this.sincronizarBotaoAbaAtiva();
+
+      if (ehAdmin) {
+        await this.atualizarContadorDemandasAptasEtp();
+      }
       this.filtrarTabela();
     } catch (e) {
       console.error(e);
     }
   },
 
-  async carregarEstatisticasTi() {
-    try {
-      const u = this.usuarioLogado;
-      const ehAdmin = u && (u.tipo_usuario === 'admin' || (u.email && u.email.includes('admin')));
-      const statsUrl = ehAdmin 
-        ? '/api/estatisticas?tipoUsuario=admin' 
-        : `/api/estatisticas?tipoUsuario=padrao&usuarioId=${u?.id || ''}`;
-
-      const res = await fetch(statsUrl);
-      const stats = await res.json();
-
-      const elAg = document.getElementById('metricAguardandoAnalise');
-      const elAj = document.getElementById('metricAjustes');
-      const elVal = document.getElementById('metricValidados');
-      const elEtp = document.getElementById('metricEtps');
-      const elCanc = document.getElementById('metricCanceladas');
-
-      if (elAg) elAg.innerText = stats.aguardandoAnalise || 0;
-      if (elAj) elAj.innerText = stats.ajustesSolicitados || 0;
-      if (elVal) elVal.innerText = stats.dodsValidados || 0;
-      if (elEtp) elEtp.innerText = stats.etpsGerados || 0;
-      if (elCanc) elCanc.innerText = (stats.reprovados || 0) + (stats.canceladas || 0);
-
-      // Atualiza badges das abas
-      const bAg = document.getElementById('badgeQtdAguardando');
-      const bAj = document.getElementById('badgeQtdAjustes');
-      const bVal = document.getElementById('badgeQtdValidados');
-      const bEtp = document.getElementById('badgeQtdEtp');
-      const bCancTab = document.getElementById('badgeQtdCanceladas');
-      const bTodas = document.getElementById('badgeQtdTodas');
-
-      if (bAg) bAg.innerText = stats.aguardandoAnalise || 0;
-      if (bAj) bAj.innerText = stats.ajustesSolicitados || 0;
-      if (bVal) bVal.innerText = stats.dodsValidados || 0;
-      if (bEtp) bEtp.innerText = stats.etpsGerados || 0;
-      if (bCancTab) bCancTab.innerText = (stats.reprovados || 0) + (stats.canceladas || 0);
-      if (bTodas) bTodas.innerText = stats.totalDemandas || 0;
-    } catch (e) {
-      console.error('Erro ao carregar estatísticas do TI:', e);
+  sincronizarBotaoAbaAtiva() {
+    const abasValidas = ['aguardando_analise', 'ajustes', 'validados', 'etp_gerado', 'canceladas', 'todas'];
+    if (!abasValidas.includes(this.abaStatusAtual)) {
+      this.abaStatusAtual = 'aguardando_analise';
     }
-  },
 
-  protocoloParaCancelar: null,
-
-  setAbaStatus(aba) {
-    this.abaStatusAtual = aba;
     document.querySelectorAll('.status-tab-btn').forEach(btn => btn.classList.remove('active'));
-
     const btnMap = {
       'aguardando_analise': 'tabStatusAguardando',
       'ajustes': 'tabStatusAjustes',
@@ -640,10 +933,65 @@ const app = {
       'canceladas': 'tabStatusCanceladas',
       'todas': 'tabStatusTodas'
     };
-
-    const targetId = btnMap[aba] || 'tabStatusTodas';
+    const targetId = btnMap[this.abaStatusAtual] || 'tabStatusAguardando';
     document.getElementById(targetId)?.classList.add('active');
+  },
 
+  async carregarEstatisticasTi() {
+    // Os contadores das abas e métricas são calculados em tempo real em filtrarTabela()
+    // a partir de this.demandasCarregadas para garantir 100% de consistência com os filtros ativos.
+    this.atualizarContadoresAbas(this.demandasCarregadas || []);
+  },
+
+  atualizarContadoresAbas(listaBase) {
+    const contagens = {
+      aguardando_analise: 0,
+      ajustes: 0,
+      validados: 0,
+      etp_gerado: 0,
+      canceladas: 0,
+      todas: (listaBase || []).length
+    };
+
+    for (const d of (listaBase || [])) {
+      const cat = this.classificarStatusDemanda(d);
+      if (contagens[cat] !== undefined) {
+        contagens[cat]++;
+      }
+    }
+
+    const elAg = document.getElementById('metricAguardandoAnalise');
+    const elAj = document.getElementById('metricAjustes');
+    const elVal = document.getElementById('metricValidados');
+    const elEtp = document.getElementById('metricEtps');
+    const elCanc = document.getElementById('metricCanceladas');
+
+    if (elAg) elAg.innerText = contagens.aguardando_analise;
+    if (elAj) elAj.innerText = contagens.ajustes;
+    if (elVal) elVal.innerText = contagens.validados;
+    if (elEtp) elEtp.innerText = contagens.etp_gerado;
+    if (elCanc) elCanc.innerText = contagens.canceladas;
+
+    const bAg = document.getElementById('badgeQtdAguardando');
+    const bAj = document.getElementById('badgeQtdAjustes');
+    const bVal = document.getElementById('badgeQtdValidados');
+    const bEtp = document.getElementById('badgeQtdEtp');
+    const bCancTab = document.getElementById('badgeQtdCanceladas');
+    const bTodas = document.getElementById('badgeQtdTodas');
+
+    if (bAg) bAg.innerText = contagens.aguardando_analise;
+    if (bAj) bAj.innerText = contagens.ajustes;
+    if (bVal) bVal.innerText = contagens.validados;
+    if (bEtp) bEtp.innerText = contagens.etp_gerado;
+    if (bCancTab) bCancTab.innerText = contagens.canceladas;
+    if (bTodas) bTodas.innerText = contagens.todas;
+  },
+
+  protocoloParaCancelar: null,
+
+  setAbaStatus(aba) {
+    this.abaStatusAtual = aba;
+    this.sincronizarBotaoAbaAtiva();
     this.filtrarTabela();
   },
 
@@ -651,28 +999,26 @@ const app = {
     const term = (document.getElementById('inputBusca')?.value || '').toLowerCase().trim();
     const todas = this.demandasCarregadas || [];
 
-    const norm = (s) => String(s || '').toUpperCase().trim();
-
     // Filtra pelo termo de busca
-    let filtradas = todas.filter(d => 
+    const baseBusca = todas.filter(d => 
       !term ||
       (d.protocolo || '').toLowerCase().includes(term) ||
       (d.setor || '').toLowerCase().includes(term) ||
+      (d.instituicao_nome || '').toLowerCase().includes(term) ||
       (d.orgao || '').toLowerCase().includes(term) ||
       (d.usuario_nome || '').toLowerCase().includes(term)
     );
 
-    // Filtra pela aba de status
-    if (this.abaStatusAtual === 'aguardando_analise') {
-      filtradas = filtradas.filter(d => norm(d.status) === 'ENVIADO PARA TI' || norm(d.status) === 'EM ANÁLISE PELO TI' || norm(d.status) === 'AGUARDANDO ANÁLISE PELO TI');
-    } else if (this.abaStatusAtual === 'ajustes') {
-      filtradas = filtradas.filter(d => norm(d.status) === 'AJUSTES SOLICITADOS');
-    } else if (this.abaStatusAtual === 'validados') {
-      filtradas = filtradas.filter(d => d.dod_validado === 1 || norm(d.status) === 'VALIDADO PELO TI');
-    } else if (this.abaStatusAtual === 'etp_gerado') {
-      filtradas = filtradas.filter(d => d.etp_gerado === 1 || norm(d.status) === 'ETP GERADO');
-    } else if (this.abaStatusAtual === 'canceladas') {
-      filtradas = filtradas.filter(d => norm(d.status) === 'CANCELADO' || norm(d.status) === 'CANCELADA' || norm(d.status) === 'REPROVADO');
+    // Atualiza todos os badges de contagem com base no recorte atual (Secretaria/Unidade/Busca)
+    this.atualizarContadoresAbas(baseBusca);
+
+    // Garante que a aba ativa seja válida
+    this.sincronizarBotaoAbaAtiva();
+
+    // Filtra pela aba de status selecionada usando o classificador único
+    let filtradas = baseBusca;
+    if (this.abaStatusAtual !== 'todas') {
+      filtradas = baseBusca.filter(d => this.classificarStatusDemanda(d) === this.abaStatusAtual);
     }
 
     this.renderizarTabela(filtradas);
@@ -729,7 +1075,7 @@ const app = {
     const totalRows = demandas.length;
     if (footer) footer.style.display = 'flex';
     if (footerText) {
-      footerText.innerText = `Exibindo ${totalRows} ${totalRows === 1 ? 'requisição' : 'requisições'}`;
+      footerText.innerText = `${totalRows} ${totalRows === 1 ? 'registro' : 'registros'}`;
     }
 
     tbody.innerHTML = demandas.map((d, index) => {
@@ -750,32 +1096,30 @@ const app = {
         stText = 'Cancelado';
       } else if (ehReprovado) {
         stClass = 'status-cancelado';
-        stText = 'Reprovado pelo TI';
+        stText = 'Reprovado';
       } else if (ehEtpGerado) {
         stClass = 'status-homologado';
         stText = 'ETP Gerado';
       } else if (ehValidado) {
         stClass = 'status-homologado';
-        stText = 'Validado pelo TI';
+        stText = 'Validado';
       } else if (ehAjustes) {
         stClass = 'status-revisao';
-        stText = 'Ajustes Solicitados';
+        stText = 'Ajuste';
       } else if (ehEmAnalise) {
         stClass = 'status-analise';
-        stText = 'Em Análise pelo TI';
+        stText = 'Pendente';
       } else {
         stClass = 'status-analise';
-        stText = 'Enviado para TI';
+        stText = 'Pendente';
       }
 
-      let nomeEquip = 'Notebook Corporativo';
-      let descEquip = 'Nível 1 • Gestão Escolar';
+      let nomeEquip = 'Notebook';
+      let descEquip = '';
       if (d.perfil_escolhido_id === 2) {
-        nomeEquip = 'Estação Análise de Dados';
-        descEquip = 'Nível 2 • BI & Finanças';
+        nomeEquip = 'PC Dados';
       } else if (d.perfil_escolhido_id === 3) {
-        nomeEquip = 'Workstation CAD / 3D';
-        descEquip = 'Nível 3 • Engenharia (SEPLAN)';
+        nomeEquip = 'Workstation';
       }
 
       const isDropUp = totalRows >= 3 && index >= totalRows - 2;
@@ -786,29 +1130,23 @@ const app = {
             <span class="badge-protocolo">${d.protocolo}</span>
             ${(d.etp_numero || d.etp_gerado === 1) ? `
               <div class="badge-etp-sub" title="Demanda unificada no Estudo Técnico Preliminar">
-                <span class="etp-tag-pill" style="cursor: pointer; background: rgba(0,240,255,0.15); color: #00F0FF; border: 1px solid rgba(0,240,255,0.3); font-weight: 700;" onclick="app.abrirModalEtpCompleto('${d.protocolo}')">
+                <span class="etp-tag-pill" style="cursor: pointer; background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; font-weight: 700;" onclick="app.abrirModalEtpCompleto('${d.protocolo}')">
                   📑 ${d.etp_numero || d.protocolo.replace('DOD-', 'ETP-')}
                 </span>
               </div>
             ` : ''}
           </td>
           <td class="col-orgao">
-            <div class="text-primary-strong orgao-setor" style="display: flex; align-items: center; gap: 5px;">
-              <span style="color: #00F0FF; font-size: 0.95rem;">🏛️</span>
-              <span style="font-weight: 700;">${d.instituicao_nome || d.setor || 'Escolas Municipais (SME)'}</span>
-            </div>
-            <div class="text-secondary-muted orgao-nome">${d.setor || d.instituicao_secretaria || d.orgao || 'Prefeitura de Lages'}</div>
+            <div class="text-primary-strong orgao-setor">${(d.instituicao_nome || d.setor || 'Unidade').replace(/\s*\(.*?\)/g, '')}</div>
           </td>
           <td class="col-solicitante">
-            <div class="text-primary-strong solicitante-nome">${d.usuario_nome || 'Servidor Solicitante'}</div>
-            <div class="text-secondary-muted solicitante-cargo">${d.cargo || 'Diretora de Escola'}</div>
+            <div class="text-primary-strong solicitante-nome">${(d.usuario_nome || 'Servidor').replace(/^(Profa?\.|Dra?\.|Eng\.|Srta?\.)\s*/i, '')}</div>
           </td>
           <td class="col-qtd" style="text-align: center;">
             <span class="qty-pill-badge">${d.quantidade_usuarios}</span>
           </td>
           <td class="col-equipamento">
             <div class="text-primary-strong equip-nome">${nomeEquip}</div>
-            <div class="text-secondary-muted equip-desc">${descEquip}</div>
           </td>
           <td class="col-status" style="text-align: center;">
             <span class="badge-status-chip ${stClass}">
@@ -846,7 +1184,7 @@ const app = {
                   <button type="button" class="acoes-menu-item" style="color: #38BDF8;" onclick="app.abrirPainelAnaliseTi('${d.protocolo}')">
                     <span class="item-icon">🛡️</span>
                     <div class="item-label">
-                      <strong>Analisar Solicitação (TI)</strong>
+                      <strong>Analisar</strong>
                       <small>Diagnóstico, DOD Oficial e Validação</small>
                     </div>
                   </button>
@@ -866,7 +1204,7 @@ const app = {
                     <button type="button" class="acoes-menu-item" style="color: #38BDF8;" onclick="app.gerarEtpDocumento('${d.protocolo}')">
                       <span class="item-icon">📑</span>
                       <div class="item-label">
-                        <strong>${ehEtpGerado ? 'Visualizar / Editar ETP' : 'Gerar ETP'}</strong>
+                        <strong>${ehEtpGerado ? 'Ver ETP' : 'Gerar ETP'}</strong>
                         <small>Estudo Técnico Preliminar (12 seções)</small>
                       </div>
                     </button>
@@ -885,7 +1223,7 @@ const app = {
                     <button type="button" class="acoes-menu-item" style="color: #FBBF24;" onclick="app.abrirModalResponderAjustes('${d.protocolo}')">
                       <span class="item-icon">⚠️</span>
                       <div class="item-label">
-                        <strong>Responder Ajustes do TI</strong>
+                        <strong>Responder Ajuste</strong>
                         <small>Enviar esclarecimentos solicitados</small>
                       </div>
                     </button>
@@ -905,7 +1243,7 @@ const app = {
                 <button type="button" class="acoes-menu-item" onclick="app.abrirMinuta('${d.protocolo}')">
                   <span class="item-icon">📄</span>
                   <div class="item-label">
-                    <strong>Visualizar DOD Oficial</strong>
+                    <strong>Ver DOD</strong>
                     <small>Documento com Anexos I e II (SC)</small>
                   </div>
                 </button>
@@ -924,7 +1262,7 @@ const app = {
                   <button type="button" class="acoes-menu-item item-danger" onclick="app.abrirModalCancelar('${d.protocolo}')">
                     <span class="item-icon">🚫</span>
                     <div class="item-label">
-                      <strong>Cancelar Requisição</strong>
+                      <strong>Cancelar</strong>
                       <small>Informar motivo e arquivar</small>
                     </div>
                   </button>
@@ -1386,17 +1724,48 @@ const app = {
         'Gestão Escolar & Rotina Administrativa (Diário de Classe, Word, SGPe, Planilhas e Internet)'
       ];
       this.demanda.softwareIds = [1, 2, 3];
+      this.demanda.multitarefas = false;
+      this.demanda.planilhasGrandes = false;
+      this.demanda.programasUtilizados = [
+        'Diário de Classe & Notas',
+        'Word / Textos & Provas',
+        'Planilhas & Médias',
+        'Internet & SGPe',
+        'Reuniões Online (Meet/Teams)'
+      ];
     } else if (nivel === 2) {
       this.demanda.atividadesNomes = [
         'Análise de Dados & Relatórios Gerenciais (Grandes Bases, BI e Contabilidade)'
       ];
       this.demanda.softwareIds = [4];
+      this.demanda.multitarefas = true;
+      this.demanda.planilhasGrandes = true;
+      this.demanda.programasUtilizados = [
+        'Planilhas & Médias',
+        'Internet & SGPe',
+        'Power BI / Dashboards',
+        'Reuniões Online (Meet/Teams)'
+      ];
     } else {
       this.demanda.atividadesNomes = [
         'Projetos de Engenharia, Plantas e CAD 3D (AutoCAD Civil 3D e Topografia)'
       ];
       this.demanda.softwareIds = [5, 6];
+      this.demanda.multitarefas = true;
+      this.demanda.planilhasGrandes = true;
+      this.demanda.programasUtilizados = [
+        'AutoCAD / Plantas',
+        'Planilhas & Médias',
+        'Internet & SGPe'
+      ];
     }
+
+    // Sincroniza visualmente os botões de programas com o nível selecionado
+    document.querySelectorAll('.chip-sistema-btn').forEach(btn => {
+      const onclickAttr = btn.getAttribute('onclick') || '';
+      const ativo = (this.demanda.programasUtilizados || []).some(prog => onclickAttr.includes(prog));
+      btn.classList.toggle('active', ativo);
+    });
 
     this.calcularHardware();
   },
@@ -2666,10 +3035,11 @@ const app = {
 
       this.demandaAnaliseAtual = data.demanda;
       const d = data.demanda;
+      const ehAdmin = this.ehUsuarioAdmin();
 
-      // Se for a primeira visualização técnica e estiver como "Enviado para TI", atualiza para "Em análise pelo TI"
+      // Apenas Admin/TI move a demanda automaticamente para "Em análise pelo TI"
       const statusNorm = String(d.status || '').toUpperCase().trim();
-      if (statusNorm === 'ENVIADO PARA TI' || statusNorm === 'SOB ANÁLISE') {
+      if (ehAdmin && (statusNorm === 'ENVIADO PARA TI' || statusNorm === 'SOB ANÁLISE')) {
         try {
           await fetch(`/api/demandas/${protocolo}/em-analise`, {
             method: 'POST',
@@ -2692,7 +3062,11 @@ const app = {
       const elBadge = document.getElementById('analiseTiStatusBadge');
       const elSub = document.getElementById('analiseTiSubtitulo');
 
-      if (elTit) elTit.innerText = `Análise Técnica — ${d.setor || 'Unidade Solicitante'}`;
+      if (elTit) {
+        elTit.innerText = ehAdmin 
+          ? `Análise Técnica — ${d.setor || 'Unidade Solicitante'}` 
+          : `Detalhes da Demanda — ${d.setor || 'Unidade Solicitante'}`;
+      }
       if (elProt) elProt.innerText = d.protocolo;
       if (elSub) elSub.innerText = `Solicitante: ${d.usuario_nome} • Cargo: ${d.cargo || 'Servidor'} • Órgão: ${d.orgao}`;
 
@@ -2717,7 +3091,7 @@ const app = {
       // Preenche Aba 4: Histórico & Rastreabilidade
       await this.carregarHistoricoDemanda(protocolo);
 
-      // Atualiza botões do rodapé
+      // Atualiza botões do rodapé (oculta todos para usuário comum)
       this.atualizarBotoesAcaoTi(d);
 
       // Abre modal
@@ -2781,7 +3155,7 @@ const app = {
         <div class="info-item-row">
           <span class="info-item-label">Sistemas e Softwares Diários:</span>
           <div class="info-item-value">
-            ${this.obterListaSoftwares(d, resp.programasUtilizados).map(s => `<span class="tag-software" style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; margin-right: 4px; display: inline-block; margin-bottom: 4px;">${s}</span>`).join('')}
+            ${this.obterListaSoftwares(d, resp.programasUtilizados).map(s => `<span class="tag-software">${s}</span>`).join('')}
           </div>
         </div>
         <div class="info-item-row">
@@ -2803,13 +3177,13 @@ const app = {
       corpoRecs.innerHTML = `
         <div class="info-item-row">
           <span class="info-item-label">Monitor na Mesa:</span>
-          <div class="info-item-value" style="color: ${recs.monitor === 'none' ? '#34D399' : '#FBBF24'};">
+          <div class="info-item-value ${recs.monitor === 'none' ? 'status-recurso-ok' : 'status-recurso-warn'}">
             ${recs.monitor === 'none' ? '✓ Já possui monitor funcionando (Dispensado da compra)' : '⚠️ Precisa de monitor de vídeo'}
           </div>
         </div>
         <div class="info-item-row">
           <span class="info-item-label">Teclado e Mouse:</span>
-          <div class="info-item-value" style="color: ${recs.teclado !== false ? '#34D399' : '#FBBF24'};">
+          <div class="info-item-value ${recs.teclado !== false ? 'status-recurso-ok' : 'status-recurso-warn'}">
             ${recs.teclado !== false ? '✓ Periféricos existentes preservados' : '⚠️ Precisa de kit teclado/mouse'}
           </div>
         </div>
@@ -2827,7 +3201,7 @@ const app = {
         </div>
         <div class="info-item-row">
           <span class="info-item-label">Quantidade Requisitada:</span>
-          <div class="info-item-value" style="font-size: 1.1rem; font-weight: 800; color: #FFFFFF;">
+          <div class="info-item-value" style="font-size: 1.1rem; font-weight: 800; color: var(--dark-text);">
             ${d.quantidade_usuarios || recs.quantidadePostos || 1} equipamento(s)
           </div>
         </div>
@@ -2845,17 +3219,17 @@ const app = {
     if (!corpo) return;
 
     corpo.innerHTML = `
-      <div style="background: #141C28; border: 1px solid var(--dark-border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 20px;">
+      <div style="background: var(--dark-surface); border: 1px solid var(--dark-border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 20px;">
         <span class="label-muted-small" style="color: var(--dark-accent); font-weight: 800;">DIAGNÓSTICO SISTÊMICO DA NECESSIDADE</span>
-        <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; margin: 4px 0 10px 0;">
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--dark-text); margin: 4px 0 10px 0;">
           ${diag.perfilSugerido || 'Notebook Corporativo Portátil'}
         </h3>
-        <p style="font-size: 0.9rem; color: #CBD5E1; line-height: 1.5; margin-bottom: 16px;">
+        <p style="font-size: 0.9rem; color: var(--dark-muted); line-height: 1.5; margin-bottom: 16px;">
           ${diag.justificativaUso || d.justificativa_usuario || 'Necessidade identificada para rotina operacional e educacional.'}
         </p>
 
-        <h5 style="font-size: 0.85rem; color: #FFFFFF; text-transform: uppercase; margin-bottom: 8px;">Critérios de Adequação Técnica:</h5>
-        <ul style="margin: 0; padding-left: 20px; color: #94A3B8; font-size: 0.85rem; line-height: 1.6;">
+        <h5 style="font-size: 0.85rem; color: var(--dark-text); text-transform: uppercase; margin-bottom: 8px;">Critérios de Adequação Técnica:</h5>
+        <ul style="margin: 0; padding-left: 20px; color: var(--dark-muted); font-size: 0.85rem; line-height: 1.6;">
           ${(diag.resumoCriterios || [
             'Proporcionalidade entre carga de trabalho e capacidade do processador',
             'Sustentabilidade com reaproveitamento de monitores e cabos existentes',
@@ -2964,6 +3338,7 @@ const app = {
   },
 
   atualizarBotoesAcaoTi(d) {
+    const ehAdmin = this.ehUsuarioAdmin();
     const ehValidado = d.dod_validado === 1 || String(d.status).toUpperCase() === 'VALIDADO PELO TI';
     const ehCancelado = String(d.status).toUpperCase() === 'CANCELADO' || String(d.status).toUpperCase() === 'REPROVADO';
 
@@ -2971,9 +3346,20 @@ const app = {
     const btnAj = document.getElementById('btnAcaoSolicitarAjustes');
     const btnRep = document.getElementById('btnAcaoReprovar');
     const btnEtp = document.getElementById('btnAcaoGerarEtp');
+    const lblFooter = document.getElementById('analiseTiFooterLabel');
     const iconEtp = document.getElementById('btnGerarEtpIcon');
     const txtEtp = document.getElementById('btnGerarEtpText');
 
+    if (!ehAdmin) {
+      if (btnVal) btnVal.style.display = 'none';
+      if (btnAj) btnAj.style.display = 'none';
+      if (btnRep) btnRep.style.display = 'none';
+      if (btnEtp) btnEtp.style.display = 'none';
+      if (lblFooter) lblFooter.style.display = 'none';
+      return;
+    }
+
+    if (lblFooter) lblFooter.style.display = 'inline';
     if (btnVal) {
       btnVal.style.display = (ehValidado || ehCancelado) ? 'none' : 'inline-block';
     }
@@ -2985,6 +3371,7 @@ const app = {
     }
 
     if (btnEtp) {
+      btnEtp.style.display = 'inline-flex';
       if (ehValidado) {
         btnEtp.className = 'btn-action-etp unlocked';
         if (iconEtp) iconEtp.innerText = '📑';
@@ -3000,6 +3387,7 @@ const app = {
   },
 
   async validarDodTi(protocolo) {
+    if (!this.ehUsuarioAdmin()) return;
     if (!confirm(`Deseja validar formalmente o DOD da demanda ${protocolo}?\n\nEsta ação atesta a conformidade das respostas e libera a geração do Estudo Técnico Preliminar (ETP).`)) {
       return;
     }
@@ -3033,6 +3421,7 @@ const app = {
   protocoloAjusteAtual: null,
 
   abrirModalAjustes(protocolo) {
+    if (!this.ehUsuarioAdmin()) return;
     this.protocoloAjusteAtual = protocolo;
     const lbl = document.getElementById('labelProtocoloAjustes');
     if (lbl) lbl.innerText = protocolo;
@@ -3051,6 +3440,7 @@ const app = {
   },
 
   async confirmarSolicitarAjustes() {
+    if (!this.ehUsuarioAdmin()) return;
     const nota = document.getElementById('txtNotasAjustesTi')?.value.trim();
     if (!nota) {
       alert('Informe os apontamentos técnicos para o servidor.');
@@ -3083,6 +3473,7 @@ const app = {
   },
 
   abrirModalReprovar(protocolo) {
+    if (!this.ehUsuarioAdmin()) return;
     this.protocoloAjusteAtual = protocolo;
     const lbl = document.getElementById('labelProtocoloReprovar');
     if (lbl) lbl.innerText = protocolo;
@@ -3101,6 +3492,7 @@ const app = {
   },
 
   async confirmarReprovacao() {
+    if (!this.ehUsuarioAdmin()) return;
     const motivo = document.getElementById('txtJustificativaReprovacao')?.value.trim();
     if (!motivo) {
       alert('A justificativa técnica de reprovação é obrigatória.');
@@ -3196,6 +3588,7 @@ const app = {
   etpAtual: null,
 
   async gerarEtpDocumento(protocolo) {
+    if (!this.ehUsuarioAdmin()) return;
     const d = this.demandasCarregadas.find(item => item.protocolo === protocolo) || this.demandaAnaliseAtual;
 
     if (!d || d.dod_validado !== 1) {
@@ -3314,6 +3707,7 @@ const app = {
   modoEdicaoEtp: false,
 
   toggleEdicaoEtp() {
+    if (!this.ehUsuarioAdmin()) return;
     this.modoEdicaoEtp = !this.modoEdicaoEtp;
     const btn = document.getElementById('btnToggleEdicaoEtp');
     if (btn) {
@@ -3695,7 +4089,7 @@ const app = {
             <small style="color: var(--dark-muted);">${d.orgao}</small>
           </td>
           <td>
-            <span style="font-size: 0.85rem; color: #CBD5E1;">${softwaresTxt}</span><br>
+            <span style="font-size: 0.85rem; color: #334155;">${softwaresTxt}</span><br>
             <small style="color: var(--dark-muted);">${d.cargo || 'Servidor'}</small>
           </td>
           <td>
@@ -3712,7 +4106,7 @@ const app = {
           </td>
           <td>${statusBadge}</td>
           <td style="text-align: center;">
-            <button class="btn-table-action" onclick="app.gerarParecerTce('${d.protocolo}')" style="background: rgba(124, 58, 237, 0.15); border-color: rgba(124, 58, 237, 0.3); color: #C4B5FD;">
+            <button class="btn-table-action" onclick="app.gerarParecerTce('${d.protocolo}')">
               📄 Parecer TCE
             </button>
           </td>
@@ -4043,7 +4437,7 @@ const app = {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom', labels: { color: '#8493A8' } } },
+          plugins: { legend: { position: 'bottom', labels: { color: '#64748B' } } },
           cutout: '72%'
         }
       });
@@ -4061,8 +4455,8 @@ const app = {
           labels,
           datasets: [{
             data: vals,
-            backgroundColor: '#34D399',
-            borderRadius: 4
+            backgroundColor: '#2563EB',
+            borderRadius: 6
           }]
         },
         options: {
@@ -4070,8 +4464,8 @@ const app = {
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
           scales: {
-            x: { ticks: { color: '#8493A8' }, grid: { display: false } },
-            y: { ticks: { color: '#8493A8', callback: v => 'R$' + (v/1000) + 'k' }, grid: { color: '#1E293B' } }
+            x: { ticks: { color: '#64748B' }, grid: { display: false } },
+            y: { ticks: { color: '#64748B', callback: v => 'R$' + (v/1000) + 'k' }, grid: { color: '#E2E8F0' } }
           }
         }
       });
@@ -4127,37 +4521,50 @@ const app = {
   dodsSelecionadosParaEtp: new Set(),
   dodsAptosCarregados: [],
 
-  async carregarInstituicoesFiltro() {
+  async carregarInstituicoesFiltro(resetSelection = false) {
     try {
       const res = await fetch('/api/instituicoes');
       this.instituicoesCadastradas = await res.json();
       const sel = document.getElementById('filtroInstituicaoAdmin');
       if (!sel) return;
 
-      const valorAtual = sel.value;
-      let html = '<option value="">Todas as Instituições</option>';
+      const valorAtual = resetSelection ? '' : sel.value;
+      let html = '<option value="">Unidades</option>';
       for (const inst of this.instituicoesCadastradas) {
-        html += `<option value="${inst.id}">${inst.nome} (${inst.secretaria})</option>`;
+        html += `<option value="${inst.id}">${inst.nome}</option>`;
       }
       sel.innerHTML = html;
-      sel.value = valorAtual;
+      sel.value = valorAtual || '';
     } catch (e) {
       console.error('Erro ao carregar instituições no filtro:', e);
     }
   },
 
   aplicarFiltrosAdmin() {
-    this.carregarDemandas();
+    this.carregarDemandas(true);
+  },
+
+  limparFiltrosAdmin() {
+    const selSec = document.getElementById('filtroSecretariaAdmin');
+    const selInst = document.getElementById('filtroInstituicaoAdmin');
+    const inpBusca = document.getElementById('inputBusca');
+    const btnLimpar = document.getElementById('btnLimparFiltrosAdmin');
+    if (selSec) selSec.value = '';
+    if (selInst) selInst.value = '';
+    if (inpBusca) inpBusca.value = '';
+    if (btnLimpar) btnLimpar.style.display = 'none';
+    this.carregarDemandas(true);
   },
 
   async atualizarContadorDemandasAptasEtp() {
+    if (!this.ehUsuarioAdmin()) return;
     try {
       const res = await fetch('/api/demandas-para-etp');
       const aptos = await res.json();
       const disponiveis = aptos.filter(d => d.disponivel_agrupamento);
       const badge = document.getElementById('badgeTotalAptosEtp');
       if (badge) {
-        badge.innerText = `${disponiveis.length} aptos`;
+        badge.innerText = `${disponiveis.length}`;
       }
     } catch (e) {
       console.error('Erro ao atualizar contador de aptos para ETP:', e);
@@ -4165,6 +4572,7 @@ const app = {
   },
 
   async abrirModalAgruparEtp() {
+    if (!this.ehUsuarioAdmin()) return;
     const modal = document.getElementById('modalAgruparEtp');
     if (!modal) return;
 
@@ -4182,102 +4590,93 @@ const app = {
     const tbody = document.getElementById('tbodyDodsAgrupamento');
     if (!tbody) return;
 
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px; color: #94A3B8;">Carregando demandas validadas...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 24px; color: #94A3B8;">Carregando...</td></tr>';
 
     try {
       const res = await fetch('/api/demandas-para-etp');
       this.dodsAptosCarregados = await res.json();
 
       if (this.dodsAptosCarregados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px; color: #94A3B8;">Nenhuma demanda com DOD validado encontrada para agrupamento no momento.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 24px; color: #94A3B8;">Nenhum DOD validado disponível.</td></tr>';
         this.atualizarResumoConsolidacaoEtp();
         return;
       }
 
-      // Pré-seleciona os DODs do cenário de teste (DOD-2026-0001, DOD-2026-0002, DOD-2026-0003) se estiverem disponíveis
-      const cenarioDods = ['DOD-2026-0001', 'DOD-2026-0002', 'DOD-2026-0003'];
-      for (const d of this.dodsAptosCarregados) {
-        if (cenarioDods.includes(d.protocolo) && d.disponivel_agrupamento) {
-          this.dodsSelecionadosParaEtp.add(d.protocolo);
+      // Pré-seleciona os DODs do cenário se ainda não houver seleção
+      if (this.dodsSelecionadosParaEtp.size === 0) {
+        const cenarioDods = ['DOD-2026-0001', 'DOD-2026-0002', 'DOD-2026-0003'];
+        for (const d of this.dodsAptosCarregados) {
+          if (cenarioDods.includes(d.protocolo) && d.disponivel_agrupamento) {
+            this.dodsSelecionadosParaEtp.add(d.protocolo);
+          }
         }
       }
 
-      // Ordena por protocolo para manter DOD-0001, DOD-0002, DOD-0003 em ordem natural
+      // Ordena por protocolo
       this.dodsAptosCarregados.sort((a, b) => (a.protocolo || '').localeCompare(b.protocolo || ''));
 
-      tbody.innerHTML = this.dodsAptosCarregados.map(d => {
-        const isSelected = this.dodsSelecionadosParaEtp.has(d.protocolo);
-        const jaVinculado = !d.disponivel_agrupamento;
-        const etpNumero = d.etp_vinculado_numero || d.etp_numero;
-        const ehNotebook = (d.tipo_necessidade === 'notebook' || (d.respostas_diagnostico && d.respostas_diagnostico.includes('notebook')) || d.quantidade_usuarios > 1);
-
-        let trStyle = 'border-bottom: 1px solid rgba(255,255,255,0.07); transition: all 0.15s ease; cursor: pointer;';
-        if (jaVinculado) {
-          trStyle += ' opacity: 0.5; background: rgba(0,0,0,0.25); cursor: not-allowed;';
-        } else if (isSelected) {
-          trStyle += ' background: rgba(0, 240, 255, 0.08); border-left: 3px solid #00F0FF;';
-        } else {
-          trStyle += ' border-left: 3px solid transparent;';
-        }
-
-        return `
-          <tr style="${trStyle}" onclick="${jaVinculado ? '' : 'app.toggleSelecaoDodEtp(\'' + d.protocolo + '\')'}">
-            <td style="text-align: center; padding: 12px 10px;" onclick="event.stopPropagation();">
-              <input type="checkbox" 
-                     ${isSelected ? 'checked' : ''} 
-                     ${jaVinculado ? 'disabled title="Já vinculado ao ' + etpNumero + '"' : ''} 
-                     onchange="app.toggleSelecaoDodEtp('${d.protocolo}')"
-                     style="cursor: ${jaVinculado ? 'not-allowed' : 'pointer'}; width: 18px; height: 18px; accent-color: #00F0FF;">
-            </td>
-            <td style="padding: 12px 10px; font-weight: 800; color: #FFFFFF; font-family: monospace; font-size: 0.92rem;">
-              ${d.protocolo}
-            </td>
-            <td style="padding: 12px 10px;">
-              <div style="font-weight: 800; color: #F1F5F9; font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
-                <span style="color: #00F0FF;">🏫</span>
-                <span>${d.instituicao_nome || d.orgao}</span>
-              </div>
-              <small style="color: #64748B; font-size: 0.78rem;">${d.instituicao_secretaria || d.orgao}</small>
-            </td>
-            <td style="padding: 12px 10px;">
-              <div style="color: #E2E8F0; font-weight: 600;">${d.usuario_nome || 'Servidor'}</div>
-              <small style="color: #94A3B8; font-size: 0.78rem;">${d.cargo || 'Diretora'}</small>
-            </td>
-            <td style="padding: 12px 10px;">
-              <span style="font-size: 0.82rem; background: rgba(255,255,255,0.06); color: #E2E8F0; padding: 3px 8px; border-radius: 4px; font-weight: 600;">
-                ${ehNotebook ? '💻 Notebook Corporativo' : '🖥️ Desktop Corporativo'}
-              </span>
-            </td>
-            <td style="text-align: center; padding: 12px 10px; font-weight: 800; color: #00F0FF; font-size: 1.05rem;">
-              ${d.quantidade_usuarios}
-            </td>
-            <td style="text-align: right; padding: 12px 10px; font-weight: 800; color: #F1F5F9; font-size: 0.9rem;">
-              R$ ${(d.custo_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </td>
-            <td style="text-align: center; padding: 12px 10px;">
-              ${jaVinculado ? `
-                <span style="font-size: 0.74rem; background: rgba(245, 158, 11, 0.15); color: #FBBF24; padding: 4px 8px; border-radius: 4px; font-weight: 700; border: 1px solid rgba(245, 158, 11, 0.3);">
-                  🔒 ${etpNumero || 'Vinculado a ETP'}
-                </span>
-              ` : (isSelected ? `
-                <span style="font-size: 0.74rem; background: rgba(0, 240, 255, 0.18); color: #00F0FF; padding: 4px 8px; border-radius: 4px; font-weight: 800; border: 1px solid rgba(0, 240, 255, 0.4);">
-                  ★ Selecionado
-                </span>
-              ` : `
-                <span style="font-size: 0.74rem; background: rgba(16, 185, 129, 0.15); color: #10B981; padding: 4px 8px; border-radius: 4px; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.25);">
-                  ✓ Disponível
-                </span>
-              `)}
-            </td>
-          </tr>
-        `;
-      }).join('');
-
+      this.renderizarLinhasAgrupamentoEtp();
       this.atualizarResumoConsolidacaoEtp();
     } catch (e) {
       console.error('Erro ao carregar demandas para ETP:', e);
-      tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 20px; color: #EF4444;">Erro ao carregar demandas: ${e.message}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px; color: #EF4444;">Erro ao carregar demandas: ${e.message}</td></tr>`;
     }
+  },
+
+  renderizarLinhasAgrupamentoEtp() {
+    const tbody = document.getElementById('tbodyDodsAgrupamento');
+    if (!tbody) return;
+
+    tbody.innerHTML = this.dodsAptosCarregados.map(d => {
+      const isSelected = this.dodsSelecionadosParaEtp.has(d.protocolo);
+      const jaVinculado = !d.disponivel_agrupamento;
+      const etpNumero = d.etp_vinculado_numero || d.etp_numero;
+      const ehNotebook = (d.tipo_necessidade === 'notebook' || (d.respostas_diagnostico && d.respostas_diagnostico.includes('notebook')) || d.quantidade_usuarios > 1);
+      const nomeUnidade = (d.instituicao_nome || d.setor || d.orgao || 'Unidade').replace(/\s*\(.*?\)/g, '');
+
+      let trStyle = 'border-bottom: 1px solid var(--dark-border); transition: all 0.15s ease; cursor: pointer;';
+      if (jaVinculado) {
+        trStyle += ' opacity: 0.5; cursor: not-allowed;';
+      } else if (isSelected) {
+        trStyle += ' background: var(--dark-accent-glow);';
+      }
+
+      return `
+        <tr style="${trStyle}" onclick="${jaVinculado ? '' : 'app.toggleSelecaoDodEtp(\'' + d.protocolo + '\')'}">
+          <td style="text-align: center;" onclick="event.stopPropagation();">
+            <input type="checkbox" 
+                   ${isSelected ? 'checked' : ''} 
+                   ${jaVinculado ? 'disabled title="Já vinculado ao ' + etpNumero + '"' : ''} 
+                   onchange="app.toggleSelecaoDodEtp('${d.protocolo}')"
+                   style="cursor: ${jaVinculado ? 'not-allowed' : 'pointer'}; width: 20px; height: 20px; accent-color: #2563EB;">
+          </td>
+          <td style="white-space: nowrap;">
+            <span class="badge-protocolo">${d.protocolo}</span>
+          </td>
+          <td>
+            <div class="text-primary-strong">${nomeUnidade}</div>
+          </td>
+          <td style="white-space: nowrap;">
+            <div class="text-primary-strong">${ehNotebook ? 'Notebook' : 'Desktop'}</div>
+          </td>
+          <td style="text-align: center;">
+            <span class="qty-pill-badge">${d.quantidade_usuarios}</span>
+          </td>
+          <td style="text-align: right; white-space: nowrap; font-weight: 800; color: var(--dark-text);">
+            R$ ${(d.custo_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          </td>
+          <td style="text-align: center; white-space: nowrap;">
+            ${jaVinculado ? `
+              <span class="badge-status-chip status-revisao">${etpNumero || 'Em ETP'}</span>
+            ` : (isSelected ? `
+              <span class="badge-status-chip status-homologado">Selecionado</span>
+            ` : `
+              <span class="badge-status-chip status-analise">Disponível</span>
+            `)}
+          </td>
+        </tr>
+      `;
+    }).join('');
   },
 
   toggleSelecaoDodEtp(protocolo) {
@@ -4286,15 +4685,22 @@ const app = {
     } else {
       this.dodsSelecionadosParaEtp.add(protocolo);
     }
+    this.renderizarLinhasAgrupamentoEtp();
     this.atualizarResumoConsolidacaoEtp();
   },
 
   selecionarTodosDodsEtp() {
     const disponiveis = this.dodsAptosCarregados.filter(d => d.disponivel_agrupamento);
-    for (const d of disponiveis) {
-      this.dodsSelecionadosParaEtp.add(d.protocolo);
+    const todosJaSelecionados = disponiveis.length > 0 && disponiveis.every(d => this.dodsSelecionadosParaEtp.has(d.protocolo));
+    if (todosJaSelecionados) {
+      this.dodsSelecionadosParaEtp.clear();
+    } else {
+      for (const d of disponiveis) {
+        this.dodsSelecionadosParaEtp.add(d.protocolo);
+      }
     }
-    this.carregarTabelaAgrupamentoEtp();
+    this.renderizarLinhasAgrupamentoEtp();
+    this.atualizarResumoConsolidacaoEtp();
   },
 
   atualizarResumoConsolidacaoEtp() {
@@ -4322,9 +4728,9 @@ const app = {
     const cardQtd = document.getElementById('etpCardQtdTotal');
     const cardEco = document.getElementById('etpCardEconomia');
 
-    if (cardDods) cardDods.innerText = `${selecionados.length} DODs`;
-    if (cardInst) cardInst.innerText = `${instSet.size} unidades`;
-    if (cardQtd) cardQtd.innerText = `${qtdTotal} un`;
+    if (cardDods) cardDods.innerText = `${selecionados.length}`;
+    if (cardInst) cardInst.innerText = `${instSet.size}`;
+    if (cardQtd) cardQtd.innerText = `${qtdTotal}`;
     if (cardEco) cardEco.innerText = `R$ ${economiaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
 
     // Sugere título e justificativa automáticos
@@ -4344,6 +4750,7 @@ const app = {
   },
 
   async executarAgrupamentoEtp() {
+    if (!this.ehUsuarioAdmin()) return;
     const selecionados = Array.from(this.dodsSelecionadosParaEtp);
     if (selecionados.length === 0) {
       alert('Selecione pelo menos 1 (uma) demanda com DOD validado para agrupar no ETP.');

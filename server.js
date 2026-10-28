@@ -23,46 +23,23 @@ app.post('/api/login', (req, res) => {
     }
 
     const emailLimpo = email.trim().toLowerCase();
+    const senhaLimpa = senha.trim();
 
-    // Busca usuário existente
-    let usuario = db.prepare('SELECT * FROM usuarios WHERE LOWER(email) = ?').get(emailLimpo);
+    // Busca usuário cadastrado no banco de dados
+    const usuario = db.prepare('SELECT * FROM usuarios WHERE LOWER(email) = ?').get(emailLimpo);
 
     if (!usuario) {
-      // Se não existir, cadastra automaticamente para o usuário não ficar travado no Hackathon!
-      const nomeSugerido = emailLimpo.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase());
-      const tipoUsuario = emailLimpo.includes('admin') ? 'admin' : 'padrao';
-      const insertNovo = db.prepare(`
-        INSERT INTO usuarios (nome, email, senha, cargo, orgao, setor, municipio, matricula, perfil_padrao_id, atividades_padrao, avatar, tipo_usuario)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `);
+      return res.status(401).json({ error: 'E-mail não encontrado. Verifique o e-mail informado.' });
+    }
 
-      const matriculaGerada = `MAT-${Math.floor(10000 + Math.random() * 90000)}/PML`;
-      insertNovo.run(
-        nomeSugerido,
-        emailLimpo,
-        senha,
-        tipoUsuario === 'admin' ? 'Diretor de TIC e Licitações' : 'Servidor Público',
-        'Prefeitura do Município de Lages',
-        tipoUsuario === 'admin' ? 'Diretoria Geral de TIC' : 'Secretaria Municipal de Administração',
-        'Lages',
-        matriculaGerada,
-        tipoUsuario === 'admin' ? 2 : 1,
-        JSON.stringify([1, 2]),
-        tipoUsuario === 'admin' ? '👑' : '👤',
-        tipoUsuario
-      );
-
-      usuario = db.prepare('SELECT * FROM usuarios WHERE LOWER(email) = ?').get(emailLimpo);
-    } else {
-      // Se já existir, verifica senha se não for vazia
-      if (usuario.senha && senha && usuario.senha !== senha && usuario.senha !== '123456') {
-        return res.status(401).json({ error: 'Senha incorreta para este e-mail cadastrado.' });
-      }
+    // Valida senha (aceita a senha cadastrada ou 123456 para compatibilidade com scripts de teste)
+    if (usuario.senha !== senhaLimpa && !(emailLimpo === 'admin@lages.sc.gov.br' && senhaLimpa === '123456')) {
+      return res.status(401).json({ error: 'Senha incorreta. Tente novamente.' });
     }
 
     const { senha: _, ...usuarioSemSenha } = usuario;
     usuarioSemSenha.atividades_padrao = JSON.parse(usuario.atividades_padrao || '[1, 2]');
-    usuarioSemSenha.tipo_usuario = usuario.tipo_usuario || (emailLimpo.includes('admin') ? 'admin' : (emailLimpo.includes('escola') ? 'diretora' : 'padrao'));
+    usuarioSemSenha.tipo_usuario = usuario.tipo_usuario || (emailLimpo.includes('admin') ? 'admin' : 'diretora');
 
     let instInfo = null;
     if (usuario.instituicao_id) {
@@ -83,6 +60,114 @@ app.post('/api/login', (req, res) => {
   }
 });
 
+// 1.05 Cadastro de Novo Usuário (Criar Conta com Vínculo Institucional e Matrícula Fixados)
+app.post('/api/cadastro', (req, res) => {
+  try {
+    const { nome, email, senha, cargo, tipoUsuario, instituicaoId, novaInstituicaoNome, matricula } = req.body;
+
+    if (!nome || nome.trim().length < 2) {
+      return res.status(400).json({ error: 'Por favor, informe seu nome completo.' });
+    }
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ error: 'Por favor, informe um e-mail válido.' });
+    }
+    if (!senha || senha.trim().length < 4) {
+      return res.status(400).json({ error: 'A senha deve possuir pelo menos 4 caracteres.' });
+    }
+
+    const emailLimpo = email.trim().toLowerCase();
+    const existente = db.prepare('SELECT id FROM usuarios WHERE LOWER(email) = ?').get(emailLimpo);
+    if (existente) {
+      return res.status(400).json({ error: 'Este endereço de e-mail já está cadastrado. Faça login.' });
+    }
+
+    const tipoFinal = (tipoUsuario === 'admin') ? 'admin' : 'diretora';
+    let idInstFinal = instituicaoId ? Number(instituicaoId) : null;
+    let instRow = null;
+
+    if (instituicaoId === 'nova' && novaInstituicaoNome && novaInstituicaoNome.trim().length > 2) {
+      const nomeNova = novaInstituicaoNome.trim();
+      const tipoInst = nomeNova.toLowerCase().includes('escola') || nomeNova.toLowerCase().includes('cmei')
+        ? 'escola'
+        : nomeNova.toLowerCase().includes('ubs') || nomeNova.toLowerCase().includes('saúde') || nomeNova.toLowerCase().includes('saude')
+          ? 'saude'
+          : 'secretaria';
+      const secPadrao = tipoInst === 'escola'
+        ? 'Secretaria Municipal de Educação'
+        : tipoInst === 'saude'
+          ? 'Secretaria Municipal de Saúde'
+          : 'Prefeitura do Município de Lages';
+
+      const infoNova = db.prepare(`
+        INSERT INTO instituicoes (nome, tipo, secretaria, municipio, ativo)
+        VALUES (?, ?, ?, 'Lages', 1)
+      `).run(nomeNova, tipoInst, secPadrao);
+      idInstFinal = infoNova.lastInsertRowid;
+    }
+
+    if (tipoFinal === 'admin' && !idInstFinal) {
+      const dirTic = db.prepare("SELECT id FROM instituicoes WHERE nome LIKE '%Diretoria Geral de TIC%'").get();
+      if (dirTic) idInstFinal = dirTic.id;
+    }
+
+    if (idInstFinal) {
+      instRow = db.prepare('SELECT * FROM instituicoes WHERE id = ?').get(idInstFinal);
+    }
+    if (!instRow) {
+      instRow = db.prepare('SELECT * FROM instituicoes ORDER BY id ASC LIMIT 1').get();
+      if (instRow) idInstFinal = instRow.id;
+    }
+
+    const setorFinal = tipoFinal === 'admin'
+      ? 'Diretoria Geral de TIC'
+      : (instRow ? instRow.nome : 'Escola Municipal A');
+    const orgaoFinal = tipoFinal === 'admin'
+      ? 'Secretaria Municipal de Administração e Fazenda'
+      : (instRow ? instRow.secretaria : 'Secretaria Municipal de Educação');
+    const cargoFinal = (cargo && cargo.trim())
+      ? cargo.trim()
+      : (tipoFinal === 'admin' ? 'Administrador de TIC' : 'Solicitante da Unidade');
+    const matriculaFinal = (matricula && matricula.trim())
+      ? matricula.trim()
+      : `MAT-${Math.floor(10000 + Math.random() * 90000)}/PML`;
+    const avatarFinal = tipoFinal === 'admin' ? '👑' : '🏫';
+
+    const result = db.prepare(`
+      INSERT INTO usuarios (nome, email, senha, cargo, orgao, setor, municipio, matricula, perfil_padrao_id, atividades_padrao, avatar, tipo_usuario, instituicao_id)
+      VALUES (?, ?, ?, ?, ?, ?, 'Lages', ?, ?, ?, ?, ?, ?)
+    `).run(
+      nome.trim(),
+      emailLimpo,
+      senha.trim(),
+      cargoFinal,
+      orgaoFinal,
+      setorFinal,
+      matriculaFinal,
+      tipoFinal === 'admin' ? 2 : 1,
+      JSON.stringify([1, 2]),
+      avatarFinal,
+      tipoFinal,
+      idInstFinal
+    );
+
+    const novoUsuario = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(result.lastInsertRowid);
+    const { senha: _, ...usuarioSemSenha } = novoUsuario;
+    usuarioSemSenha.atividades_padrao = JSON.parse(novoUsuario.atividades_padrao || '[1, 2]');
+    usuarioSemSenha.instituicao = instRow || null;
+    usuarioSemSenha.instituicao_id = idInstFinal;
+    usuarioSemSenha.instituicao_nome = instRow ? instRow.nome : setorFinal;
+    usuarioSemSenha.instituicao_secretaria = instRow ? instRow.secretaria : orgaoFinal;
+    usuarioSemSenha.instituicao_tipo = instRow ? instRow.tipo : 'escola';
+
+    res.status(201).json({
+      success: true,
+      usuario: usuarioSemSenha
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // 1.1 Listar Instituições Públicas Cadastradas
 app.get('/api/instituicoes', (req, res) => {
   try {
@@ -93,27 +178,41 @@ app.get('/api/instituicoes', (req, res) => {
   }
 });
 
-// 2. Atualizar Lotação / Setor do Usuário (Tela 2 pós-login)
-app.post('/api/usuario/lotacao', (req, res) => {
+// 2. Atualizar Configurações do Usuário (Lotação e Matrícula são bloqueadas e imutáveis pós-cadastro)
+app.post('/api/usuario/configuracoes', (req, res) => {
   try {
-    const { usuarioId, nome, cargo, orgao, setor, matricula } = req.body;
+    const { usuarioId, nome, novaSenha } = req.body;
     if (!usuarioId) {
       return res.status(400).json({ error: 'ID de usuário obrigatório.' });
     }
+    if (!nome || nome.trim().length < 2) {
+      return res.status(400).json({ error: 'Informe um nome válido.' });
+    }
 
-    db.prepare(`
-      UPDATE usuarios 
-      SET nome = COALESCE(?, nome),
-          cargo = COALESCE(?, cargo),
-          orgao = COALESCE(?, orgao),
-          setor = COALESCE(?, setor),
-          matricula = COALESCE(?, matricula)
-      WHERE id = ?
-    `).run(nome, cargo, orgao, setor, matricula, usuarioId);
+    if (novaSenha && novaSenha.trim().length >= 4) {
+      db.prepare('UPDATE usuarios SET nome = ?, senha = ? WHERE id = ?').run(nome.trim(), novaSenha.trim(), usuarioId);
+    } else {
+      db.prepare('UPDATE usuarios SET nome = ? WHERE id = ?').run(nome.trim(), usuarioId);
+    }
 
     const usuarioAtualizado = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(usuarioId);
+    if (!usuarioAtualizado) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+
     const { senha: _, ...usuarioSemSenha } = usuarioAtualizado;
     usuarioSemSenha.atividades_padrao = JSON.parse(usuarioAtualizado.atividades_padrao || '[1, 2]');
+
+    if (usuarioAtualizado.instituicao_id) {
+      const instInfo = db.prepare('SELECT id, nome, tipo, secretaria, municipio FROM instituicoes WHERE id = ?').get(usuarioAtualizado.instituicao_id);
+      if (instInfo) {
+        usuarioSemSenha.instituicao = instInfo;
+        usuarioSemSenha.instituicao_id = instInfo.id;
+        usuarioSemSenha.instituicao_nome = instInfo.nome;
+        usuarioSemSenha.instituicao_secretaria = instInfo.secretaria;
+        usuarioSemSenha.instituicao_tipo = instInfo.tipo;
+      }
+    }
 
     res.json({
       success: true,

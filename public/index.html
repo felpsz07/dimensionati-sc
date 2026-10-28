@@ -13,125 +13,307 @@
   <!-- TELA 1: LOGIN FULLSCREEN (DARK MINIMALISTA)                  -->
   <!-- ============================================================ -->
   <div id="screen-login" class="app-screen active">
+    <div class="glass-login-bg">
 
-    <!-- LADO ESQUERDO: FORMULÁRIO -->
-    <div class="login-split login-form-side">
-      <div class="login-form-container">
+      <!-- MALHA TÉCNICA DE DIMENSIONAMENTO E CIRCUITOS DE FUNDO -->
+      <div class="tech-blueprint-grid" aria-hidden="true"></div>
 
-        <!-- LOGO -->
-        <div class="brand-badge">
-          <div class="brand-icon">✓</div>
-          <span class="brand-text">DimensionaTI<span class="accent-dot">.</span></span>
+      <!-- MOLDURA DE VIDRO EXTERNA (STAGE) -->
+      <div class="glass-login-stage">
+
+        <!-- LINHAS DE CONEXÃO DO FLUXO DE TI (CONECTANDO OS NÓS AO CENTRO) -->
+        <svg class="login-flow-circuit-svg" viewBox="0 0 1140 680" fill="none" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs>
+            <linearGradient id="gradLineLeft" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.15" />
+              <stop offset="60%" stop-color="#38BDF8" stop-opacity="0.65" />
+              <stop offset="100%" stop-color="#34D399" stop-opacity="0.85" />
+            </linearGradient>
+            <linearGradient id="gradLineRight" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#34D399" stop-opacity="0.85" />
+              <stop offset="40%" stop-color="#38BDF8" stop-opacity="0.65" />
+              <stop offset="100%" stop-color="#38BDF8" stop-opacity="0.15" />
+            </linearGradient>
+            <filter id="glowNode" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+
+          <!-- Grades circulares de medição ("Dimensão") -->
+          <circle cx="570" cy="340" r="250" stroke="rgba(255,255,255,0.06)" stroke-width="1.5" stroke-dasharray="6 8" />
+          <circle cx="570" cy="340" r="340" stroke="rgba(56,189,248,0.08)" stroke-width="1" />
+
+          <!-- Trilha Superior Esquerda (Instituições -> Centro) -->
+          <path d="M 220 165 L 330 165 L 395 235" stroke="url(#gradLineLeft)" stroke-width="2.2" stroke-dasharray="5 5" />
+          <circle cx="330" cy="165" r="4" fill="#38BDF8" filter="url(#glowNode)" />
+          <circle cx="395" cy="235" r="5" fill="#34D399" filter="url(#glowNode)" />
+
+          <!-- Trilha Inferior Esquerda (Dimensionamento Hardware -> Centro) -->
+          <path d="M 230 515 L 335 515 L 395 445" stroke="url(#gradLineLeft)" stroke-width="2.2" />
+          <circle cx="335" cy="515" r="4" fill="#38BDF8" filter="url(#glowNode)" />
+          <circle cx="395" cy="445" r="5" fill="#38BDF8" filter="url(#glowNode)" />
+
+          <!-- Trilha Superior Direita (Centro -> DOD Oficial) -->
+          <path d="M 745 235 L 810 165 L 915 165" stroke="url(#gradLineRight)" stroke-width="2.2" />
+          <circle cx="745" cy="235" r="5" fill="#34D399" filter="url(#glowNode)" />
+          <circle cx="810" cy="165" r="4" fill="#38BDF8" filter="url(#glowNode)" />
+
+          <!-- Trilha Inferior Direita (Centro -> Agrupamento ETP) -->
+          <path d="M 745 445 L 810 515 L 910 515" stroke="url(#gradLineRight)" stroke-width="2.2" stroke-dasharray="5 5" />
+          <circle cx="745" cy="445" r="5" fill="#38BDF8" filter="url(#glowNode)" />
+          <circle cx="810" cy="515" r="4" fill="#34D399" filter="url(#glowNode)" />
+
+          <!-- Linha vertical conectando DOD -> ETP na direita -->
+          <path d="M 920 225 L 920 450" stroke="rgba(56, 189, 248, 0.22)" stroke-width="1.5" stroke-dasharray="4 6" />
+          <!-- Linha vertical conectando Instituição -> Hardware na esquerda -->
+          <path d="M 215 225 L 215 450" stroke="rgba(56, 189, 248, 0.22)" stroke-width="1.5" stroke-dasharray="4 6" />
+        </svg>
+
+        <!-- ============================================================== -->
+        <!-- ELEMENTO TEMÁTICO 1 (ESQUERDA TOPO): INSTITUIÇÕES & DIAGNÓSTICO -->
+        <!-- ============================================================== -->
+        <div class="bg-theme-card pos-top-left" aria-hidden="true">
+          <div class="btc-header">
+            <div class="btc-icon-box btc-cyan">
+              <!-- Ícone Vetorial de Prédio Público / Escola -->
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 21h18"></path>
+                <path d="M5 21V7l7-4 7 4v14"></path>
+                <path d="M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4"></path>
+                <path d="M10 9h4"></path>
+                <path d="M10 12h4"></path>
+              </svg>
+            </div>
+            <div>
+              <span class="btc-step-tag">ETAPA 01 • UNIDADES</span>
+              <strong class="btc-title">Diagnóstico da Necessidade</strong>
+            </div>
+          </div>
+          <div class="btc-pills-list">
+            <span class="btc-mini-pill">🏫 Escolas Municipais</span>
+            <span class="btc-mini-pill">🏥 Unidades de Saúde</span>
+            <span class="btc-mini-pill">🏛️ Secretarias</span>
+          </div>
         </div>
 
-        <p class="tag-label">01 / ACESSO</p>
-        <div class="sparkle-icon">✦</div>
-
-        <h1 class="login-title">Acesse seu espaço.</h1>
-        <p class="login-subtitle">
-          Dimensionamento inteligente de computadores para Lages/SC.
-        </p>
-
-        <!-- FORMULÁRIO -->
-        <form id="formLogin" onsubmit="app.fazerLogin(event)">
-          <div class="field-group">
-            <label class="field-label">E-mail</label>
-            <input type="email" id="loginEmail" class="dark-input" placeholder="nome@exemplo.com" value="angelita.escola@lages.sc.gov.br" required autocomplete="email">
-          </div>
-
-          <div class="field-group">
-            <div class="label-row">
-              <label class="field-label">Senha</label>
-              <span class="hint-text">Demo: 123456</span>
+        <!-- ============================================================== -->
+        <!-- ELEMENTO TEMÁTICO 2 (ESQUERDA BASE): DIMENSIONAMENTO DE TI      -->
+        <!-- ============================================================== -->
+        <div class="bg-theme-card pos-bottom-left" aria-hidden="true">
+          <div class="btc-header">
+            <div class="btc-icon-box btc-emerald">
+              <!-- Ícone Vetorial de Notebook / Hardware / CPU -->
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="12" rx="2"></rect>
+                <line x1="2" y1="20" x2="22" y2="20"></line>
+                <path d="M9 9h6"></path>
+                <path d="M9 12h4"></path>
+              </svg>
             </div>
-            <div class="password-wrap">
-              <input type="password" id="loginSenha" class="dark-input" placeholder="Sua senha" value="123456" required autocomplete="current-password">
-              <button type="button" class="eye-btn" onclick="app.toggleSenha()" tabindex="-1">👁</button>
+            <div>
+              <span class="btc-step-tag">ETAPA 02 • DIMENSIONAMENTO</span>
+              <strong class="btc-title">Hardware na Medida Certa</strong>
             </div>
           </div>
-
-          <button type="submit" class="btn-primary-neon" id="btnLogin">
-            Entrar no painel <span class="arrow-icon">↗</span>
-          </button>
-        </form>
-
-        <div class="error-text" id="loginErrorMsg"></div>
-
-        <div class="demo-credentials-box">
-          <div style="font-weight: 800; color: #FFFFFF; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-            <span>🏛️</span>
-            <span>Perfis e Instituições para Demonstração:</span>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 6px;">
-            <div>
-              <span class="demo-pill-btn" onclick="app.preencherLogin('admin@lages.sc.gov.br', '123456')">
-                👑 <strong>Admin Central de TIC:</strong> admin@lages.sc.gov.br <em style="color:#00F0FF; font-size:0.75rem;">(Visão Global + Agrupamento ETP)</em>
-              </span>
+          <div class="btc-meters">
+            <div class="btc-meter-row">
+              <span>CPU &amp; RAM Ideal</span>
+              <div class="btc-bar"><div class="btc-fill" style="width: 82%;"></div></div>
             </div>
-            <div>
-              <span class="demo-pill-btn" onclick="app.preencherLogin('angelita.escola@lages.sc.gov.br', '123456')">
-                👩‍🏫 <strong>Profa. Angelita (Escola Municipal A):</strong> angelita.escola@lages.sc.gov.br
-              </span>
+            <div class="btc-meter-row">
+              <span>Economicidade</span>
+              <div class="btc-bar"><div class="btc-fill fill-emerald" style="width: 94%;"></div></div>
             </div>
-            <div>
-              <span class="demo-pill-btn" onclick="app.preencherLogin('maria.prof@lages.sc.gov.br', '123456')">
-                👩‍🏫 <strong>Profa. Maria Eduarda (Escola Municipal B):</strong> maria.prof@lages.sc.gov.br
-              </span>
-            </div>
-            <div>
-              <span class="demo-pill-btn" onclick="app.preencherLogin('carla.escola@lages.sc.gov.br', '123456')">
-                👩‍🏫 <strong>Profa. Carla Cristina (Escola Municipal C):</strong> carla.escola@lages.sc.gov.br
-              </span>
-            </div>
-            <div>
-              <span class="demo-pill-btn" onclick="app.preencherLogin('camila.saude@lages.sc.gov.br', '123456')">
-                👩‍⚕️ <strong>Dra. Camila Ramos (UBS Centro - Saúde):</strong> camila.saude@lages.sc.gov.br
-              </span>
-            </div>
-          </div>
-          <div style="margin-top: 8px; font-size: 0.72rem; color: #94A3B8; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 6px;">
-            🔒 <strong>Segurança Backend:</strong> Diretora visualiza estritamente sua instituição. Tentativas cruzadas são bloqueadas com <code>HTTP 403 Forbidden</code>.
           </div>
         </div>
 
-        <div class="login-foot">
-          <span>PORTAL PML</span>
-          <span>LEI 14.133</span>
+        <!-- ============================================================== -->
+        <!-- ELEMENTO TEMÁTICO 3 (DIREITA TOPO): FORMALIZAÇÃO DO DOD         -->
+        <!-- ============================================================== -->
+        <div class="bg-theme-card pos-top-right" aria-hidden="true">
+          <div class="btc-header">
+            <div class="btc-icon-box btc-blue">
+              <!-- Ícone Vetorial de Documento DOD Verificado -->
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <path d="M9 15l2 2 4-4"></path>
+              </svg>
+            </div>
+            <div>
+              <span class="btc-step-tag">ETAPA 03 • FORMALIZAÇÃO</span>
+              <strong class="btc-title">DOD Oficial &amp; Análise TI</strong>
+            </div>
+          </div>
+          <div class="btc-doc-lines">
+            <div class="btc-doc-line"><span class="btc-check">✓</span> <span>Justificativa Técnica Automática</span></div>
+            <div class="btc-doc-line"><span class="btc-check">✓</span> <span>Validação pela Diretoria de TIC</span></div>
+          </div>
         </div>
 
-      </div>
+        <!-- ============================================================== -->
+        <!-- ELEMENTO TEMÁTICO 4 (DIREITA BASE): AGRUPAMENTO & ETP ÚNICO    -->
+        <!-- ============================================================== -->
+        <div class="bg-theme-card pos-bottom-right" aria-hidden="true">
+          <div class="btc-header">
+            <div class="btc-icon-box btc-emerald">
+              <!-- Ícone Vetorial de Camadas / Consolidação ETP -->
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                <polyline points="2 12 12 17 22 12"></polyline>
+                <polyline points="2 17 12 22 22 17"></polyline>
+              </svg>
+            </div>
+            <div>
+              <span class="btc-step-tag">ETAPA 04 • PLANEJAMENTO</span>
+              <strong class="btc-title">Consolidação em ETP Único</strong>
+            </div>
+          </div>
+          <div class="btc-etp-merge">
+            <span class="btc-merge-node">DOD A</span>
+            <span class="btc-merge-node">DOD B</span>
+            <span class="btc-merge-arrow">&rarr;</span>
+            <span class="btc-merge-target">📑 ETP Lages</span>
+          </div>
+        </div>
 
-      <div class="login-copy">
-        © 2026 DimensionaTI • Lages / SC
+        <!-- Canvas oculto por compatibilidade -->
+        <canvas id="loginDotsCanvas" style="display:none;"></canvas>
+
+        <!-- ============================================================== -->
+        <!-- CARD CENTRAL DE LOGIN (GLASSMORPHISM)                          -->
+        <!-- ============================================================== -->
+        <div class="glass-login-card" id="glassAuthCard">
+          
+          <!-- LOGO NO TOPO -->
+          <div class="glass-logo-top">
+            <div class="glass-brand-row">
+              <span class="glass-brand-badge-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+              </span>
+              <span class="glass-logo-text">DimensionaTI</span>
+            </div>
+            <span class="glass-logo-sub">Planejamento de Demandas de TIC • DOD &amp; ETP</span>
+          </div>
+
+          <!-- ========================================== -->
+          <!-- VISÃO 1: LOGIN                             -->
+          <!-- ========================================== -->
+          <div id="boxModoLogin">
+            <h1 class="glass-login-heading">Login</h1>
+
+            <form id="formLogin" onsubmit="app.fazerLogin(event)">
+              <div class="glass-field-group">
+                <label class="glass-label" for="loginEmail">E-mail</label>
+                <input type="email" id="loginEmail" class="glass-input" placeholder="Digite seu e-mail institucional" value="" required autocomplete="email">
+              </div>
+
+              <div class="glass-field-group">
+                <label class="glass-label" for="loginSenha">Senha</label>
+                <div class="glass-password-wrap">
+                  <input type="password" id="loginSenha" class="glass-input" placeholder="Digite sua senha" value="" required autocomplete="current-password">
+                  <button type="button" class="glass-eye-btn" onclick="app.toggleSenha()" tabindex="-1" title="Mostrar/ocultar senha">👁</button>
+                </div>
+                <div class="glass-forgot-row">
+                  <span>Esqueceu a senha?</span>
+                </div>
+              </div>
+
+              <button type="submit" class="glass-signin-btn" id="btnLogin">
+                Entrar
+              </button>
+            </form>
+
+            <div class="error-text" id="loginErrorMsg" style="text-align: center; margin-top: 8px; min-height: 16px; color: #FFD1D1;"></div>
+
+            <div class="glass-register-footer">
+              Ainda não tem uma conta? <a href="#" class="glass-switch-link" onclick="app.alternarModoCadastro(true); return false;">Criar conta</a>
+            </div>
+          </div>
+
+          <!-- ========================================== -->
+          <!-- VISÃO 2: CRIAR CONTA (CADASTRO)            -->
+          <!-- ========================================== -->
+          <div id="boxModoCadastro" style="display: none;">
+            <h1 class="glass-login-heading" style="margin-bottom: 12px;">Criar Conta</h1>
+
+            <form id="formCadastro" onsubmit="app.criarContaUsuario(event)">
+              <div class="glass-field-group">
+                <label class="glass-label" for="cadNome">Nome Completo</label>
+                <input type="text" id="cadNome" class="glass-input" placeholder="Ex: Maria da Silva" required>
+              </div>
+
+              <div class="glass-field-group">
+                <label class="glass-label" for="cadEmail">E-mail Institucional</label>
+                <input type="email" id="cadEmail" class="glass-input" placeholder="nome@lages.sc.gov.br" required autocomplete="email">
+              </div>
+
+              <div class="glass-field-group">
+                <label class="glass-label" for="cadTipoUsuario">Tipo de Conta</label>
+                <select id="cadTipoUsuario" class="glass-input" onchange="app.aoMudarPerfilCadastro()">
+                  <option value="diretora">Usuário / Solicitante</option>
+                  <option value="admin">Admin / Equipe TIC</option>
+                </select>
+              </div>
+
+              <!-- CAMPOS EXCLUSIVOS DE USUÁRIO (LOTAÇÃO E MATRÍCULA DEFINIDOS NO CADASTRO) -->
+              <div id="grupoDadosUsuarioCad">
+                <div class="glass-grid-2col">
+                  <div class="glass-field-group">
+                    <label class="glass-label" for="cadInstituicaoId">Lotação / Unidade</label>
+                    <select id="cadInstituicaoId" class="glass-input" onchange="app.aoMudarInstituicaoCadastro()">
+                      <option value="1">Escola Municipal A</option>
+                    </select>
+                  </div>
+
+                  <div class="glass-field-group">
+                    <label class="glass-label" for="cadMatricula">Matrícula</label>
+                    <input type="text" id="cadMatricula" class="glass-input" placeholder="Ex: MAT-48921/PML">
+                  </div>
+                </div>
+
+                <div class="glass-field-group" id="boxNovaInstituicaoCad" style="display: none;">
+                  <label class="glass-label" for="cadNovaInstituicaoNome">Nome da Nova Unidade</label>
+                  <input type="text" id="cadNovaInstituicaoNome" class="glass-input" placeholder="Ex: Escola Municipal D">
+                </div>
+              </div>
+
+              <div class="glass-grid-2col">
+                <div class="glass-field-group">
+                  <label class="glass-label" for="cadSenha">Senha</label>
+                  <div class="glass-password-wrap">
+                    <input type="password" id="cadSenha" class="glass-input" placeholder="Mín. 4 caracteres" required autocomplete="new-password">
+                    <button type="button" class="glass-eye-btn" onclick="app.toggleSenhaCadastro()" tabindex="-1" title="Mostrar/ocultar senha">👁</button>
+                  </div>
+                </div>
+
+                <div class="glass-field-group">
+                  <label class="glass-label" for="cadConfirmaSenha">Confirmar Senha</label>
+                  <input type="password" id="cadConfirmaSenha" class="glass-input" placeholder="Repita a senha" required autocomplete="new-password">
+                </div>
+              </div>
+
+              <button type="submit" class="glass-signin-btn" id="btnCriarConta" style="margin-top: 8px;">
+                Cadastrar e Entrar
+              </button>
+            </form>
+
+            <div class="error-text" id="cadastroErrorMsg" style="text-align: center; margin-top: 8px; min-height: 16px; color: #FFD1D1;"></div>
+
+            <div class="glass-register-footer" style="margin-top: 12px;">
+              Já possui uma conta? <a href="#" class="glass-switch-link" onclick="app.alternarModoCadastro(false); return false;">Fazer login</a>
+            </div>
+          </div>
+
+        </div>
+
       </div>
     </div>
-
-    <!-- LADO DIREITO: HERO DECORATIVO -->
-    <div class="login-split login-hero-side">
-      <div class="hero-inner">
-        <p class="hero-kicker">● CONFORMIDADE PREVENTIVA</p>
-        
-        <div class="dot-grid-bg" aria-hidden="true">
-          <canvas id="loginDotsCanvas"></canvas>
-        </div>
-
-        <div class="hero-caption">
-          <p class="hero-subkicker">LAGES • SANTA CATARINA</p>
-          <h2 class="hero-h1">
-            Seu próximo passo,<br>
-            <span class="neon-text">ao seu alcance.</span>
-          </h2>
-          <p class="hero-p">
-            Hardware dimensionado na medida certa. Sem excessos, sem desperdício e com garantia de fábrica.
-          </p>
-        </div>
-      </div>
-
-      <div class="hero-bottom-text">
-        <span>EFICIÊNCIA &amp; TRANSPARÊNCIA</span>
-      </div>
-    </div>
-
   </div>
 
 
@@ -144,7 +326,7 @@
 
         <div class="text-center" style="margin-bottom: 24px;">
           <div class="brand-badge" style="justify-content: center; margin-bottom: 12px;">
-            <div class="brand-icon">✓</div>
+            <div class="brand-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></div>
             <span class="brand-text">DimensionaTI<span class="accent-dot">.</span></span>
           </div>
           <p class="tag-label">02 / LOTAÇÃO</p>
@@ -228,7 +410,7 @@
     <header class="dark-navbar">
       <div class="dark-nav-left">
         <div class="brand-badge" onclick="app.navegar('licitacoes')">
-          <div class="brand-icon">✓</div>
+          <div class="brand-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></div>
           <span class="brand-text">DimensionaTI<span class="accent-dot">.</span></span>
         </div>
 
@@ -237,24 +419,29 @@
             Licitações
           </button>
           <button class="nav-link-btn" id="btnNavAuditor" onclick="app.navegar('auditor')">
-            Auditoria TCE
+            Auditoria
           </button>
         </nav>
       </div>
 
       <div class="dark-nav-right">
-        <div id="navInstituicaoTag" class="user-inst-badge" style="background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.25); color: #00F0FF; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+        <div id="navInstituicaoTag" class="user-inst-badge">
           <span id="navInstituicaoIcone">🏫</span>
           <span id="navInstituicaoNome">Escola Municipal A</span>
         </div>
 
-        <div class="user-pill-badge" onclick="app.mostrarTela('screen-workplace')" title="Clique para editar lotação">
+        <div class="user-pill-badge" id="navUserPillBadge" onclick="app.abrirConfiguracoesUsuario()" title="Configurações da Conta">
           <div class="user-avatar-mini" id="navAvatar">ME</div>
           <div class="user-text-mini">
             <span class="user-name" id="navNome">Servidor</span>
             <span class="user-sector" id="navSetor">Educação</span>
           </div>
         </div>
+
+        <button type="button" class="btn-theme-toggle" id="btnThemeToggle" onclick="app.alternarTema()" title="Alternar entre tema White e Dark">
+          <span id="themeToggleIcon">🌙</span>
+          <span id="themeToggleText">Dark</span>
+        </button>
 
         <button class="btn-ghost-icon" onclick="app.logout()" title="Sair do sistema">
           🚪
@@ -275,31 +462,29 @@
           <!-- LINHA 1: TÍTULO, SUBTÍTULO E BOTÃO PRINCIPAL -->
           <div class="header-main-row">
             <div class="header-title-wrap">
-              <h1 id="tituloSecaoLicitacoes" class="header-page-title">
-                Minhas Requisições de Equipamento
-              </h1>
+              <h1 id="tituloSecaoLicitacoes" class="header-page-title">Demandas</h1>
               <p id="subtituloSecaoLicitacoes" class="header-page-subtitle">
                 Acompanhe o fluxo: Diagnóstico do Servidor &rarr; DOD Oficial &rarr; Análise Técnica do TI &rarr; ETP.
               </p>
             </div>
 
             <div style="display: flex; gap: 10px; align-items: center;">
-              <!-- Botão Exclusivo do Admin / TI: Agrupar Demandas para ETP Único -->
-              <button type="button" class="btn-primary-action" id="btnAbrirAgrupamentoEtp" style="display: none; background: linear-gradient(135deg, #00F0FF, #0284C7); color: #000000; font-weight: 800; border: none; box-shadow: 0 4px 18px rgba(0,240,255,0.35);" onclick="app.abrirModalAgruparEtp()">
+              <!-- Botão Exclusivo do Admin / TI: Agrupar ETP -->
+              <button type="button" class="btn-secondary-glass" id="btnAbrirAgrupamentoEtp" style="display: none;" onclick="app.abrirModalAgruparEtp()">
                 <span class="btn-action-icon">📑</span>
-                <span>Agrupar Demandas para ETP</span>
-                <span class="badge-count-etp" id="badgeTotalAptosEtp" style="background: #000000; color: #00F0FF; padding: 2px 7px; border-radius: 10px; font-size: 0.76rem; margin-left: 4px;">0</span>
+                <span>Agrupar ETP</span>
+                <span class="badge-count-etp" id="badgeTotalAptosEtp">0</span>
               </button>
 
               <button type="button" class="btn-primary-action" onclick="app.abrirWizardNovo()">
                 <span class="btn-action-icon">+</span>
-                <span>Nova Requisição</span>
+                <span>Nova Demanda</span>
               </button>
             </div>
           </div>
 
           <!-- BANNER INFORMATIVO DE VÍNCULO INSTITUCIONAL (PARA DIRETORA / SOLICITANTE) -->
-          <div id="bannerVinculoInstitucional" style="display: none; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px; padding: 10px 16px; margin: 12px 0; font-size: 0.88rem; color: #E2E8F0; align-items: center; justify-content: space-between;">
+          <div id="bannerVinculoInstitucional" class="banner-vinculo-glass" style="display: none;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <span style="font-size: 1.2rem;">🏫</span>
               <span>
@@ -359,23 +544,27 @@
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
-              <input type="text" id="inputBusca" class="search-pro-field" placeholder="Buscar por protocolo, órgão ou solicitante..." oninput="app.filtrarTabela()">
+              <input type="text" id="inputBusca" class="search-pro-field" placeholder="Buscar..." autocomplete="off" oninput="app.filtrarTabela()">
             </div>
 
             <!-- FILTROS AVANÇADOS EXCLUSIVOS PARA ADMIN/TI -->
             <div id="filtrosAdminWrap" style="display: none; align-items: center; gap: 8px;">
-              <select id="filtroSecretariaAdmin" class="dark-input" style="padding: 7px 12px; font-size: 0.85rem; background: #0B111D; border-color: rgba(255,255,255,0.12);" onchange="app.aplicarFiltrosAdmin()">
-                <option value="">Todas as Secretarias</option>
-                <option value="Secretaria Municipal de Educação">Educação (SME)</option>
-                <option value="Secretaria Municipal de Saúde">Saúde (SMS)</option>
-                <option value="Secretaria de Planejamento e Obras">Planejamento e Obras (SEPLAN)</option>
-                <option value="Secretaria da Fazenda">Fazenda e Finanças</option>
+              <select id="filtroSecretariaAdmin" class="dark-input filter-select-glass" autocomplete="off" onchange="app.aplicarFiltrosAdmin()">
+                <option value="">Secretarias</option>
+                <option value="Secretaria Municipal de Educação">Educação</option>
+                <option value="Secretaria Municipal de Saúde">Saúde</option>
+                <option value="Secretaria de Planejamento e Obras">Obras</option>
+                <option value="Secretaria da Fazenda">Fazenda</option>
               </select>
 
-              <select id="filtroInstituicaoAdmin" class="dark-input" style="padding: 7px 12px; font-size: 0.85rem; background: #0B111D; border-color: rgba(255,255,255,0.12);" onchange="app.aplicarFiltrosAdmin()">
-                <option value="">Todas as Instituições</option>
+              <select id="filtroInstituicaoAdmin" class="dark-input filter-select-glass" autocomplete="off" onchange="app.aplicarFiltrosAdmin()">
+                <option value="">Unidades</option>
                 <!-- Preenchido via app.carregarInstituicoesFiltro() -->
               </select>
+
+              <button type="button" id="btnLimparFiltrosAdmin" class="btn-dark-outline" style="display: none; padding: 6px 10px; font-size: 0.75rem; height: 36px;" onclick="app.limparFiltrosAdmin()" title="Limpar filtros">
+                ✕ Limpar
+              </button>
             </div>
 
             <!-- IDENTIFICAÇÃO DO PERFIL DO USUÁRIO -->
@@ -390,27 +579,27 @@
           <div class="status-tabs-wrapper">
             <div class="status-tabs-container">
               <button type="button" class="status-tab-btn active" id="tabStatusAguardando" onclick="app.setAbaStatus('aguardando_analise')">
-                <span class="tab-label">Aguardando TI</span>
+                <span class="tab-label">Pendentes</span>
                 <span class="tab-count-badge" id="badgeQtdAguardando">0</span>
               </button>
               <button type="button" class="status-tab-btn" id="tabStatusAjustes" onclick="app.setAbaStatus('ajustes')">
-                <span class="tab-label">Com Ajustes</span>
+                <span class="tab-label">Ajustes</span>
                 <span class="tab-count-badge badge-warn" id="badgeQtdAjustes">0</span>
               </button>
               <button type="button" class="status-tab-btn" id="tabStatusValidados" onclick="app.setAbaStatus('validados')">
-                <span class="tab-label">DODs Validados</span>
+                <span class="tab-label">Validados</span>
                 <span class="tab-count-badge badge-success" id="badgeQtdValidados">0</span>
               </button>
               <button type="button" class="status-tab-btn" id="tabStatusEtp" onclick="app.setAbaStatus('etp_gerado')">
-                <span class="tab-label">ETP Gerado</span>
+                <span class="tab-label">ETPs</span>
                 <span class="tab-count-badge badge-accent" id="badgeQtdEtp">0</span>
               </button>
               <button type="button" class="status-tab-btn" id="tabStatusCanceladas" onclick="app.setAbaStatus('canceladas')">
-                <span class="tab-label">Canceladas</span>
+                <span class="tab-label">Cancelados</span>
                 <span class="tab-count-badge badge-cancel" id="badgeQtdCanceladas">0</span>
               </button>
               <button type="button" class="status-tab-btn" id="tabStatusTodas" onclick="app.setAbaStatus('todas')">
-                <span class="tab-label">Todas as Requisições</span>
+                <span class="tab-label">Todos</span>
                 <span class="tab-count-badge" id="badgeQtdTodas">0</span>
               </button>
             </div>
@@ -423,12 +612,12 @@
             <table class="dark-table enterprise-table">
               <thead>
                 <tr>
-                  <th style="width: 175px;">Nº REQUISIÇÃO</th>
-                  <th style="min-width: 220px;">ÓRGÃO / SETOR</th>
-                  <th style="min-width: 230px;">SOLICITANTE</th>
-                  <th style="width: 80px; text-align: center;">QTD</th>
-                  <th style="min-width: 240px;">EQUIPAMENTO SOLICITADO</th>
-                  <th style="width: 195px; text-align: center;">STATUS TI</th>
+                  <th style="width: 175px;">PROTOCOLO</th>
+                  <th>UNIDADE</th>
+                  <th>SOLICITANTE</th>
+                  <th style="width: 85px; text-align: center;">QTD</th>
+                  <th>ITEM</th>
+                  <th style="width: 155px; text-align: center;">STATUS</th>
                   <th style="width: 125px; text-align: right;">AÇÕES</th>
                 </tr>
               </thead>
@@ -445,7 +634,7 @@
               <span id="footerCountText">Exibindo requisições</span>
             </div>
             <div class="footer-meta-text">
-              Diretoria de TIC • Prefeitura de Lages/SC
+              TIC • Lages/SC
             </div>
           </div>
         </div>
@@ -475,7 +664,7 @@
                   <path d="M14 16H18" stroke-width="2" stroke-linecap="round" />
                 </svg>
               </div>
-              <span class="stepper-label-text">1 - Necessidade</span>
+              <span class="stepper-label-text">1. Item</span>
             </div>
 
             <!-- SETA 1 -> 2 -->
@@ -500,7 +689,7 @@
                   <circle cx="14" cy="34" r="1.5" fill="currentColor" />
                 </svg>
               </div>
-              <span class="stepper-label-text">2 - Rotina</span>
+              <span class="stepper-label-text">2. Uso</span>
             </div>
 
             <!-- SETA 2 -> 3 -->
@@ -523,7 +712,7 @@
                   <line x1="37" y1="36" x2="37" y2="39" stroke-width="1.5" stroke-linecap="round" />
                 </svg>
               </div>
-              <span class="stepper-label-text">3 - Recursos</span>
+              <span class="stepper-label-text">3. Posto</span>
             </div>
 
             <!-- SETA 3 -> 4 -->
@@ -550,7 +739,7 @@
                   <line x1="36" y1="30" x2="42" y2="30" stroke-width="2" stroke-linecap="round" />
                 </svg>
               </div>
-              <span class="stepper-label-text">4 - Recomendação</span>
+              <span class="stepper-label-text">4. Perfil</span>
             </div>
 
             <!-- SETA 4 -> 5 -->
@@ -571,7 +760,7 @@
                   <path d="M21 26L23.5 28.5L27.5 23.5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </div>
-              <span class="stepper-label-text">5 - Finalizar</span>
+              <span class="stepper-label-text">5. Enviar</span>
             </div>
 
           </div>
@@ -581,7 +770,7 @@
           <!-- ETAPA 1: O QUE VOCÊ PRECISA PARA REALIZAR SEU TRABALHO?   -->
           <!-- ======================================================== -->
           <div class="wizard-pane active" id="pane-passo-1">
-            <h3 class="pane-headline">O que você precisa para realizar seu trabalho?</h3>
+            <h3 class="pane-headline">O que você precisa?</h3>
             <p class="pane-sub">Conte o que você precisa para realizar seu trabalho. Vamos ajudar a identificar a melhor solução:</p>
 
             <div class="necessidade-grid">
@@ -589,59 +778,59 @@
               <div class="necessidade-card active" id="cardNecComputador" onclick="app.setTipoNecessidade('computador', this)">
                 <span class="nec-badge-top">✓ RECOMENDADO</span>
                 <div class="nec-icon">💻</div>
-                <div class="nec-title">Preciso de um computador</div>
+                <div class="nec-title">Computador</div>
                 <div class="nec-desc">Notebook ou Computador de Mesa para minhas tarefas e rotina diária de trabalho.</div>
               </div>
 
               <!-- MONITOR -->
               <div class="necessidade-card" id="cardNecMonitor" onclick="app.setTipoNecessidade('monitor', this)">
                 <div class="nec-icon">🖥️</div>
-                <div class="nec-title">Preciso de um monitor</div>
+                <div class="nec-title">Monitor</div>
                 <div class="nec-desc">Tela avulsa ou tela adicional para trabalhar com mais conforto e produtividade.</div>
               </div>
 
               <!-- IMPRESSORA -->
               <div class="necessidade-card" id="cardNecImpressora" onclick="app.setTipoNecessidade('impressora', this)">
                 <div class="nec-icon">🖨️</div>
-                <div class="nec-title">Preciso de uma impressora</div>
+                <div class="nec-title">Impressora</div>
                 <div class="nec-desc">Equipamento para impressão, cópia ou digitalização de documentos e relatórios.</div>
               </div>
 
               <!-- OUTRO EQUIPAMENTO -->
               <div class="necessidade-card" id="cardNecOutro" onclick="app.setTipoNecessidade('outro', this)">
                 <div class="nec-icon">📱</div>
-                <div class="nec-title">Preciso de outro equipamento</div>
+                <div class="nec-title">Outro Item</div>
                 <div class="nec-desc">Nobreak, scanner, periféricos específicos ou equipamentos de rede da unidade.</div>
               </div>
 
               <!-- MANUTENÇÃO -->
               <div class="necessidade-card" id="cardNecManutencao" onclick="app.setTipoNecessidade('manutencao', this)">
                 <div class="nec-icon">🔧</div>
-                <div class="nec-title">Preciso de manutenção</div>
+                <div class="nec-title">Manutenção</div>
                 <div class="nec-desc">O computador da sala estragou, não liga, está travando ou necessita de suporte técnico.</div>
               </div>
 
               <!-- SISTEMA / SOFTWARE -->
               <div class="necessidade-card" id="cardNecSoftware" onclick="app.setTipoNecessidade('software', this)">
                 <div class="nec-icon">💿</div>
-                <div class="nec-title">Preciso de um sistema/software</div>
+                <div class="nec-title">Software</div>
                 <div class="nec-desc">Instalação, licença ou liberação de acesso a um programa corporativo do município.</div>
               </div>
 
               <!-- AINDA NÃO SEI -->
               <div class="necessidade-card" id="cardNecIndeciso" onclick="app.setTipoNecessidade('indeciso', this)">
                 <div class="nec-icon">❓</div>
-                <div class="nec-title">Ainda não sei exatamente</div>
+                <div class="nec-title">Apoio Técnico</div>
                 <div class="nec-desc">Estou com dificuldades para trabalhar e preciso de apoio do TI para diagnosticar.</div>
               </div>
             </div>
 
             <!-- AVISO CONTEXTUAL PARA ITENS QUE DIRECIONAM OU COMPLEMENTAM O COMPUTADOR -->
             <div class="aviso-outra-necessidade" id="boxAvisoOutraNecessidade" style="display: none;">
-              <div style="font-size: 1.8rem;">💡</div>
-              <div>
-                <strong style="color: #60A5FA; font-size: 1.05rem;">Orientação da Diretoria de TIC:</strong>
-                <p id="txtAvisoOutraNecessidade" style="margin-top: 4px; font-size: 0.95rem;">
+              <div class="aviso-nec-icon">💡</div>
+              <div class="aviso-nec-body">
+                <strong class="aviso-nec-title">Orientação da Diretoria de TIC:</strong>
+                <p id="txtAvisoOutraNecessidade" class="aviso-nec-text">
                   Se a sua demanda envolve substituir uma máquina defeituosa ou estruturar o posto com computador, continuaremos o diagnóstico simples a seguir.
                 </p>
               </div>
@@ -665,7 +854,7 @@
           <!-- ETAPA 2: COMO VOCÊ UTILIZA O COMPUTADOR NO SEU TRABALHO? -->
           <!-- ======================================================== -->
           <div class="wizard-pane" id="pane-passo-2">
-            <h3 class="pane-headline">Como você utiliza o computador no seu trabalho?</h3>
+            <h3 class="pane-headline">Perfil de Uso</h3>
             <p class="pane-sub">Conte um pouco sobre sua rotina de trabalho para identificarmos o perfil mais adequado:</p>
 
             <!-- CATEGORIAS DE ROTINA (ENTENDENDO A NECESSIDADE, NÃO O HARDWARE) -->
@@ -677,7 +866,7 @@
                 <div class="nivel-icon">🏫</div>
                 <div class="nivel-content">
                   <div class="nivel-header-row">
-                    <span class="nivel-title">Gestão Escolar & Rotina Administrativa</span>
+                    <span class="nivel-title">Básico / Administrativo</span>
                     <span class="rotina-banner-badge" style="background: rgba(52, 211, 153, 0.2); color: var(--dark-accent);">
                       ✓ RECOMENDADO PARA ROTINA PÚBLICA
                     </span>
@@ -694,8 +883,8 @@
                 <div class="nivel-icon">📊</div>
                 <div class="nivel-content">
                   <div class="nivel-header-row">
-                    <span class="nivel-title">Análise de Dados & Relatórios Gerenciais</span>
-                    <span class="rotina-banner-badge" style="background: rgba(245, 158, 11, 0.15); color: #FBBF24;">
+                    <span class="nivel-title">Intermediário / Dados</span>
+                    <span class="rotina-banner-badge" style="background: rgba(245, 158, 11, 0.15); color: #D97706;">
                       INTERMEDIÁRIO
                     </span>
                   </div>
@@ -711,8 +900,8 @@
                 <div class="nivel-icon">📐</div>
                 <div class="nivel-content">
                   <div class="nivel-header-row">
-                    <span class="nivel-title">Projetos de Engenharia, Plantas e CAD (3D)</span>
-                    <span class="rotina-banner-badge" style="background: rgba(239, 68, 68, 0.15); color: #F87171;">
+                    <span class="nivel-title">Avançado / Engenharia</span>
+                    <span class="rotina-banner-badge" style="background: rgba(239, 68, 68, 0.15); color: #DC2626;">
                       ALTO DESEMPENHO (SEPLAN)
                     </span>
                   </div>
@@ -738,19 +927,19 @@
 
               <!-- 1. MOBILIDADE -->
               <div class="pergunta-bloco">
-                <span class="pergunta-titulo">1. Você precisa transportar o equipamento para reuniões ou outras salas?</span>
+                <span class="pergunta-titulo">1. Mobilidade</span>
                 <div class="pergunta-cards-grid">
                   <div class="pergunta-card-opt active" id="cardMobSim" onclick="app.setMobilidade(true, this)">
                     <div class="opt-radio-circle"></div>
                     <div class="opt-text-wrap">
-                      <strong>🚗 Sim, preciso de mobilidade (Notebook)</strong>
+                      <strong>💻 Notebook (Portátil)</strong>
                       <small>Para levar a reuniões pedagógicas, conselhos de classe, treinamentos e salas</small>
                     </div>
                   </div>
                   <div class="pergunta-card-opt" id="cardMobNao" onclick="app.setMobilidade(false, this)">
                     <div class="opt-radio-circle"></div>
                     <div class="opt-text-wrap">
-                      <strong>🏢 Não, trabalho sempre fixo na mesa (Desktop)</strong>
+                      <strong>🖥️ Desktop (Fixo)</strong>
                       <small>O computador fica exclusivamente no posto de trabalho ou gabinete</small>
                     </div>
                   </div>
@@ -759,7 +948,7 @@
 
               <!-- 2. PROGRAMAS UTILIZADOS -->
               <div class="pergunta-bloco">
-                <span class="pergunta-titulo">2. Quais ferramentas fazem parte do seu trabalho diário?</span>
+                <span class="pergunta-titulo">2. Programas utilizados</span>
                 <div class="chips-softwares-grid">
                   <button type="button" class="chip-sistema-btn active" onclick="app.toggleSoftwareChip('Diário de Classe & Notas', this)">
                     <span>🎓</span> Diário de Classe & Notas
@@ -785,70 +974,28 @@
                 </div>
               </div>
 
-              <!-- 3. USO SIMULTÂNEO / MULTITAREFAS -->
+              <!-- 3. SITUAÇÃO DO EQUIPAMENTO ATUAL -->
               <div class="pergunta-bloco">
-                <span class="pergunta-titulo">3. Você costuma utilizar vários sistemas abertos ao mesmo tempo com frequência?</span>
-                <div class="pergunta-cards-grid">
-                  <div class="pergunta-card-opt active" id="cardMultiSim" onclick="app.setMultitarefas(true, this)">
-                    <div class="opt-radio-circle"></div>
-                    <div class="opt-text-wrap">
-                      <strong>⚡ Sim, alterno entre múltiplos sistemas simultaneamente</strong>
-                      <small>Navegadores com várias abas, sistema escolar, planilhas e reuniões ao mesmo tempo</small>
-                    </div>
-                  </div>
-                  <div class="pergunta-card-opt" id="cardMultiNao" onclick="app.setMultitarefas(false, this)">
-                    <div class="opt-radio-circle"></div>
-                    <div class="opt-text-wrap">
-                      <strong>🌱 Não, utilizo um ou dois programas por vez</strong>
-                      <small>Minha rotina é linear e focada em uma tarefa por vez</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 4. PLANILHAS GRANDES OU DADOS PESADOS -->
-              <div class="pergunta-bloco">
-                <span class="pergunta-titulo">4. Você trabalha com planilhas grandes ou grande volume de dados?</span>
-                <div class="pergunta-cards-grid">
-                  <div class="pergunta-card-opt" id="cardPlanilhasSim" onclick="app.setPlanilhasGrandes(true, this)">
-                    <div class="opt-radio-circle"></div>
-                    <div class="opt-text-wrap">
-                      <strong>📊 Sim, planilhas pesadas com milhares de linhas</strong>
-                      <small>Controles fiscais complexos, orçamentos municipais ou grandes tabelas</small>
-                    </div>
-                  </div>
-                  <div class="pergunta-card-opt active" id="cardPlanilhasNao" onclick="app.setPlanilhasGrandes(false, this)">
-                    <div class="opt-radio-circle"></div>
-                    <div class="opt-text-wrap">
-                      <strong>📄 Não, planilhas comuns de notas e controles simples</strong>
-                      <small>Tabelas de até poucas centenas de linhas para rotina normal</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 5. SITUAÇÃO DO EQUIPAMENTO ATUAL -->
-              <div class="pergunta-bloco">
-                <span class="pergunta-titulo">5. Qual é a situação do computador atual da sua sala?</span>
+                <span class="pergunta-titulo">3. Situação atual</span>
                 <div class="pergunta-cards-grid">
                   <div class="pergunta-card-opt active" id="cardSitEstragou" onclick="app.setSituacaoAtual('estragou', this)">
                     <div class="opt-radio-circle"></div>
                     <div class="opt-text-wrap">
-                      <strong>🔥 O computador anterior estragou / não liga</strong>
+                      <strong>🔥 Estragou / Sem uso</strong>
                       <small>Preciso de substituição para retomar as atividades da unidade</small>
                     </div>
                   </div>
                   <div class="pergunta-card-opt" id="cardSitLento" onclick="app.setSituacaoAtual('lento', this)">
                     <div class="opt-radio-circle"></div>
                     <div class="opt-text-wrap">
-                      <strong>⏳ A máquina atual trava muito / é muito lenta</strong>
+                      <strong>⏳ Muito lento</strong>
                       <small>Equipamento antigo que atrasa o atendimento e gera perda de tempo</small>
                     </div>
                   </div>
                   <div class="pergunta-card-opt" id="cardSitNovo" onclick="app.setSituacaoAtual('novo', this)">
                     <div class="opt-radio-circle"></div>
                     <div class="opt-text-wrap">
-                      <strong>🆕 Novo posto de trabalho</strong>
+                      <strong>🆕 Novo posto</strong>
                       <small>Não possuo computador disponível para minha função na unidade</small>
                     </div>
                   </div>
@@ -863,7 +1010,7 @@
           <!-- ETAPA 3: O QUE VOCÊ JÁ POSSUI NO SEU POSTO DE TRABALHO?   -->
           <!-- ======================================================== -->
           <div class="wizard-pane" id="pane-passo-3">
-            <h3 class="pane-headline">O que você já possui no seu posto de trabalho?</h3>
+            <h3 class="pane-headline">Itens no Posto</h3>
             <p class="pane-sub">Marque o que já está funcionando para solicitar apenas o que realmente falta (evita compras desnecessárias):</p>
 
             <div class="recursos-mesa-grid">
@@ -931,13 +1078,13 @@
             <!-- QUANTIDADE DE POSTOS -->
             <div class="quantidade-box-grande">
               <div>
-                <strong class="qtd-box-titulo">Quantas pessoas no seu setor precisam dessa solução?</strong>
+                <strong class="qtd-box-titulo">Quantidade</strong>
                 <p class="qtd-box-sub">Selecione a quantidade de postos de trabalho necessários:</p>
               </div>
               <div class="quick-qty-row">
-                <button type="button" class="qty-pill active" onclick="app.setQtd(1, this)">1 equipamento</button>
-                <button type="button" class="qty-pill" onclick="app.setQtd(2, this)">2 equipamentos</button>
-                <button type="button" class="qty-pill" onclick="app.setQtd(5, this)">5 equipamentos</button>
+                <button type="button" class="qty-pill active" onclick="app.setQtd(1, this)">1 un</button>
+                <button type="button" class="qty-pill" onclick="app.setQtd(2, this)">2 un</button>
+                <button type="button" class="qty-pill" onclick="app.setQtd(5, this)">5 un</button>
                 <input type="number" id="inputQtd" class="dark-input inline-qty" min="1" max="50" value="1" onchange="app.setQtdCustom(this.value)">
               </div>
             </div>
@@ -948,7 +1095,7 @@
           <!-- ETAPA 4: NECESSIDADE IDENTIFICADA & RECOMENDAÇÃO TÉCNICA -->
           <!-- ======================================================== -->
           <div class="wizard-pane" id="pane-passo-4">
-            <h3 class="pane-headline">Necessidade Identificada</h3>
+            <h3 class="pane-headline">Perfil Recomendado</h3>
             <p class="pane-sub">Com base nas respostas sobre a sua rotina, o sistema estruturou a seguinte recomendação preliminar:</p>
 
             <div class="diagnostico-container">
@@ -1028,7 +1175,7 @@
           <!-- ETAPA 5: CONFIRA SUA SOLICITAÇÃO & ENVIAR PARA O TI       -->
           <!-- ======================================================== -->
           <div class="wizard-pane" id="pane-passo-5">
-            <h3 class="pane-headline">Confira sua solicitação</h3>
+            <h3 class="pane-headline">Resumo</h3>
             <p class="pane-sub">Revise os dados antes de enviar para análise e homologação da Diretoria de TIC:</p>
 
             <div class="resumo-executivo-box">
@@ -1050,7 +1197,7 @@
                 </div>
                 <div class="resumo-card-info">
                   <small>Encaminhamento</small>
-                  <strong style="color: #60A5FA;">Análise Técnica da Diretoria de TIC</strong>
+                  <strong style="color: #2563EB;">Análise Técnica da Diretoria de TIC</strong>
                   <p>Geração automática do DOD Oficial (SC)</p>
                 </div>
               </div>
@@ -1194,9 +1341,9 @@
             <!-- FILTRO DE RISCO -->
             <div style="display: flex; gap: 6px;">
               <button class="qty-pill active" onclick="app.filtrarRadarAuditor('TODOS', this)">Todos</button>
-              <button class="qty-pill" onclick="app.filtrarRadarAuditor('ALTO', this)" style="color: #F87171;">Alto Risco (Superdimensionado)</button>
-              <button class="qty-pill" onclick="app.filtrarRadarAuditor('MEDIO', this)" style="color: #FBBF24;">Médio</button>
-              <button class="qty-pill" onclick="app.filtrarRadarAuditor('BAIXO', this)" style="color: #34D399;">Conforme</button>
+              <button class="qty-pill" onclick="app.filtrarRadarAuditor('ALTO', this)" style="color: #DC2626;">Alto Risco (Superdimensionado)</button>
+              <button class="qty-pill" onclick="app.filtrarRadarAuditor('MEDIO', this)" style="color: #D97706;">Médio</button>
+              <button class="qty-pill" onclick="app.filtrarRadarAuditor('BAIXO', this)" style="color: #059669;">Conforme</button>
             </div>
           </div>
 
@@ -1221,6 +1368,107 @@
           </div>
         </div>
 
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- VISTA 4: PÁGINA DE CONFIGURAÇÕES E DADOS DO USUÁRIO          -->
+      <!-- ============================================================ -->
+      <section id="view-configuracoes" class="dark-view">
+        <div class="wizard-container-box" style="max-width: 760px;">
+          
+          <!-- CABEÇALHO -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px;">
+            <h1 class="header-page-title" style="margin: 0;">Minha Conta</h1>
+            <button type="button" class="btn-ghost" style="height: 44px; padding: 0 18px; font-size: 1rem; font-weight: 700;" onclick="app.navegar('licitacoes')">
+              &larr; Voltar
+            </button>
+          </div>
+
+          <div class="dark-card-box" style="padding: 28px 32px;">
+            
+            <!-- RESUMO DO USUÁRIO NO TOPO -->
+            <div style="display: flex; align-items: center; gap: 18px; padding-bottom: 22px; border-bottom: 1px solid var(--dark-border); margin-bottom: 24px;">
+              <div id="cfgAvatar" style="width: 64px; height: 64px; border-radius: 50%; background: #1D4ED8; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; flex-shrink: 0;">
+                US
+              </div>
+              <div style="flex: 1;">
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                  <h2 id="cfgHeaderNome" style="font-size: 1.45rem; font-weight: 800; color: var(--dark-text); margin: 0;">Usuário</h2>
+                  <span id="cfgHeaderBadge" style="font-size: 0.82rem; font-weight: 800; padding: 4px 12px; border-radius: 999px; background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE;">
+                    USUÁRIO
+                  </span>
+                </div>
+                <p id="cfgHeaderEmail" style="font-size: 1.02rem; color: var(--dark-muted); margin: 4px 0 0 0;">email@lages.sc.gov.br</p>
+              </div>
+            </div>
+
+            <!-- BLOCO DE LOTAÇÃO E MATRÍCULA (SOMENTE LEITURA / BLOQUEADO PARA ALTERAÇÃO) -->
+            <div id="cfgBlocoVinculoFixo" style="margin-bottom: 26px; padding: 20px 22px; background: var(--dark-surface); border: 1px solid var(--dark-border); border-radius: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                <strong style="font-size: 1.05rem; color: var(--dark-text); display: flex; align-items: center; gap: 8px;">
+                  <span>🔒</span> <span>Vínculo Institucional (Fixado no Cadastro)</span>
+                </strong>
+                <span style="font-size: 0.85rem; color: var(--dark-muted); font-weight: 600;">
+                  Não editável
+                </span>
+              </div>
+
+              <div class="grid-2col" style="gap: 16px;">
+                <div>
+                  <label class="field-label" style="font-size: 0.96rem;">Lotação / Unidade</label>
+                  <input type="text" id="cfgLotacaoFixa" class="dark-input" disabled readonly style="opacity: 0.75; cursor: not-allowed; font-weight: 700;">
+                </div>
+                <div>
+                  <label class="field-label" style="font-size: 0.96rem;">Matrícula</label>
+                  <input type="text" id="cfgMatriculaFixa" class="dark-input" disabled readonly style="opacity: 0.75; cursor: not-allowed; font-weight: 700; font-family: monospace;">
+                </div>
+              </div>
+            </div>
+
+            <!-- CONFIGURAÇÕES EDITÁVEIS DA CONTA -->
+            <div style="margin-bottom: 22px;">
+              <strong style="font-size: 1.08rem; color: var(--dark-text); display: block; margin-bottom: 14px;">
+                Dados da Conta &amp; Segurança
+              </strong>
+
+              <div class="grid-2col" style="gap: 16px; margin-bottom: 16px;">
+                <div>
+                  <label class="field-label" for="cfgInputNome" style="font-size: 0.96rem;">Nome</label>
+                  <input type="text" id="cfgInputNome" class="dark-input" placeholder="Seu nome completo">
+                </div>
+                <div>
+                  <label class="field-label" for="cfgInputEmail" style="font-size: 0.96rem;">E-mail de Login</label>
+                  <input type="email" id="cfgInputEmail" class="dark-input" disabled readonly style="opacity: 0.75; cursor: not-allowed;">
+                </div>
+              </div>
+
+              <div class="grid-2col" style="gap: 16px;">
+                <div>
+                  <label class="field-label" for="cfgInputNovaSenha" style="font-size: 0.96rem;">Nova Senha (opcional)</label>
+                  <input type="password" id="cfgInputNovaSenha" class="dark-input" placeholder="Deixe vazio para manter a atual" autocomplete="new-password">
+                </div>
+                <div>
+                  <label class="field-label" for="cfgInputConfirmaSenha" style="font-size: 0.96rem;">Confirmar Nova Senha</label>
+                  <input type="password" id="cfgInputConfirmaSenha" class="dark-input" placeholder="Repita a nova senha" autocomplete="new-password">
+                </div>
+              </div>
+            </div>
+
+            <div id="cfgFeedbackMsg" style="display: none; margin-bottom: 16px; padding: 12px 16px; border-radius: 10px; font-size: 0.98rem; font-weight: 700;"></div>
+
+            <!-- RODAPÉ DE AÇÕES -->
+            <div style="display: flex; justify-content: flex-end; gap: 12px; padding-top: 18px; border-top: 1px solid var(--dark-border);">
+              <button type="button" class="btn-ghost" style="height: 46px; padding: 0 20px; font-size: 1rem; font-weight: 600;" onclick="app.navegar('licitacoes')">
+                Cancelar
+              </button>
+              <button type="button" class="btn-primary-neon" style="height: 46px; padding: 0 24px; font-size: 1.04rem; font-weight: 700;" onclick="app.salvarConfiguracoesUsuario()">
+                Salvar Alterações
+              </button>
+            </div>
+
+          </div>
+        </div>
       </section>
 
     </main>
@@ -1307,13 +1555,13 @@
   <!-- MODAL: CANCELAR REQUISIÇÃO (COM JUSTIFICATIVA)           -->
   <!-- ========================================================= -->
   <div class="modal-overlay" id="modalCancelarDemanda">
-    <div class="modal-content" style="max-width: 480px; padding: 26px; background: #111822; border: 1px solid var(--dark-border); border-radius: var(--radius-lg); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);">
+    <div class="modal-content" style="max-width: 480px; padding: 26px; background: var(--dark-card); border: 1px solid var(--dark-border); border-radius: var(--radius-lg); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);">
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
         <div style="width: 42px; height: 42px; border-radius: 50%; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
           🚫
         </div>
         <div>
-          <h3 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Cancelar Requisição</h3>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--dark-text); margin: 0;">Cancelar Requisição</h3>
           <span id="labelProtocoloCancelar" style="font-family: monospace; font-size: 0.82rem; color: var(--dark-accent); font-weight: 700;">REQ-2026-XXXX</span>
         </div>
       </div>
@@ -1323,7 +1571,7 @@
       </p>
 
       <div class="field-group">
-        <label class="field-label" style="color: #F1F5F9; font-weight: 700;">Motivo do Cancelamento (Obrigatório):</label>
+        <label class="field-label" style="color: var(--dark-text); font-weight: 700;">Motivo do Cancelamento (Obrigatório):</label>
         <textarea id="txtMotivoCancelamento" class="dark-input" rows="3" placeholder="Ex: O computador antigo da escola foi consertado pelo técnico..." style="resize: vertical;"></textarea>
       </div>
 
@@ -1356,17 +1604,17 @@
 
   <!-- MODAL: VER MOTIVO DO CANCELAMENTO -->
   <div class="modal-overlay" id="modalVerCancelamento">
-    <div class="modal-content" style="max-width: 440px; padding: 24px; background: #111822; border: 1px solid var(--dark-border); border-radius: var(--radius-lg);">
+    <div class="modal-content" style="max-width: 440px; padding: 24px; background: var(--dark-card); border: 1px solid var(--dark-border); border-radius: var(--radius-lg);">
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
         <span style="font-size: 1.4rem;">ℹ️</span>
         <div>
-          <h3 style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF; margin: 0;">Requisição Cancelada</h3>
-          <span id="labelVerProtocoloCancelado" style="font-family: monospace; font-size: 0.8rem; color: #F87171; font-weight: 700;">REQ-2026-XXXX</span>
+          <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--dark-text); margin: 0;">Requisição Cancelada</h3>
+          <span id="labelVerProtocoloCancelado" style="font-family: monospace; font-size: 0.8rem; color: #DC2626; font-weight: 700;">REQ-2026-XXXX</span>
         </div>
       </div>
       <div style="background: var(--dark-surface); border: 1px solid var(--dark-border); border-radius: var(--radius-sm); padding: 14px; margin-top: 10px;">
-        <small style="font-size: 0.72rem; text-transform: uppercase; color: var(--dark-muted); font-weight: 700;">Motivo Declarado:</small>
-        <p id="textoVerMotivoCancelamento" style="font-size: 0.88rem; color: #F1F5F9; margin-top: 4px; line-height: 1.4;"></p>
+        <small style="font-size: 0.78rem; text-transform: uppercase; color: var(--dark-muted); font-weight: 700;">Motivo Declarado:</small>
+        <p id="textoVerMotivoCancelamento" style="font-size: 0.98rem; color: var(--dark-text); margin-top: 4px; line-height: 1.45;"></p>
       </div>
       <div style="text-align: right; margin-top: 18px;">
         <button type="button" class="btn-ghost" onclick="app.fecharModalVerCancelamento()">Fechar</button>
@@ -1467,7 +1715,7 @@
         <div class="drawer-tab-pane" id="paneAnaliseHistorico">
           <div class="historico-timeline-container">
             <div class="timeline-header-info">
-              <h4 style="margin: 0; color: #FFFFFF; font-size: 1.05rem;">Trilha de Auditoria & Registro Cronológico</h4>
+              <h4 style="margin: 0; color: var(--dark-text); font-size: 1.05rem;">Trilha de Auditoria & Registro Cronológico</h4>
               <p style="margin: 4px 0 0 0; color: var(--dark-muted); font-size: 0.82rem;">
                 Registro formal de todas as ações de criação, validação, solicitações de ajuste e pareceres emitidos.
               </p>
@@ -1568,12 +1816,12 @@
   <!-- MODAL: SOLICITAR AJUSTES (TI &rarr; SERVIDOR)             -->
   <!-- ========================================================= -->
   <div class="modal-overlay" id="modalSolicitarAjustesTi">
-    <div class="modal-content" style="max-width: 500px; padding: 24px; background: #111822; border: 1px solid var(--dark-border); border-radius: var(--radius-lg); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+    <div class="modal-content" style="max-width: 500px; padding: 24px; background: var(--dark-card); border: 1px solid var(--dark-border); border-radius: var(--radius-lg); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
         <span style="font-size: 1.6rem;">⚠️</span>
         <div>
-          <h3 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Solicitar Ajustes na Demanda</h3>
-          <span id="labelProtocoloAjustes" style="font-family: monospace; font-size: 0.82rem; color: #FBBF24; font-weight: 700;">REQ-2026-XXXX</span>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--dark-text); margin: 0;">Solicitar Ajustes na Demanda</h3>
+          <span id="labelProtocoloAjustes" style="font-family: monospace; font-size: 0.82rem; color: #D97706; font-weight: 700;">REQ-2026-XXXX</span>
         </div>
       </div>
 
@@ -1582,7 +1830,7 @@
       </p>
 
       <div class="field-group">
-        <label class="field-label" style="color: #F1F5F9; font-weight: 700;">Orientações do TI (Obrigatório):</label>
+        <label class="field-label" style="color: var(--dark-text); font-weight: 700;">Orientações do TI (Obrigatório):</label>
         <textarea id="txtNotasAjustesTi" class="dark-input" rows="4" placeholder="Ex: Favor esclarecer se há monitores disponíveis na unidade para reaproveitamento..." style="resize: vertical;"></textarea>
       </div>
 
@@ -1616,14 +1864,14 @@
   <!-- MODAL: REPROVAR DEMANDA (TI)                              -->
   <!-- ========================================================= -->
   <div class="modal-overlay" id="modalReprovarTi">
-    <div class="modal-content" style="max-width: 500px; padding: 24px; background: #111822; border: 1px solid var(--dark-border); border-radius: var(--radius-lg); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+    <div class="modal-content" style="max-width: 500px; padding: 24px; background: var(--dark-card); border: 1px solid var(--dark-border); border-radius: var(--radius-lg); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
         <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(239,68,68,0.15); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
           🚫
         </div>
         <div>
-          <h3 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Reprovar Demanda</h3>
-          <span id="labelProtocoloReprovar" style="font-family: monospace; font-size: 0.82rem; color: #F87171; font-weight: 700;">REQ-2026-XXXX</span>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--dark-text); margin: 0;">Reprovar Demanda</h3>
+          <span id="labelProtocoloReprovar" style="font-family: monospace; font-size: 0.82rem; color: #DC2626; font-weight: 700;">REQ-2026-XXXX</span>
         </div>
       </div>
 
@@ -1632,7 +1880,7 @@
       </p>
 
       <div class="field-group">
-        <label class="field-label" style="color: #F1F5F9; font-weight: 700;">Justificativa Técnica da Reprovação (Obrigatória):</label>
+        <label class="field-label" style="color: var(--dark-text); font-weight: 700;">Justificativa Técnica da Reprovação (Obrigatória):</label>
         <textarea id="txtJustificativaReprovacao" class="dark-input" rows="4" placeholder="Ex: Demanda indeferida por incompatibilidade com as diretrizes do PCA de TIC..." style="resize: vertical;"></textarea>
       </div>
 
@@ -1659,22 +1907,22 @@
   <!-- MODAL: RESPONDER AJUSTES (SERVIDOR &rarr; TI)             -->
   <!-- ========================================================= -->
   <div class="modal-overlay" id="modalResponderAjustes">
-    <div class="modal-content" style="max-width: 520px; padding: 24px; background: #111822; border: 1px solid var(--dark-border); border-radius: var(--radius-lg); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+    <div class="modal-content" style="max-width: 520px; padding: 24px; background: var(--dark-card); border: 1px solid var(--dark-border); border-radius: var(--radius-lg); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
         <span style="font-size: 1.5rem;">📝</span>
         <div>
-          <h3 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Responder Apontamentos do TI</h3>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--dark-text); margin: 0;">Responder Apontamentos do TI</h3>
           <span id="labelProtocoloResponderAjustes" style="font-family: monospace; font-size: 0.82rem; color: var(--dark-accent); font-weight: 700;">REQ-2026-XXXX</span>
         </div>
       </div>
 
-      <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px;">
-        <small style="font-size: 0.72rem; text-transform: uppercase; color: #FBBF24; font-weight: 700;">Apontamento do TI:</small>
-        <p id="txtApontamentoTiExibicao" style="font-size: 0.88rem; color: #F1F5F9; margin-top: 4px; line-height: 1.4;"></p>
+      <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 14px;">
+        <small style="font-size: 0.78rem; text-transform: uppercase; color: #D97706; font-weight: 800;">Apontamento do TI:</small>
+        <p id="txtApontamentoTiExibicao" style="font-size: 0.98rem; color: var(--dark-text); margin-top: 4px; line-height: 1.45; font-weight: 500;"></p>
       </div>
 
       <div class="field-group">
-        <label class="field-label" style="color: #F1F5F9; font-weight: 700;">Sua Resposta / Esclarecimentos:</label>
+        <label class="field-label" style="color: var(--dark-text); font-weight: 700;">Sua Resposta / Esclarecimentos:</label>
         <textarea id="txtRespostaAjusteServidor" class="dark-input" rows="4" placeholder="Ex: Confirmamos que na unidade dispomos de monitor e teclado funcionando..." style="resize: vertical;"></textarea>
       </div>
 
@@ -1691,121 +1939,74 @@
   <!-- MODAL: AGRUPAR DEMANDAS PARA ETP ÚNICO CONSOLIDADO         -->
   <!-- ========================================================= -->
   <div class="modal-overlay" id="modalAgruparEtp">
-    <div class="modal-content modal-agrupar-etp-dark">
+    <div class="modal-content modal-agrupar-etp-dark" style="max-width: 920px; width: 94vw; max-height: 86vh; padding: 24px 28px; display: flex; flex-direction: column;">
       
-      <!-- CABEÇALHO DO MODAL (ESCURO MINIMALISTA COM ALTO CONTRASTE) -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px; margin-bottom: 18px; flex-shrink: 0;">
-        <div style="display: flex; align-items: center; gap: 14px;">
-          <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, rgba(0,240,255,0.22), rgba(16,185,129,0.22)); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; border: 1px solid rgba(0,240,255,0.35); box-shadow: 0 4px 15px rgba(0,240,255,0.15);">
-            📑
-          </div>
-          <div>
-            <div style="display: inline-block; margin-bottom: 5px; background: rgba(0,240,255,0.14); color: #00F0FF; border: 1px solid rgba(0,240,255,0.35); font-size: 0.72rem; padding: 3px 10px; border-radius: 4px; font-weight: 800; letter-spacing: 0.05em;">
-              PLANEJAMENTO CONSOLIDADO • LEI 14.133/2021 ART. 18
-            </div>
-            <h2 style="font-size: 1.45rem; font-weight: 800; color: #FFFFFF !important; margin: 0; letter-spacing: -0.02em;">
-              Agrupar Demandas para ETP Único
-            </h2>
-            <p style="font-size: 0.86rem; color: #94A3B8; margin: 4px 0 0 0; line-height: 1.4;">
-              Várias instituições municipais podem possuir a mesma necessidade. O DimensionaTI consolida os quantitativos, unifica as especificações e gera um único ETP com ganho de escala e rastreabilidade total.
-            </p>
-          </div>
-        </div>
-
-        <button type="button" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #FFFFFF; width: 38px; height: 38px; border-radius: 8px; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onclick="app.fecharModalAgruparEtp()" title="Fechar janela" onmouseover="this.style.background='rgba(239,68,68,0.25)'; this.style.borderColor='#EF4444';" onmouseout="this.style.background='rgba(255,255,255,0.06)'; this.style.borderColor='rgba(255,255,255,0.15)';">
-          ✕
-        </button>
-      </div>
-
-      <!-- CORPO ROLÁVEL -->
-      <div style="flex: 1 1 auto; overflow-y: auto; padding-right: 4px;">
-        
-        <!-- PAINEL DE CONSOLIDAÇÃO EM TEMPO REAL -->
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px;">
-          <div style="background: #111A28; border: 1px solid rgba(255,255,255,0.09); border-radius: 10px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-            <span style="font-size: 0.75rem; text-transform: uppercase; color: #94A3B8; font-weight: 700; letter-spacing: 0.04em;">Demandas Selecionadas</span>
-            <div style="font-size: 1.6rem; font-weight: 800; color: #00F0FF; margin-top: 5px;" id="etpCardQtdDods">0 DODs</div>
-            <small style="font-size: 0.74rem; color: #64748B;">Documentos de formalização</small>
-          </div>
-          <div style="background: #111A28; border: 1px solid rgba(255,255,255,0.09); border-radius: 10px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-            <span style="font-size: 0.75rem; text-transform: uppercase; color: #94A3B8; font-weight: 700; letter-spacing: 0.04em;">Instituições Atendidas</span>
-            <div style="font-size: 1.6rem; font-weight: 800; color: #38BDF8; margin-top: 5px;" id="etpCardQtdInst">0 unidades</div>
-            <small style="font-size: 0.74rem; color: #64748B;">Escolas e órgãos municipais</small>
-          </div>
-          <div style="background: #111A28; border: 1px solid rgba(255,255,255,0.09); border-radius: 10px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-            <span style="font-size: 0.75rem; text-transform: uppercase; color: #94A3B8; font-weight: 700; letter-spacing: 0.04em;">Qtd Total Consolidada</span>
-            <div style="font-size: 1.6rem; font-weight: 800; color: #10B981; margin-top: 5px;" id="etpCardQtdTotal">0 un</div>
-            <small style="font-size: 0.74rem; color: #64748B;">Soma consolidada do lote</small>
-          </div>
-          <div style="background: #111A28; border: 1px solid rgba(255,255,255,0.09); border-radius: 10px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-            <span style="font-size: 0.75rem; text-transform: uppercase; color: #94A3B8; font-weight: 700; letter-spacing: 0.04em;">Economia Consolidada</span>
-            <div style="font-size: 1.6rem; font-weight: 800; color: #F59E0B; margin-top: 5px;" id="etpCardEconomia">R$ 0,00</div>
-            <small style="font-size: 0.74rem; color: #10B981; font-weight: 600;">Ganho em escala + dimensionamento</small>
-          </div>
-        </div>
-
-        <!-- TABELA DE SELEÇÃO DE DODS APTOS -->
-        <div style="background: #0B111D; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
-          <div style="padding: 12px 16px; background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 700; font-size: 0.88rem; color: #F1F5F9;">
-              Selecione as Demandas Validadas para Unificação em ETP:
-            </span>
-            <button type="button" class="btn-ghost" style="padding: 4px 10px; font-size: 0.76rem;" onclick="app.selecionarTodosDodsEtp()">
-              Selecionar Todas Disponíveis
-            </button>
-          </div>
-          
-          <div style="max-height: 260px; overflow-y: auto;">
-            <table class="dark-table" style="width: 100%; border-collapse: collapse; font-size: 0.86rem;">
-              <thead>
-                <tr style="background: rgba(15,23,42,0.9); border-bottom: 1px solid rgba(255,255,255,0.08); color: #94A3B8;">
-                  <th style="width: 44px; text-align: center; padding: 10px;">SELECIONAR</th>
-                  <th style="width: 140px; padding: 10px;">DOD Nº</th>
-                  <th style="padding: 10px;">INSTITUIÇÃO PÚBLICA</th>
-                  <th style="padding: 10px;">SOLICITANTE</th>
-                  <th style="padding: 10px;">EQUIPAMENTO</th>
-                  <th style="width: 70px; text-align: center; padding: 10px;">QTD</th>
-                  <th style="width: 120px; text-align: right; padding: 10px;">VALOR EST.</th>
-                  <th style="width: 140px; text-align: center; padding: 10px;">SITUAÇÃO</th>
-                </tr>
-              </thead>
-              <tbody id="tbodyDodsAgrupamento">
-                <!-- Preenchido via app.carregarTabelaAgrupamentoEtp() -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- CAMPOS DE IDENTIFICAÇÃO DO ETP CONSOLIDADO -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-          <div class="field-group" style="margin: 0;">
-            <label class="field-label" style="color: #F1F5F9; font-weight: 700;">Título da Contratação Consolidada:</label>
-            <input type="text" id="inputTituloEtpAgrupado" class="dark-input" placeholder="Ex: Aquisição Unificada de Notebooks para Escolas Municipais A, B e C">
-          </div>
-          <div class="field-group" style="margin: 0;">
-            <label class="field-label" style="color: #F1F5F9; font-weight: 700;">Técnico Responsável pela Consolidação (TI):</label>
-            <input type="text" id="inputTecnicoEtpAgrupado" class="dark-input" value="Téc. Roberto Valente - Diretoria Geral de TIC">
-          </div>
-        </div>
-
-        <div class="field-group" style="margin-bottom: 16px;">
-          <label class="field-label" style="color: #F1F5F9; font-weight: 700;">Justificativa Consolidada da Contratação (Art. 18 Lei 14.133/2021):</label>
-          <textarea id="txtObjetivoEtpAgrupado" class="dark-input" rows="3" placeholder="Descreva a motivação de agrupar as demandas e as vantagens econômicas e operacionais para o Município de Lages..."></textarea>
-        </div>
-
-      </div>
-
-      <!-- RODAPÉ DE AÇÕES -->
-      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; flex-shrink: 0; margin-top: 10px;">
-        <div style="font-size: 0.82rem; color: #94A3B8;">
-          <span style="color: #10B981; font-weight: 700;">● Rastreabilidade Garantida:</span> Cada DOD manterá vínculo com este ETP no banco de dados.
-        </div>
-        <div style="display: flex; gap: 10px;">
-          <button type="button" class="btn-ghost" onclick="app.fecharModalAgruparEtp()">Cancelar</button>
-          <button type="button" class="btn-primary-neon" style="font-weight: 800; padding: 10px 24px; background: linear-gradient(135deg, #00F0FF, #0284C7); color: #000; border: none;" onclick="app.executarAgrupamentoEtp()">
-            ✨ Gerar ETP Consolidado Único &rarr;
+      <!-- CABEÇALHO LIMPO E DIRETO -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid var(--dark-border); margin-bottom: 18px; flex-shrink: 0;">
+        <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--dark-text); margin: 0;">
+          Agrupar ETP
+        </h2>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button type="button" class="btn-ghost" style="padding: 8px 14px; font-size: 0.92rem; font-weight: 700;" onclick="app.selecionarTodosDodsEtp()">
+            Selecionar Todos
+          </button>
+          <button type="button" class="btn-doc-action btn-doc-close" onclick="app.fecharModalAgruparEtp()" title="Fechar">
+            ✕
           </button>
         </div>
+      </div>
+
+      <!-- RESUMO COMPACTO EM 4 INDICADORES -->
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; flex-shrink: 0;">
+        <div style="background: var(--dark-surface); border: 1px solid var(--dark-border); border-radius: 10px; padding: 12px 16px;">
+          <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--dark-muted); font-weight: 700; display: block;">DODs</span>
+          <div style="font-size: 1.45rem; font-weight: 800; color: #1D4ED8; margin-top: 2px;" id="etpCardQtdDods">0</div>
+        </div>
+        <div style="background: var(--dark-surface); border: 1px solid var(--dark-border); border-radius: 10px; padding: 12px 16px;">
+          <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--dark-muted); font-weight: 700; display: block;">Unidades</span>
+          <div style="font-size: 1.45rem; font-weight: 800; color: #2563EB; margin-top: 2px;" id="etpCardQtdInst">0</div>
+        </div>
+        <div style="background: var(--dark-surface); border: 1px solid var(--dark-border); border-radius: 10px; padding: 12px 16px;">
+          <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--dark-muted); font-weight: 700; display: block;">Itens</span>
+          <div style="font-size: 1.45rem; font-weight: 800; color: #10B981; margin-top: 2px;" id="etpCardQtdTotal">0</div>
+        </div>
+        <div style="background: var(--dark-surface); border: 1px solid var(--dark-border); border-radius: 10px; padding: 12px 16px;">
+          <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--dark-muted); font-weight: 700; display: block;">Economia</span>
+          <div style="font-size: 1.45rem; font-weight: 800; color: #F59E0B; margin-top: 2px;" id="etpCardEconomia">R$ 0,00</div>
+        </div>
+      </div>
+
+      <!-- TABELA LIMPA COM BARRA DE ROLAGEM ÚNICA -->
+      <div style="flex: 1 1 auto; min-height: 0; overflow-y: auto; border: 1px solid var(--dark-border); border-radius: 10px; background: var(--dark-card);">
+        <table class="dark-table enterprise-table" style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="width: 54px; text-align: center;">SEL.</th>
+              <th style="width: 165px;">PROTOCOLO</th>
+              <th>UNIDADE</th>
+              <th style="width: 130px;">ITEM</th>
+              <th style="width: 80px; text-align: center;">QTD</th>
+              <th style="width: 140px; text-align: right;">VALOR</th>
+              <th style="width: 135px; text-align: center;">STATUS</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyDodsAgrupamento">
+            <!-- Preenchido via app.carregarTabelaAgrupamentoEtp() -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Campos automáticos ocultos para geração do documento -->
+      <input type="hidden" id="inputTituloEtpAgrupado">
+      <input type="hidden" id="inputTecnicoEtpAgrupado" value="Téc. Roberto Valente - Diretoria Geral de TIC">
+      <input type="hidden" id="txtObjetivoEtpAgrupado">
+
+      <!-- RODAPÉ DE AÇÕES LIMPO -->
+      <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px; padding-top: 18px; margin-top: 16px; border-top: 1px solid var(--dark-border); flex-shrink: 0;">
+        <button type="button" class="btn-ghost" style="height: 44px; padding: 0 20px; font-size: 1rem; font-weight: 600;" onclick="app.fecharModalAgruparEtp()">Cancelar</button>
+        <button type="button" class="btn-primary-neon" style="height: 44px; padding: 0 24px; font-size: 1.02rem; font-weight: 700;" onclick="app.executarAgrupamentoEtp()">
+          Gerar ETP &rarr;
+        </button>
       </div>
 
     </div>
