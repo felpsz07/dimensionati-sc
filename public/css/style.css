@@ -858,7 +858,7 @@ body {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .table-responsive {
@@ -1162,15 +1162,14 @@ body {
 }
 
 .acoes-menu-dropdown {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 6px);
+  position: fixed;
   background: #141E2A !important;
   border: 1px solid #2B3D52;
   border-radius: var(--radius-sm);
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.85);
-  z-index: 9999;
-  min-width: 240px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.95);
+  z-index: 9999999 !important;
+  min-width: 250px;
+  max-width: 320px;
   display: none;
   flex-direction: column;
   padding: 6px;

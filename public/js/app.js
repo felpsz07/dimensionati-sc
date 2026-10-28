@@ -301,7 +301,10 @@ const app = {
     this.verificarSessao();
 
     // Fecha dropdowns de ações ao clicar fora
+    // Fecha dropdowns de a??es ao clicar fora ou rolar
     window.addEventListener('click', () => this.fecharTodosMenusAcoes());
+    window.addEventListener('resize', () => this.fecharTodosMenusAcoes(), { passive: true });
+    document.addEventListener('scroll', () => this.fecharTodosMenusAcoes(), { passive: true, capture: true });
   },
 
   mostrarTela(id) {
@@ -887,19 +890,67 @@ const app = {
   },
 
   toggleMenuAcoes(protocolo, evt) {
-    if (evt) evt.stopPropagation();
+    if (evt) {
+      evt.preventDefault();
+      evt.stopPropagation();
+    }
     const menu = document.getElementById(`menu-acoes-${protocolo}`);
     const todosMenus = document.querySelectorAll('.acoes-menu-dropdown');
     
+    const estaAtivo = menu && menu.classList.contains('active');
+
+    // Fecha todos os menus abertos primeiro
     todosMenus.forEach(m => {
-      if (m !== menu) m.classList.remove('active');
+      m.classList.remove('active');
+      m.style.display = '';
+      m.style.visibility = '';
     });
 
-    if (menu) menu.classList.toggle('active');
+    if (!menu || estaAtivo) return;
+
+    // Achar o bot?o disparador para posicionamento preciso por cima de qualquer elemento
+    const btn = (evt && evt.currentTarget) ? evt.currentTarget : (evt && evt.target ? evt.target.closest('button') : null);
+    
+    if (btn) {
+      const rect = btn.getBoundingClientRect();
+
+      // Ativa temporariamente invis?vel para medir dimens?es reais
+      menu.style.visibility = 'hidden';
+      menu.style.display = 'flex';
+      menu.style.position = 'fixed';
+      menu.style.zIndex = '9999999';
+
+      const menuHeight = menu.offsetHeight || 190;
+
+      // Verifica se h? espa?o vertical suficiente abaixo na janela (evita projetar dentro de outros quadros/rodap?)
+      const espacoAbaixo = window.innerHeight - rect.bottom;
+      const abrirParaCima = espacoAbaixo < (menuHeight + 12) && rect.top > (menuHeight + 12);
+
+      if (abrirParaCima) {
+        menu.style.top = `${Math.max(10, rect.top - menuHeight - 6)}px`;
+        menu.style.bottom = 'auto';
+      } else {
+        menu.style.top = `${rect.bottom + 6}px`;
+        menu.style.bottom = 'auto';
+      }
+
+      // Alinha ? borda direita do bot?o
+      const rightPos = window.innerWidth - rect.right;
+      menu.style.right = `${Math.max(12, rightPos)}px`;
+      menu.style.left = 'auto';
+
+      menu.style.visibility = 'visible';
+    }
+
+    menu.classList.add('active');
   },
 
   fecharTodosMenusAcoes() {
-    document.querySelectorAll('.acoes-menu-dropdown').forEach(m => m.classList.remove('active'));
+    document.querySelectorAll('.acoes-menu-dropdown').forEach(m => {
+      m.classList.remove('active');
+      m.style.display = '';
+      m.style.visibility = '';
+    });
   },
 
   abrirModalCancelar(protocolo) {
