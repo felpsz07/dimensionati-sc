@@ -347,133 +347,196 @@
       <!-- ============================================================ -->
       <section id="view-wizard" class="dark-view">
 
-        <div class="dark-card-box" style="max-width: 860px; margin: 0 auto;">
+        <div class="dark-card-box wizard-container-box">
 
-          <!-- STEPPER FLUIDO DE 5 ETAPAS (ORIENTADO À NECESSIDADE) -->
-          <div class="stepper-bar">
-            <div class="step-node active" id="step-node-1" onclick="app.irParaPasso(1)">
-              <div class="step-circle">1</div>
-              <span class="step-title">1. Necessidade</span>
+          <!-- STEPPER HORIZONTAL HERO COM ÍCONES GRANDES E SETAS DIRECIONAIS -->
+          <div class="stepper-horizontal-hero">
+            
+            <!-- PASSO 1: NECESSIDADE -->
+            <div class="stepper-item active" id="step-node-1" onclick="app.irParaPasso(1)">
+              <div class="stepper-icon-wrap">
+                <svg class="stepper-icon-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor">
+                  <!-- Computador portátil/laptop e crachá de identificação de necessidade -->
+                  <rect x="8" y="10" width="32" height="20" rx="3" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                  <line x1="4" y1="34" x2="44" y2="34" stroke-width="2.5" stroke-linecap="round" />
+                  <path d="M19 34L21 38H27L29 34" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <circle cx="24" cy="20" r="4" stroke-width="2" stroke-dasharray="2 2" />
+                  <path d="M14 16H18" stroke-width="2" stroke-linecap="round" />
+                </svg>
+              </div>
+              <span class="stepper-label-text">1 - Necessidade</span>
             </div>
-            <div class="step-divider"></div>
 
-            <div class="step-node" id="step-node-2" onclick="app.irParaPasso(2)">
-              <div class="step-circle">2</div>
-              <span class="step-title">2. Rotina</span>
+            <!-- SETA 1 -> 2 -->
+            <div class="stepper-arrow-sep">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
             </div>
-            <div class="step-divider"></div>
 
-            <div class="step-node" id="step-node-3" onclick="app.irParaPasso(3)">
-              <div class="step-circle">3</div>
-              <span class="step-title">3. Recursos</span>
+            <!-- PASSO 2: ROTINA -->
+            <div class="stepper-item" id="step-node-2" onclick="app.irParaPasso(2)">
+              <div class="stepper-icon-wrap">
+                <svg class="stepper-icon-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor">
+                  <!-- Prancheta com caixas de tarefas e rotina diária -->
+                  <rect x="10" y="8" width="28" height="34" rx="4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M18 6H30V11C30 11.6 29.6 12 29 12H19C18.4 12 18 11.6 18 11V6Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <line x1="17" y1="20" x2="31" y2="20" stroke-width="2.2" stroke-linecap="round" />
+                  <line x1="17" y1="27" x2="31" y2="27" stroke-width="2.2" stroke-linecap="round" />
+                  <line x1="17" y1="34" x2="25" y2="34" stroke-width="2.2" stroke-linecap="round" />
+                  <circle cx="14" cy="20" r="1.5" fill="currentColor" />
+                  <circle cx="14" cy="27" r="1.5" fill="currentColor" />
+                  <circle cx="14" cy="34" r="1.5" fill="currentColor" />
+                </svg>
+              </div>
+              <span class="stepper-label-text">2 - Rotina</span>
             </div>
-            <div class="step-divider"></div>
 
-            <div class="step-node" id="step-node-4" onclick="app.irParaPasso(4)">
-              <div class="step-circle">4</div>
-              <span class="step-title">4. Recomendação</span>
+            <!-- SETA 2 -> 3 -->
+            <div class="stepper-arrow-sep">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
             </div>
-            <div class="step-divider"></div>
 
-            <div class="step-node" id="step-node-5" onclick="app.irParaPasso(5)">
-              <div class="step-circle">5</div>
-              <span class="step-title">5. Revisão & Envio</span>
+            <!-- PASSO 3: RECURSOS -->
+            <div class="stepper-item" id="step-node-3" onclick="app.irParaPasso(3)">
+              <div class="stepper-icon-wrap">
+                <svg class="stepper-icon-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor">
+                  <!-- Setup de mesa e periféricos: Monitor, Teclado e Mouse -->
+                  <rect x="8" y="7" width="32" height="20" rx="3" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                  <line x1="24" y1="27" x2="24" y2="33" stroke-width="2.5" stroke-linecap="round" />
+                  <line x1="17" y1="33" x2="31" y2="33" stroke-width="2.5" stroke-linecap="round" />
+                  <rect x="7" y="37" width="22" height="6" rx="1.5" stroke-width="1.8" stroke-linecap="round" />
+                  <rect x="33" y="36" width="8" height="8" rx="3" stroke-width="1.8" stroke-linecap="round" />
+                  <line x1="37" y1="36" x2="37" y2="39" stroke-width="1.5" stroke-linecap="round" />
+                </svg>
+              </div>
+              <span class="stepper-label-text">3 - Recursos</span>
             </div>
+
+            <!-- SETA 3 -> 4 -->
+            <div class="stepper-arrow-sep">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+
+            <!-- PASSO 4: RECOMENDAÇÃO -->
+            <div class="stepper-item" id="step-node-4" onclick="app.irParaPasso(4)">
+              <div class="stepper-icon-wrap">
+                <svg class="stepper-icon-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor">
+                  <!-- Diagnóstico e Recomendação Técnica do TI (Processador Inteligente / Escudo) -->
+                  <rect x="12" y="12" width="24" height="24" rx="4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M19 24L23 28L30 19" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                  <line x1="18" y1="6" x2="18" y2="12" stroke-width="2" stroke-linecap="round" />
+                  <line x1="30" y1="6" x2="30" y2="12" stroke-width="2" stroke-linecap="round" />
+                  <line x1="18" y1="36" x2="18" y2="42" stroke-width="2" stroke-linecap="round" />
+                  <line x1="30" y1="36" x2="30" y2="42" stroke-width="2" stroke-linecap="round" />
+                  <line x1="6" y1="18" x2="12" y2="18" stroke-width="2" stroke-linecap="round" />
+                  <line x1="6" y1="30" x2="12" y2="30" stroke-width="2" stroke-linecap="round" />
+                  <line x1="36" y1="18" x2="42" y2="18" stroke-width="2" stroke-linecap="round" />
+                  <line x1="36" y1="30" x2="42" y2="30" stroke-width="2" stroke-linecap="round" />
+                </svg>
+              </div>
+              <span class="stepper-label-text">4 - Recomendação</span>
+            </div>
+
+            <!-- SETA 4 -> 5 -->
+            <div class="stepper-arrow-sep">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+
+            <!-- PASSO 5: FINALIZAR (IGUAL AO DA IMAGEM DO USUÁRIO) -->
+            <div class="stepper-item" id="step-node-5" onclick="app.irParaPasso(5)">
+              <div class="stepper-icon-wrap">
+                <svg class="stepper-icon-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor">
+                  <!-- Prancheta com selo circular de verificação (idêntica ao passo 6 da imagem de referência) -->
+                  <rect x="9" y="8" width="30" height="34" rx="4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M19 6H29V10C29 10.6 28.6 11 28 11H20C19.4 11 19 10.6 19 10V6Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <circle cx="24" cy="26" r="8" stroke-width="2.2" />
+                  <path d="M21 26L23.5 28.5L27.5 23.5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </div>
+              <span class="stepper-label-text">5 - Finalizar</span>
+            </div>
+
           </div>
 
 
           <!-- ======================================================== -->
-          <!-- ETAPA 1: DO QUE VOCÊ PRECISA? (SEM TERMOS TÉCNICOS)     -->
+          <!-- ETAPA 1: DO QUE VOCÊ PRECISA? (CARDS GRANDES E DIRETOS)  -->
           <!-- ======================================================== -->
           <div class="wizard-pane active" id="pane-passo-1">
             <h3 class="pane-headline">Do que você precisa?</h3>
-            <p class="pane-sub">Conte o que você precisa para realizar seu trabalho. Vamos ajudar a identificar a melhor solução:</p>
+            <p class="pane-sub">Selecione o que você precisa para trabalhar. Vamos identificar o modelo ideal para sua rotina:</p>
 
             <div class="necessidade-grid">
               <!-- COMPUTADOR (OPÇÃO PRINCIPAL) -->
               <div class="necessidade-card active" id="cardNecComputador" onclick="app.setTipoNecessidade('computador', this)">
-                <span class="nec-badge-top">✓ PRINCIPAL</span>
+                <span class="nec-badge-top">✓ RECOMENDADO</span>
                 <div class="nec-icon">💻</div>
-                <div class="nec-title">Preciso de um computador</div>
-                <div class="nec-desc">Para trabalhar na minha mesa, acessar sistemas e realizar tarefas diárias.</div>
+                <div class="nec-title">Computador (Notebook ou Mesa)</div>
+                <div class="nec-desc">Para acessar sistemas, Diário de Classe, documentos e tarefas da sua unidade.</div>
               </div>
 
               <!-- MONITOR -->
               <div class="necessidade-card" id="cardNecMonitor" onclick="app.setTipoNecessidade('monitor', this)">
                 <div class="nec-icon">🖥️</div>
-                <div class="nec-title">Preciso de um monitor</div>
-                <div class="nec-desc">Tela avulsa ou tela adicional para o computador que já utilizo no setor.</div>
+                <div class="nec-title">Monitor de Vídeo</div>
+                <div class="nec-desc">Tela avulsa ou tela adicional para trabalhar com mais conforto visual.</div>
               </div>
 
               <!-- IMPRESSORA -->
               <div class="necessidade-card" id="cardNecImpressora" onclick="app.setTipoNecessidade('impressora', this)">
                 <div class="nec-icon">🖨️</div>
-                <div class="nec-title">Preciso de uma impressora</div>
-                <div class="nec-desc">Impressão de documentos escolares, provas e relatórios administrativos.</div>
-              </div>
-
-              <!-- OUTRO EQUIPAMENTO -->
-              <div class="necessidade-card" id="cardNecOutro" onclick="app.setTipoNecessidade('outro', this)">
-                <div class="nec-icon">📱</div>
-                <div class="nec-title">Preciso de outro equipamento</div>
-                <div class="nec-desc">Scanner, projetor, leitor ou outro acessório periférico de trabalho.</div>
+                <div class="nec-title">Impressora ou Acessórios</div>
+                <div class="nec-desc">Impressão de provas, relatórios e documentos pedagógicos.</div>
               </div>
 
               <!-- MANUTENÇÃO -->
               <div class="necessidade-card" id="cardNecManutencao" onclick="app.setTipoNecessidade('manutencao', this)">
                 <div class="nec-icon">🔧</div>
-                <div class="nec-title">Preciso de manutenção</div>
-                <div class="nec-desc">O equipamento atual estragou, não liga ou apresenta falhas técnicas.</div>
-              </div>
-
-              <!-- SISTEMA / SOFTWARE -->
-              <div class="necessidade-card" id="cardNecSoftware" onclick="app.setTipoNecessidade('software', this)">
-                <div class="nec-icon">💿</div>
-                <div class="nec-title">Preciso de um sistema/software</div>
-                <div class="nec-desc">Instalação, liberação de acesso a programas ou dúvidas operacionais.</div>
-              </div>
-
-              <!-- NÃO SEI -->
-              <div class="necessidade-card" id="cardNecNaoSei" onclick="app.setTipoNecessidade('nao_sei', this)">
-                <div class="nec-icon">❓</div>
-                <div class="nec-title">Ainda não sei ao certo</div>
-                <div class="nec-desc">Tenho dificuldades no trabalho e preciso de orientação para diagnosticar.</div>
+                <div class="nec-title">Conserto de Máquina Quebrada</div>
+                <div class="nec-desc">O computador da escola estragou, não liga ou precisa de conserto técnico.</div>
               </div>
             </div>
 
             <!-- AVISO CONTEXTUAL PARA ITENS NÃO COMPUTADOR -->
             <div class="aviso-outra-necessidade" id="boxAvisoOutraNecessidade" style="display: none;">
-              <div style="font-size: 1.4rem;">💡</div>
+              <div style="font-size: 1.8rem;">💡</div>
               <div>
-                <strong style="color: #60A5FA; font-size: 0.86rem;">Aviso da Diretoria de TIC:</strong>
-                <p id="txtAvisoOutraNecessidade" style="margin-top: 3px;">
-                  Para o fornecimento de computadores completos, o sistema realiza o dimensionamento técnico imediato. Vamos avançar para entender sua rotina e encaminhar o chamado ao TI.
+                <strong style="color: #60A5FA; font-size: 1.05rem;">Orientação da Diretoria de TIC:</strong>
+                <p id="txtAvisoOutraNecessidade" style="margin-top: 4px; font-size: 0.95rem;">
+                  Se o computador da sua sala estragou ou precisa de substituição, continuaremos o dimensionamento a seguir.
                 </p>
               </div>
             </div>
 
-            <!-- SOLICITANTE IDENTIFICADO -->
-            <div style="margin-top: 20px; background: var(--dark-surface); padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--dark-border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-              <div style="display: flex; align-items: center; gap: 10px; font-size: 0.84rem;">
-                <span style="font-size: 1.1rem;">📍</span>
+            <!-- SOLICITANTE IDENTIFICADO (TEMPLATE GRANDE E CLARO) -->
+            <div class="solicitante-banner-box">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <span style="font-size: 1.6rem;">📍</span>
                 <div>
-                  <small style="color: var(--dark-muted); text-transform: uppercase; font-weight: 700; font-size: 0.68rem; display: block;">Servidor Solicitante Identificado</small>
-                  <strong id="labelLocalSolicitante" style="color: var(--dark-text);">Profa. Angelita de Souza — Escolas Municipais (SME Lages)</strong>
+                  <span class="label-muted-small">Servidor Solicitante Identificado:</span>
+                  <strong id="labelLocalSolicitante" class="text-solicitante-destaque">Profa. Angelita de Souza — Escolas Municipais (SME Lages)</strong>
                 </div>
               </div>
-              <span class="user-role-pill" style="height: 28px; font-size: 0.65rem;">SESSÃO AUTENTICADA</span>
+              <span class="user-role-pill">SESSÃO AUTENTICADA</span>
             </div>
           </div>
 
 
           <!-- ======================================================== -->
-          <!-- ETAPA 2: ENTENDER A ROTINA & PERGUNTAS COMPLEMENTARES    -->
+          <!-- ETAPA 2: ENTENDER A ROTINA (TEXTOS RESUMIDOS E GRANDES)  -->
           <!-- ======================================================== -->
           <div class="wizard-pane" id="pane-passo-2">
             <h3 class="pane-headline">Como você utiliza o computador?</h3>
-            <p class="pane-sub">Conte um pouco sobre sua rotina de trabalho para identificarmos o perfil mais adequado:</p>
+            <p class="pane-sub">Escolha a categoria que melhor representa sua rotina de trabalho:</p>
 
-            <!-- CATEGORIAS DE ROTINA (ANÁLISE DE NECESSIDADE) -->
+            <!-- CATEGORIAS DE ROTINA RESUMIDAS E GRANDES -->
             <div class="nivel-demanda-grid">
 
               <!-- NÍVEL 1: GESTÃO ESCOLAR E ROTINA ADMINISTRATIVA -->
@@ -488,15 +551,8 @@
                     </span>
                   </div>
                   <p class="nivel-desc">
-                    <strong>Engloba toda a rotina escolar em um único computador ágil:</strong> Diário de Classe, Sistema Escolar, Word/Writer (provas e documentos), Excel/Planilhas de notas, pesquisas na internet, SGPe e reuniões online sem travamentos.
+                    Diário de Classe, Word/textos e provas, planilhas de notas, SGPe, internet e reuniões online.
                   </p>
-                  <div class="nivel-chips-row">
-                    <span class="nivel-chip">🎓 Diário de Classe & Notas</span>
-                    <span class="nivel-chip">📝 Word, Textos & Provas</span>
-                    <span class="nivel-chip">🌐 Internet & SGPe</span>
-                    <span class="nivel-chip">📊 Planilhas & Médias</span>
-                    <span class="nivel-chip">📽️ Reuniões & Apresentações</span>
-                  </div>
                 </div>
               </div>
 
@@ -512,13 +568,8 @@
                     </span>
                   </div>
                   <p class="nivel-desc">
-                    Trabalho intensivo com grandes planilhas fiscais (dezenas de milhares de linhas), cruzamento de dados orçamentários e dashboards no Power BI.
+                    Grandes planilhas fiscais com dezenas de milhares de linhas, relatórios contábeis e Power BI.
                   </p>
-                  <div class="nivel-chips-row">
-                    <span class="nivel-chip">📊 Power BI & Dashboards</span>
-                    <span class="nivel-chip">📑 Análise Contábil / Fiscal</span>
-                    <span class="nivel-chip">📈 Grandes Bases de Dados</span>
-                  </div>
                 </div>
               </div>
 
@@ -534,54 +585,49 @@
                     </span>
                   </div>
                   <p class="nivel-desc">
-                    Desenvolvimento de plantas de engenharia civil, topografia, loteamentos, modelagem 3D pesada e softwares gráficos dedicados.
+                    Desenvolvimento de plantas de engenharia civil, topografia e modelagem 3D pesada.
                   </p>
-                  <div class="nivel-chips-row">
-                    <span class="nivel-chip">📐 AutoCAD Civil 3D</span>
-                    <span class="nivel-chip">🗺️ Geoprocessamento / GIS</span>
-                    <span class="nivel-chip">🏗️ Projetos de Obras</span>
-                  </div>
                   <div class="nivel-alert-tce" id="alertaNivel3Escola">
-                    🚨 <strong>Alerta TCE/SC:</strong> Equipamento de alto custo reservado a engenheiros e arquitetos. Não aplicável para rotinas escolares ou administrativas.
+                    🚨 <strong>Alerta TCE/SC:</strong> Equipamento reservado a engenheiros e arquitetos da SEPLAN.
                   </div>
                 </div>
               </div>
 
             </div>
 
-            <!-- PERGUNTAS COMPLEMENTARES PROGRESSIVAS (ETAPA 3) -->
+            <!-- PERGUNTAS COMPLEMENTARES OBJETIVAS (TEMPLATES GRANDES) -->
             <div class="perguntas-complementares-box">
               <div class="perguntas-header-bar">
                 <span class="perguntas-header-title">
-                  <span>📋</span> Perguntas Complementares da Rotina
+                  <span>📋</span> Perguntas Sobre Sua Rotina
                 </span>
-                <span style="font-size: 0.72rem; color: var(--dark-muted);">Diagnóstico Dinâmico</span>
+                <span class="tag-etapa-indicador">DIAGNÓSTICO RÁPIDO</span>
               </div>
 
-              <!-- PERGUNTA 1: MOBILIDADE E TRANSPORTE (DEFINE NOTEBOOK VS DESKTOP) -->
+              <!-- PERGUNTA 1: MOBILIDADE (DEFINE NOTEBOOK VS DESKTOP) -->
               <div class="pergunta-bloco">
-                <span class="pergunta-titulo">1. Você precisa transportar o equipamento para reuniões, conselho de classe ou trabalhar em diferentes salas?</span>
+                <span class="pergunta-titulo">1. Você precisa transportar o computador entre salas ou reuniões?</span>
                 <div class="pergunta-cards-grid">
                   <div class="pergunta-card-opt active" id="cardMobSim" onclick="app.setMobilidade(true, this)">
                     <div class="opt-radio-circle"></div>
                     <div class="opt-text-wrap">
-                      <strong>🚗 Sim, preciso de mobilidade</strong>
-                      <small>Levo para reuniões pedagógicas, conselho de classe e salas de aula</small>
+                      <strong>🚗 Sim, preciso de mobilidade (Notebook)</strong>
+                      <small>Para levar a reuniões pedagógicas, conselho de classe e salas de aula</small>
                     </div>
                   </div>
                   <div class="pergunta-card-opt" id="cardMobNao" onclick="app.setMobilidade(false, this)">
                     <div class="opt-radio-circle"></div>
                     <div class="opt-text-wrap">
-                      <strong>🏢 Não, trabalho sempre fixo na minha mesa</strong>
-                      <small>O computador fica exclusivamente na secretaria ou sala de atendimento</small>
+                      <strong>🏢 Não, trabalho sempre fixo na mesa (Desktop)</strong>
+                      <small>O computador fica exclusivamente na secretaria ou gabinete escolar</small>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- PERGUNTA 2: PROGRAMAS E SISTEMAS UTILIZADOS -->
+              <!-- PERGUNTA 2: PROGRAMAS UTILIZADOS (CHIPS GRANDES) -->
               <div class="pergunta-bloco">
-                <span class="pergunta-titulo">2. Quais ferramentas e sistemas fazem parte do seu trabalho? (Selecione o que você utiliza)</span>
+                <span class="pergunta-titulo">2. Quais ferramentas fazem parte do seu dia a dia?</span>
                 <div class="chips-softwares-grid">
                   <button type="button" class="chip-sistema-btn active" onclick="app.toggleSoftwareChip('Diário de Classe & Notas', this)">
                     <span>🎓</span> Diário de Classe & Notas
@@ -598,51 +644,32 @@
                   <button type="button" class="chip-sistema-btn active" onclick="app.toggleSoftwareChip('Reuniões Online (Meet/Teams)', this)">
                     <span>📽️</span> Reuniões Online (Meet/Teams)
                   </button>
-                  <button type="button" class="chip-sistema-btn" onclick="app.toggleSoftwareChip('Power BI & Relatórios', this)">
-                    <span>📈</span> Power BI & Relatórios
-                  </button>
-                  <button type="button" class="chip-sistema-btn" onclick="app.toggleSoftwareChip('AutoCAD & Plantas 3D', this)">
-                    <span>📐</span> AutoCAD & Plantas 3D
-                  </button>
                 </div>
               </div>
 
-              <!-- PERGUNTA 3: MULTITAREFA -->
+              <!-- PERGUNTA 3: SITUAÇÃO ATUAL DO EQUIPAMENTO -->
               <div class="pergunta-bloco">
-                <span class="pergunta-titulo">3. Você costuma trabalhar com muitos programas e várias abas abertas simultaneamente?</span>
-                <div style="display: flex; gap: 8px;">
-                  <button type="button" class="recurso-pill-btn active" id="btnMultiSim" onclick="app.setMultitarefa(true, this)">
-                    Sim, utilizo vários sistemas ao mesmo tempo
-                  </button>
-                  <button type="button" class="recurso-pill-btn" id="btnMultiNao" onclick="app.setMultitarefa(false, this)">
-                    Não, apenas um programa por vez
-                  </button>
-                </div>
-              </div>
-
-              <!-- PERGUNTA 4: SITUAÇÃO ATUAL DO EQUIPAMENTO -->
-              <div class="pergunta-bloco">
-                <span class="pergunta-titulo">4. O que está dificultando seu trabalho atualmente?</span>
+                <span class="pergunta-titulo">3. Qual a situação do computador atual da sua sala?</span>
                 <div class="pergunta-cards-grid">
                   <div class="pergunta-card-opt active" id="cardSitEstragou" onclick="app.setSituacaoAtual('estragou', this)">
                     <div class="opt-radio-circle"></div>
                     <div class="opt-text-wrap">
-                      <strong>🔥 O computador anterior estragou / queimou</strong>
-                      <small>A máquina antiga da escola parou de funcionar e não liga</small>
+                      <strong>🔥 O computador anterior estragou / não liga</strong>
+                      <small>Preciso de substituição urgente para poder trabalhar</small>
                     </div>
                   </div>
                   <div class="pergunta-card-opt" id="cardSitLento" onclick="app.setSituacaoAtual('lento', this)">
                     <div class="opt-radio-circle"></div>
                     <div class="opt-text-wrap">
-                      <strong>⏳ O computador atual trava constantemente</strong>
-                      <small>Máquina antiga, muito lenta, que atrasa as tarefas diárias</small>
+                      <strong>⏳ A máquina atual trava muito</strong>
+                      <small>Computador antigo e lento que prejudica o atendimento</small>
                     </div>
                   </div>
                   <div class="pergunta-card-opt" id="cardSitNovo" onclick="app.setSituacaoAtual('novo', this)">
                     <div class="opt-radio-circle"></div>
                     <div class="opt-text-wrap">
-                      <strong>🆕 Não possuo computador na minha mesa</strong>
-                      <small>Novo posto de trabalho ou ampliação de atendimento</small>
+                      <strong>🆕 Novo posto de trabalho</strong>
+                      <small>Não possuo computador disponível na minha mesa</small>
                     </div>
                   </div>
                 </div>
@@ -653,59 +680,44 @@
 
 
           <!-- ======================================================== -->
-          <!-- ETAPA 3: RECURSOS EXISTENTES ("O QUE VOCÊ JÁ POSSUI?")   -->
+          <!-- ETAPA 3: RECURSOS EXISTENTES (CARDS GRANDES E CLAROS)    -->
           <!-- ======================================================== -->
           <div class="wizard-pane" id="pane-passo-3">
             <h3 class="pane-headline">O que você já possui na sua mesa?</h3>
-            <p class="pane-sub">Marque o que já está funcionando para solicitar apenas o que realmente falta, evitando desperdício de recursos públicos:</p>
+            <p class="pane-sub">Marque o que já está funcionando para solicitar apenas o que realmente falta:</p>
 
             <div class="recursos-mesa-grid">
               <!-- MONITOR PRINCIPAL -->
               <div class="recurso-card">
                 <div class="recurso-card-header">
-                  <span>🖥️</span> Monitor de Vídeo Principal
+                  <span>🖥️</span> Monitor de Vídeo
                 </div>
                 <div class="recurso-pills-row">
                   <button type="button" class="recurso-pill-btn active" id="btnMonNone" onclick="app.setOpcaoMonitor('none', this)">
                     Já tenho na mesa
                   </button>
                   <button type="button" class="recurso-pill-btn" id="btnMon1x" onclick="app.setOpcaoMonitor('1x', this)">
-                    Preciso de um monitor
+                    Preciso de monitor
                   </button>
                 </div>
               </div>
 
-              <!-- TECLADO -->
+              <!-- TECLADO E MOUSE -->
               <div class="recurso-card">
                 <div class="recurso-card-header">
-                  <span>⌨️</span> Teclado
+                  <span>⌨️🖱️</span> Teclado e Mouse
                 </div>
                 <div class="recurso-pills-row">
                   <button type="button" class="recurso-pill-btn active" id="btnTecladoSim" onclick="app.setOpcaoTeclado(true, this)">
-                    Já tenho funcionando
+                    Já tenho na mesa
                   </button>
                   <button type="button" class="recurso-pill-btn" id="btnTecladoNao" onclick="app.setOpcaoTeclado(false, this)">
-                    Preciso de um novo
+                    Preciso de novos
                   </button>
                 </div>
               </div>
 
-              <!-- MOUSE -->
-              <div class="recurso-card">
-                <div class="recurso-card-header">
-                  <span>🖱️</span> Mouse
-                </div>
-                <div class="recurso-pills-row">
-                  <button type="button" class="recurso-pill-btn active" id="btnMouseSim" onclick="app.setOpcaoMouse(true, this)">
-                    Já tenho funcionando
-                  </button>
-                  <button type="button" class="recurso-pill-btn" id="btnMouseNao" onclick="app.setOpcaoMouse(false, this)">
-                    Preciso de um novo
-                  </button>
-                </div>
-              </div>
-
-              <!-- WEBCAM / CÂMERA -->
+              <!-- CÂMERA / WEBCAM -->
               <div class="recurso-card">
                 <div class="recurso-card-header">
                   <span>📷</span> Câmera / Webcam
@@ -715,7 +727,7 @@
                     Já tenho ou integrada
                   </button>
                   <button type="button" class="recurso-pill-btn" id="btnWebcamNao" onclick="app.setOpcaoWebcam(false, this)">
-                    Preciso de uma câmera
+                    Preciso de câmera
                   </button>
                 </div>
               </div>
@@ -723,84 +735,71 @@
               <!-- SEGUNDO MONITOR -->
               <div class="recurso-card">
                 <div class="recurso-card-header">
-                  <span>🖥️🖥️</span> Segundo Monitor de Apoio
+                  <span>🖥️🖥️</span> Segundo Monitor
                 </div>
                 <div class="recurso-pills-row">
                   <button type="button" class="recurso-pill-btn active" id="btnMon2xNao" onclick="app.setSegundoMonitor(false, this)">
                     Não preciso
                   </button>
                   <button type="button" class="recurso-pill-btn" id="btnMon2xSim" onclick="app.setSegundoMonitor(true, this)">
-                    Preciso de um 2º monitor
+                    Preciso de 2º monitor
                   </button>
                 </div>
               </div>
             </div>
 
-            <!-- QUANTIDADE DE EQUIPAMENTOS -->
-            <div style="margin-top: 22px; background: var(--dark-surface); padding: 18px 20px; border-radius: var(--radius-md); border: 1px solid var(--dark-border);">
-              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-                <div>
-                  <strong style="color: var(--dark-text); font-size: 0.95rem;">Quantas pessoas no seu setor precisam dessa configuração?</strong>
-                  <p style="color: var(--dark-muted); font-size: 0.8rem; margin-top: 2px;">Quantidade de postos de trabalho para atendimento da equipe:</p>
-                </div>
-                <div class="quick-qty-row">
-                  <button type="button" class="qty-pill active" onclick="app.setQtd(1, this)">1 pessoa</button>
-                  <button type="button" class="qty-pill" onclick="app.setQtd(2, this)">2 pessoas</button>
-                  <button type="button" class="qty-pill" onclick="app.setQtd(5, this)">5 pessoas</button>
-                  <input type="number" id="inputQtd" class="dark-input inline-qty" min="1" max="50" value="1" onchange="app.setQtdCustom(this.value)">
-                </div>
+            <!-- QUANTIDADE DE EQUIPAMENTOS (BARRAS GRANDES) -->
+            <div class="quantidade-box-grande">
+              <div>
+                <strong class="qtd-box-titulo">Quantas pessoas no seu setor precisam dessa máquina?</strong>
+                <p class="qtd-box-sub">Selecione a quantidade de postos necessários:</p>
+              </div>
+              <div class="quick-qty-row">
+                <button type="button" class="qty-pill active" onclick="app.setQtd(1, this)">1 equipamento</button>
+                <button type="button" class="qty-pill" onclick="app.setQtd(2, this)">2 equipamentos</button>
+                <button type="button" class="qty-pill" onclick="app.setQtd(5, this)">5 equipamentos</button>
+                <input type="number" id="inputQtd" class="dark-input inline-qty" min="1" max="50" value="1" onchange="app.setQtdCustom(this.value)">
               </div>
             </div>
           </div>
 
 
           <!-- ======================================================== -->
-          <!-- ETAPA 4: NECESSIDADE IDENTIFICADA & RECOMENDAÇÃO         -->
+          <!-- ETAPA 4: DIAGNÓSTICO & RECOMENDAÇÃO (TEMPLATES GRANDES)  -->
           <!-- ======================================================== -->
           <div class="wizard-pane" id="pane-passo-4">
             <h3 class="pane-headline">Diagnóstico da sua Necessidade</h3>
             <p class="pane-sub">O sistema analisou sua rotina e gerou uma recomendação preliminar para validação do TI:</p>
 
             <div class="diagnostico-container">
-              <!-- BLOCO A: NECESSIDADE IDENTIFICADA (ETAPA 5) -->
-              <div class="card-bloco-diagnostico">
-                <span class="diagnostico-tag-topo">ETAPA 1 • NECESSIDADE IDENTIFICADA</span>
-                <h4 class="diagnostico-titulo" id="txtDiagNecessidadeTitulo">
-                  Computador para Rotina Escolar e Administrativa
-                </h4>
-                <p class="diagnostico-desc-principal" id="txtDiagNecessidadeDesc">
-                  Com base nas informações fornecidas, identificamos uma necessidade de uso corporativo para sistemas escolares, elaboração de documentos, planilhas, internet e reuniões online pedagógicas.
-                </p>
+              <!-- BLOCO A: RECOMENDAÇÃO EM DESTAQUE GRANDE -->
+              <div class="card-recomendacao-destaque">
+                <span class="diagnostico-tag-topo">EQUIPAMENTO RECOMENDADO</span>
+                <div class="rec-destaque-header">
+                  <div class="rec-destaque-icon" id="recDestaqueIcon">💻</div>
+                  <div>
+                    <h3 class="rec-destaque-titulo" id="recDestaqueTitulo">Notebook Corporativo Portátil</h3>
+                    <p class="rec-destaque-sub" id="recDestaqueSub">Ideal para rotina na escola com mobilidade para reuniões pedagógicas.</p>
+                  </div>
+                </div>
 
-                <!-- BULLETS DE RESUMO DAS RESPOSTAS -->
+                <!-- POR QUE RECOMENDAMOS ISSO? (TEXTO CLARO E DIRETO) -->
+                <div class="por-que-recomendamos-box">
+                  <strong>Por que recomendamos este equipamento?</strong>
+                  <p id="txtPorQueRecomendamos">
+                    Você informou que realiza atividades de gestão escolar e precisa de mobilidade para conselhos de classe e reuniões. O Notebook Corporativo atende perfeitamente sua rotina, com bateria duradoura e início rápido.
+                  </p>
+                </div>
+
+                <!-- 3 MOTIVOS OBJETIVOS -->
                 <div class="bullets-motivos-box">
-                  <h5>Por que identificamos essa necessidade?</h5>
+                  <h5>Resumo da sua necessidade:</h5>
                   <div class="bullets-list" id="listaMotivosNecessidade">
                     <!-- Preenchido dinamicamente via JS -->
                   </div>
                 </div>
-              </div>
 
-              <!-- BLOCO B: PERFIL RECOMENDADO PRELIMINAR (ETAPA 6) -->
-              <div class="card-recomendacao-destaque">
-                <span class="diagnostico-tag-topo" style="color: #6EE7B7;">ETAPA 2 • PERFIL RECOMENDADO PRELIMINAR</span>
-                <div class="rec-destaque-header">
-                  <div class="rec-destaque-icon" id="recDestaqueIcon">💻</div>
-                  <div>
-                    <h3 class="rec-destaque-titulo" id="recDestaqueTitulo">Notebook Corporativo</h3>
-                    <p class="rec-destaque-sub" id="recDestaqueSub">Indicado para sua rotina de trabalho e necessidade de mobilidade.</p>
-                  </div>
-                </div>
-
-                <!-- POR QUE RECOMENDAMOS ISSO? (ETAPA 7) -->
-                <div class="por-que-recomendamos-box">
-                  <strong>Por que recomendamos este equipamento?</strong>
-                  <p id="txtPorQueRecomendamos">
-                    Você informou que realiza atividades pedagógicas e de gestão, participa de reuniões online e precisa transportar o equipamento para conselhos de classe. Por isso, a recomendação é um Notebook Corporativo portátil, eliminando o risco de receber máquinas fracas ou inadequadas.
-                  </p>
-                </div>
-
-                <!-- ESPECIFICAÇÃO TÉCNICA SUGERIDA SEPARADA PARA O TI -->
+                <!-- ESPECIFICAÇÃO TÉCNICA SUGERIDA RESUMIDA PARA O TI -->
                 <div class="box-specs-tecnicas-ti">
                   <div class="specs-ti-header">
                     <h4><span>⚙️</span> Perfil Técnico Sugerido para a Diretoria de TIC</h4>
@@ -813,19 +812,15 @@
                     </div>
                     <div class="spec-ti-item">
                       <small>Processador</small>
-                      <strong id="specTiCpu">Quad-Core x86-64 (PassMark 8.500+)</strong>
+                      <strong id="specTiCpu">Quad-Core Moderno</strong>
                     </div>
                     <div class="spec-ti-item">
                       <small>Memória RAM</small>
-                      <strong id="specTiRam">8 GB DDR4/DDR5 Alta Frequência</strong>
+                      <strong id="specTiRam">8 GB de Alta Velocidade</strong>
                     </div>
                     <div class="spec-ti-item">
                       <small>Armazenamento</small>
-                      <strong id="specTiSsd">SSD 256GB NVMe M.2 Rápido</strong>
-                    </div>
-                    <div class="spec-ti-item">
-                      <small>Tela & Câmera</small>
-                      <strong id="specTiTela">Tela 15.6" Full HD + Webcam Integrada</strong>
+                      <strong id="specTiSsd">SSD 256GB NVMe (Rápido)</strong>
                     </div>
                     <div class="spec-ti-item">
                       <small>Garantia Homologada</small>
@@ -835,7 +830,7 @@
 
                   <div class="alerta-validacao-ti">
                     <span>🛡️</span>
-                    <span>Esta recomendação é uma <strong>sugestão preliminar</strong> baseada nas informações fornecidas e será avaliada e validada pelo setor de TI da Prefeitura.</span>
+                    <span>Esta recomendação é preliminar e será validada e homologada tecnicamente pelo setor de TI da Prefeitura.</span>
                   </div>
                 </div>
               </div>
@@ -844,75 +839,54 @@
 
 
           <!-- ======================================================== -->
-          <!-- ETAPA 5: CONFIRMAR & ENVIAR AO TI (RESUMO EXECUTIVO)     -->
+          <!-- ETAPA 5: CONFIRMAR & ENVIAR (RESUMO EXECUTIVO GRANDE)    -->
           <!-- ======================================================== -->
           <div class="wizard-pane" id="pane-passo-5">
             <h3 class="pane-headline">Tudo pronto! Confira sua necessidade</h3>
-            <p class="pane-sub">Revise as informações antes de enviar a solicitação para análise do TI:</p>
+            <p class="pane-sub">Revise os dados antes de enviar a solicitação para análise do TI:</p>
 
             <div class="resumo-executivo-box">
               <div class="resumo-section-grid">
                 <div class="resumo-card-info">
-                  <small>Solicitante</small>
+                  <small>Solicitante & Unidade</small>
                   <strong id="resumoSolicitante">Profa. Angelita de Souza</strong>
-                  <p id="resumoCargo">Diretora de Escola Municipal</p>
+                  <p id="resumoUnidade">Escolas Municipais (SME Lages)</p>
                 </div>
                 <div class="resumo-card-info">
-                  <small>Unidade / Lotação</small>
-                  <strong id="resumoUnidade">Escolas Municipais (SME Lages)</strong>
-                  <p>Prefeitura do Município de Lages / SC</p>
-                </div>
-                <div class="resumo-card-info">
-                  <small>Necessidade Identificada</small>
-                  <strong id="resumoNecTitulo" style="color: var(--dark-accent);">Computador para Rotina Escolar e Administrativa</strong>
-                  <p id="resumoNecDesc">Uso corporativo pedagógico e mobilidade</p>
-                </div>
-                <div class="resumo-card-info">
-                  <small>Perfil Preliminar Recomendado</small>
-                  <strong id="resumoPerfilNome">Notebook Corporativo Portátil (Nível 1)</strong>
+                  <small>Equipamento Recomendado</small>
+                  <strong id="resumoPerfilNome" style="color: var(--dark-accent);">Notebook Corporativo Portátil</strong>
                   <p id="resumoQtdText">1 equipamento solicitado</p>
                 </div>
                 <div class="resumo-card-info">
-                  <small>Recursos que Você Já Possui</small>
+                  <small>O que Você Já Possui na Mesa</small>
                   <strong id="resumoRecursosExistentes">Monitor • Teclado • Mouse</strong>
-                  <p style="color: var(--dark-accent);">✓ Evita compras duplicadas</p>
+                  <p style="color: var(--dark-accent);">✓ Aproveitamento inteligente</p>
                 </div>
                 <div class="resumo-card-info">
-                  <small>Recursos Solicitados ao TI</small>
+                  <small>O que Você Vai Receber</small>
                   <strong id="resumoRecursosSolicitados">1x Notebook Corporativo</strong>
-                  <p>Com bateria, carregador e câmera</p>
+                  <p>Com bateria, carregador e webcam</p>
                 </div>
               </div>
 
-              <!-- ESPECIFICAÇÃO TÉCNICA SUGERIDA RESUMIDA -->
-              <div style="background: var(--dark-card); border: 1px solid var(--dark-border); border-radius: var(--radius-sm); padding: 14px 16px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                  <span style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--dark-muted); letter-spacing: 0.5px;">Especificação Técnica Preliminar Sugerida:</span>
-                  <span style="font-size: 0.68rem; color: #60A5FA; font-weight: 700;">AGUARDA VALIDAÇÃO DO TI</span>
-                </div>
-                <div id="resumoSpecsTexto" style="font-size: 0.8rem; color: #E2E8F0; line-height: 1.45;">
-                  Windows 11 Pro 64-bit • Quad-Core x86-64 • SSD 256GB NVMe M.2 • 8 GB RAM • Tela 15.6" Full HD • Suporte e garantia 36 meses on-site.
-                </div>
-              </div>
-
-              <!-- JUSTIFICATIVA TÉCNICA AUTOMÁTICA GERADA -->
+              <!-- JUSTIFICATIVA TÉCNICA GERADA (DIRETA E OBJETIVA) -->
               <div class="justificativa-gerada-box">
-                <label>Justificativa Gerada Automaticamente (Fundamentação Legal & Rotina):</label>
+                <label>Justificativa Gerada Automaticamente:</label>
                 <textarea id="txtJustificativa" class="justificativa-textarea" rows="3"></textarea>
-                <small style="color: var(--dark-muted); font-size: 0.7rem; display: block; margin-top: 4px;">
-                  * O texto foi gerado automaticamente a partir das suas respostas para instruir o processo de contratação em conformidade com o Art. 18 da Lei Federal nº 14.133/2021.
+                <small style="color: var(--dark-muted); font-size: 0.85rem; display: block; margin-top: 6px;">
+                  * Fundamentação legal gerada automaticamente em conformidade com o Art. 18 da Lei Federal nº 14.133/2021.
                 </small>
               </div>
             </div>
           </div>
 
 
-          <!-- BOTÕES DE NAVEGAÇÃO DO WIZARD -->
+          <!-- BOTÕES DE NAVEGAÇÃO DO WIZARD (GRANDES E FÁCEIS DE CLICAR) -->
           <div class="wizard-footer">
-            <button type="button" class="btn-ghost" id="btnWizVoltar" onclick="app.passoAnterior()" style="visibility: hidden;">
+            <button type="button" class="btn-ghost btn-wizard-nav" id="btnWizVoltar" onclick="app.passoAnterior()" style="visibility: hidden;">
               &larr; Voltar
             </button>
-            <button type="button" class="btn-primary-neon" id="btnWizAvancar" onclick="app.proximoPasso()">
+            <button type="button" class="btn-primary-neon btn-wizard-nav" id="btnWizAvancar" onclick="app.proximoPasso()">
               Avançar &rarr;
             </button>
           </div>

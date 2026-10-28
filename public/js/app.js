@@ -894,7 +894,10 @@ const app = {
       const node = document.getElementById(`step-node-${i}`);
       const pane = document.getElementById(`pane-passo-${i}`);
 
-      node?.classList.toggle('active', i === passo);
+      if (node) {
+        node.classList.toggle('active', i === passo);
+        node.classList.toggle('completed', i < passo);
+      }
       pane?.classList.toggle('active', i === passo);
     }
 
@@ -904,9 +907,9 @@ const app = {
     const btnAvancar = document.getElementById('btnWizAvancar');
     if (btnAvancar) {
       if (passo === this.totalPassos) {
-        btnAvancar.innerHTML = '🚀 Enviar Solicitação para Análise do TI ✓';
+        btnAvancar.innerHTML = '<span>🚀 Enviar Solicitação para Análise do TI</span> <span style="font-size: 1.2rem;">✓</span>';
       } else {
-        btnAvancar.innerHTML = 'Avançar &rarr;';
+        btnAvancar.innerHTML = '<span>Avançar</span> <span style="font-size: 1.2rem;">&rarr;</span>';
       }
     }
 
