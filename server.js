@@ -2,7 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { db } = require('./database');
+const { db, registrarHistorico } = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -214,7 +214,7 @@ app.post('/api/analisar-trava', (req, res) => {
   }
 });
 
-// 6. Salvar Demanda (Gera Protocolo, ETP e Contrato)
+// 6. Salvar Demanda (Gera Protocolo e DOD preliminar aguardando validação do TI)
 app.post('/api/demandas', (req, res) => {
   try {
     const {
@@ -227,15 +227,21 @@ app.post('/api/demandas', (req, res) => {
       cargo = 'Servidor Público',
       quantidadeUsuarios = 1,
       softwares = [],
-      perfilRecomendadoId,
-      perfilEscolhidoId,
+      perfilRecomendadoId = 1,
+      perfilEscolhidoId = 1,
       justificativaUsuario = '',
-      status = 'Aprovado Direto',
+      status = 'Enviado para TI',
       irs = 5,
-      nivelRisco = 'BAIXO'
+      nivelRisco = 'BAIXO',
+      tipoNecessidade = 'computador',
+      respostasDiagnostico = {},
+      diagnosticoInterpretado = '',
+      recomendacaoPreliminar = {},
+      recursosExistentes = [],
+      dodConteudo = {}
     } = req.body;
 
-    const perfilEsc = db.prepare('SELECT * FROM perfis_hardware WHERE id = ?').get(perfilEscolhidoId);
+    const perfilEsc = db.prepare('SELECT * FROM perfis_hardware WHERE id = ?').get(perfilEscolhidoId || 1);
     const custoUnitario = req.body.custoUnitario || perfilEsc.custo_unitario_estimado;
     const custoTotal = req.body.custoTotal || (custoUnitario * quantidadeUsuarios);
     
@@ -246,7 +252,7 @@ app.post('/api/demandas', (req, res) => {
     const anoAtual = new Date().getFullYear();
     const protocolo = `ETP-${anoAtual}-${randomSuffix}`;
 
-    const justificativaAutomatica = `Dimensionamento técnico calculado pelo sistema DimensionaTI SC em conformidade com o Art. 18 da Lei Federal nº 14.133/2021 para o cargo de ${cargo} em Lages/SC.`;
+    const justificativaAutomatica = `Diagnóstico de rotina gerado automaticamente pelo DimensionaTI SC para ${cargo || 'servidor'} na unidade ${setor}. Documento de Formalização da Demanda (DOD) estruturado em conformidade com o Art. 18 da Lei Federal nº 14.133/2021 aguardando validação técnica do TI.`;
 
     const stmt = db.prepare(`
       INSERT INTO demandas (
@@ -254,8 +260,11 @@ app.post('/api/demandas', (req, res) => {
         orgao, municipio, setor, cargo, quantidade_usuarios,
         softwares, perfil_recomendado_id, perfil_escolhido_id, status,
         justificativa_usuario, justificativa_tecnica_automatica,
-        custo_unitario, custo_total, economia_estimada, irs, nivel_risco
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        custo_unitario, custo_total, economia_estimada, irs, nivel_risco,
+        tipo_necessidade, respostas_diagnostico, diagnostico_interpretado,
+        recomendacao_preliminar, recursos_existentes, dod_conteudo,
+        dod_validado, etp_gerado
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0)
     `);
 
     stmt.run(
@@ -271,17 +280,35 @@ app.post('/api/demandas', (req, res) => {
       JSON.stringify(softwares),
       perfilRecomendadoId,
       perfilEscolhidoId,
-      status,
+      status || 'Enviado para TI',
       justificativaUsuario,
       justificativaAutomatica,
       custoUnitario,
       custoTotal,
       economiaEstimada,
       irs,
-      nivelRisco
+      nivelRisco,
+      tipoNecessidade,
+      typeof respostasDiagnostico === 'string' ? respostasDiagnostico : JSON.stringify(respostasDiagnostico),
+      diagnosticoInterpretado,
+      typeof recomendacaoPreliminar === 'string' ? recomendacaoPreliminar : JSON.stringify(recomendacaoPreliminar),
+      typeof recursosExistentes === 'string' ? recursosExistentes : JSON.stringify(recursosExistentes),
+      typeof dodConteudo === 'string' ? dodConteudo : JSON.stringify(dodConteudo)
     );
 
     const novaDemanda = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+
+    // Registra evento inicial no histórico de auditoria
+    registrarHistorico(
+      novaDemanda.id,
+      protocolo,
+      'Solicitação criada pelo servidor e DOD gerado automaticamente',
+      usuarioNome || 'Servidor Solicitante',
+      cargo || 'Servidor',
+      'servidor',
+      'Diagnóstico de rotina concluído sem preenchimento técnico manual. DOD oficial de SC gerado aguardando análise do TI.',
+      'Enviado para TI'
+    );
 
     res.status(201).json({
       success: true,
@@ -290,14 +317,15 @@ app.post('/api/demandas', (req, res) => {
       perfilEsc
     });
   } catch (error) {
+    console.error('Erro ao salvar demanda:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// 7. Listar demandas (Separado por Perfil de Usuário / Admin)
+// 7. Listar demandas (Separado por Perfil de Usuário / Admin com filtros por abas)
 app.get('/api/demandas', (req, res) => {
   try {
-    const { risco, search, usuarioId, tipoUsuario } = req.query;
+    const { risco, search, usuarioId, tipoUsuario, statusTab } = req.query;
     let query = `
       SELECT d.*, 
              pe.nome as perfil_esc_nome
@@ -307,10 +335,25 @@ app.get('/api/demandas', (req, res) => {
     `;
     const params = [];
 
-    // Se NÃO for admin, filtra estritamente apenas os pedidos emitidos por este usuário!
+    // Se NÃO for admin, filtra apenas os pedidos deste usuário
     if (tipoUsuario !== 'admin' && usuarioId) {
       query += ' AND d.usuario_id = ?';
       params.push(usuarioId);
+    }
+
+    // Filtros de abas de status
+    if (statusTab === 'aguardando_analise') {
+      query += " AND d.status IN ('Enviado para TI', 'Em análise pelo TI')";
+    } else if (statusTab === 'ajustes') {
+      query += " AND d.status = 'Ajustes solicitados'";
+    } else if (statusTab === 'validados') {
+      query += " AND d.status = 'Validado pelo TI'";
+    } else if (statusTab === 'etp_gerado') {
+      query += " AND d.status = 'ETP gerado'";
+    } else if (statusTab === 'reprovados') {
+      query += " AND d.status = 'Reprovado'";
+    } else if (statusTab === 'canceladas') {
+      query += " AND d.status = 'Cancelado'";
     }
 
     if (risco) {
@@ -377,6 +420,17 @@ app.post('/api/demandas/:protocolo/cancelar', (req, res) => {
       WHERE protocolo = ?
     `).run(motivo.trim(), protocolo);
 
+    registrarHistorico(
+      dem.id,
+      protocolo,
+      'Solicitação cancelada pelo solicitante',
+      dem.usuario_nome || 'Servidor',
+      dem.cargo || 'Servidor',
+      'servidor',
+      `Motivo do cancelamento: ${motivo.trim()}`,
+      'Cancelado'
+    );
+
     const atualizada = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
     res.json({ success: true, demanda: atualizada });
   } catch (err) {
@@ -384,12 +438,298 @@ app.post('/api/demandas/:protocolo/cancelar', (req, res) => {
   }
 });
 
-// 9. Estatísticas do Painel TCE/SC
+// 8.2 Obter Histórico Completo de Auditoria e Rastreabilidade
+app.get('/api/demandas/:protocolo/historico', (req, res) => {
+  try {
+    const { protocolo } = req.params;
+    const historico = db.prepare(`
+      SELECT * FROM historico_demandas 
+      WHERE protocolo = ? 
+      ORDER BY id ASC
+    `).all(protocolo);
+
+    res.json(historico);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 8.3 Iniciar Análise pelo Técnico de TI
+app.post('/api/demandas/:protocolo/em-analise', (req, res) => {
+  try {
+    const { protocolo } = req.params;
+    const { usuarioNome = 'Técnico de TI', usuarioCargo = 'Diretoria de TIC' } = req.body;
+
+    const dem = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    if (!dem) return res.status(404).json({ error: 'Demanda não encontrada.' });
+
+    db.prepare(`
+      UPDATE demandas 
+      SET status = 'Em análise pelo TI', responsavel_analise = ?
+      WHERE protocolo = ?
+    `).run(usuarioNome, protocolo);
+
+    registrarHistorico(
+      dem.id,
+      protocolo,
+      'Análise técnica iniciada pelo TI',
+      usuarioNome,
+      usuarioCargo,
+      'admin',
+      'O Técnico de TI abriu a solicitação para avaliação das respostas do diagnóstico e revisão preliminar do DOD.',
+      'Em análise pelo TI'
+    );
+
+    const atualizada = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    res.json({ success: true, demanda: atualizada });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 8.4 Validar DOD pelo TI (Libera a geração do ETP)
+app.post('/api/demandas/:protocolo/validar-dod', (req, res) => {
+  try {
+    const { protocolo } = req.params;
+    const { usuarioNome = 'Técnico de TIC', usuarioCargo = 'Diretoria Geral de TIC' } = req.body;
+
+    const dem = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    if (!dem) return res.status(404).json({ error: 'Demanda não encontrada.' });
+
+    const validadorFormatado = `${usuarioNome} (${usuarioCargo})`;
+
+    db.prepare(`
+      UPDATE demandas 
+      SET status = 'Validado pelo TI',
+          dod_validado = 1,
+          dod_validado_por = ?,
+          dod_validado_em = datetime('now', 'localtime'),
+          responsavel_analise = ?
+      WHERE protocolo = ?
+    `).run(validadorFormatado, usuarioNome, protocolo);
+
+    registrarHistorico(
+      dem.id,
+      protocolo,
+      'DOD validado tecnicamente pelo TI',
+      usuarioNome,
+      usuarioCargo,
+      'admin',
+      'Documento de Formalização da Demanda (DOD) aprovado pela equipe técnica de TIC. Opção de geração do ETP liberada.',
+      'Validado pelo TI'
+    );
+
+    const atualizada = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    res.json({ success: true, demanda: atualizada });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 8.5 Solicitar Ajustes pelo TI
+app.post('/api/demandas/:protocolo/solicitar-ajustes', (req, res) => {
+  try {
+    const { protocolo } = req.params;
+    const { motivo, usuarioNome = 'Técnico de TIC', usuarioCargo = 'Diretoria de TIC' } = req.body;
+
+    if (!motivo || motivo.trim().length === 0) {
+      return res.status(400).json({ error: 'Informe detalhadamente o que precisa ser ajustado pelo servidor.' });
+    }
+
+    const dem = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    if (!dem) return res.status(404).json({ error: 'Demanda não encontrada.' });
+
+    db.prepare(`
+      UPDATE demandas 
+      SET status = 'Ajustes solicitados',
+          ajustes_solicitados = ?,
+          responsavel_analise = ?
+      WHERE protocolo = ?
+    `).run(motivo.trim(), usuarioNome, protocolo);
+
+    registrarHistorico(
+      dem.id,
+      protocolo,
+      'Ajustes solicitados pelo TI ao servidor',
+      usuarioNome,
+      usuarioCargo,
+      'admin',
+      `Orientações do TI: ${motivo.trim()}`,
+      'Ajustes solicitados'
+    );
+
+    const atualizada = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    res.json({ success: true, demanda: atualizada });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 8.6 Reprovar Demanda pelo TI
+app.post('/api/demandas/:protocolo/reprovar', (req, res) => {
+  try {
+    const { protocolo } = req.params;
+    const { motivo, usuarioNome = 'Técnico de TIC', usuarioCargo = 'Diretoria de TIC' } = req.body;
+
+    if (!motivo || motivo.trim().length === 0) {
+      return res.status(400).json({ error: 'A justificativa técnica de reprovação é obrigatória.' });
+    }
+
+    const dem = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    if (!dem) return res.status(404).json({ error: 'Demanda não encontrada.' });
+
+    db.prepare(`
+      UPDATE demandas 
+      SET status = 'Reprovado',
+          motivo_reprovacao = ?,
+          responsavel_analise = ?
+      WHERE protocolo = ?
+    `).run(motivo.trim(), usuarioNome, protocolo);
+
+    registrarHistorico(
+      dem.id,
+      protocolo,
+      'Solicitação reprovada pelo TI',
+      usuarioNome,
+      usuarioCargo,
+      'admin',
+      `Motivo da reprovação técnica: ${motivo.trim()}`,
+      'Reprovado'
+    );
+
+    const atualizada = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    res.json({ success: true, demanda: atualizada });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 8.7 Responder Ajustes pelo Servidor (Reenvia solicitação)
+app.post('/api/demandas/:protocolo/responder-ajustes', (req, res) => {
+  try {
+    const { protocolo } = req.params;
+    const { justificativaResposta, usuarioNome = 'Servidor', usuarioCargo = 'Solicitante' } = req.body;
+
+    const dem = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    if (!dem) return res.status(404).json({ error: 'Demanda não encontrada.' });
+
+    db.prepare(`
+      UPDATE demandas 
+      SET status = 'Enviado para TI',
+          justificativa_usuario = COALESCE(?, justificativa_usuario)
+      WHERE protocolo = ?
+    `).run(justificativaResposta || '', protocolo);
+
+    registrarHistorico(
+      dem.id,
+      protocolo,
+      'Servidor respondeu aos ajustes solicitados',
+      usuarioNome,
+      usuarioCargo,
+      'servidor',
+      `Resposta do servidor: ${justificativaResposta || 'Informações complementadas conforme orientações do TI.'}`,
+      'Enviado para TI'
+    );
+
+    const atualizada = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    res.json({ success: true, demanda: atualizada });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 8.8 Gerar ETP (Disponível apenas após o DOD ser validado)
+app.post('/api/demandas/:protocolo/gerar-etp', (req, res) => {
+  try {
+    const { protocolo } = req.params;
+    const { usuarioNome = 'Técnico de TIC', usuarioCargo = 'Equipe de Planejamento da Contratação', etpConteudo = null } = req.body;
+
+    const dem = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    if (!dem) return res.status(404).json({ error: 'Demanda não encontrada.' });
+
+    if (dem.dod_validado !== 1) {
+      return res.status(400).json({ 
+        error: 'Bloqueio de Conformidade: O DOD precisa ser validado tecnicamente pelo TI antes da geração do ETP.' 
+      });
+    }
+
+    const geradorFormatado = `${usuarioNome} (${usuarioCargo})`;
+    const conteudoParaSalvar = etpConteudo ? JSON.stringify(etpConteudo) : (dem.etp_conteudo || '{}');
+
+    db.prepare(`
+      UPDATE demandas 
+      SET status = 'ETP gerado',
+          etp_gerado = 1,
+          etp_gerado_por = ?,
+          etp_gerado_em = datetime('now', 'localtime'),
+          etp_conteudo = ?
+      WHERE protocolo = ?
+    `).run(geradorFormatado, conteudoParaSalvar, protocolo);
+
+    registrarHistorico(
+      dem.id,
+      protocolo,
+      'ETP gerado com base no DOD validado',
+      usuarioNome,
+      usuarioCargo,
+      'admin',
+      'Estudo Técnico Preliminar (ETP) elaborado com levantamento de 3 alternativas, análise comparativa de viabilidade técnica/econômica e conclusão.',
+      'ETP gerado'
+    );
+
+    const atualizada = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    res.json({ success: true, demanda: atualizada });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 8.9 Salvar Edição do ETP pelo TI
+app.put('/api/demandas/:protocolo/etp', (req, res) => {
+  try {
+    const { protocolo } = req.params;
+    const { etpConteudo, usuarioNome = 'Técnico de TIC', usuarioCargo = 'Equipe de TIC' } = req.body;
+
+    const dem = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
+    if (!dem) return res.status(404).json({ error: 'Demanda não encontrada.' });
+
+    db.prepare(`
+      UPDATE demandas 
+      SET etp_conteudo = ?
+      WHERE protocolo = ?
+    `).run(typeof etpConteudo === 'string' ? etpConteudo : JSON.stringify(etpConteudo), protocolo);
+
+    registrarHistorico(
+      dem.id,
+      protocolo,
+      'ETP revisado e atualizado pelo TI',
+      usuarioNome,
+      usuarioCargo,
+      'admin',
+      'Alterações técnicas salvas no Estudo Técnico Preliminar.',
+      dem.status
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 9. Estatísticas do Painel TCE/SC e Dashboard Operacional do TI
 app.get('/api/estatisticas', (req, res) => {
   try {
     const totalDemandas = db.prepare('SELECT COUNT(*) as c FROM demandas').get().c;
     const totalEconomia = db.prepare('SELECT SUM(economia_estimada) as total FROM demandas').get().total || 0;
     const mediaIrs = db.prepare('SELECT AVG(irs) as media FROM demandas').get().media || 0;
+
+    // Contadores operacionais para os cards do dashboard TI
+    const aguardandoAnalise = db.prepare("SELECT COUNT(*) as c FROM demandas WHERE status IN ('Enviado para TI', 'Em análise pelo TI')").get().c;
+    const ajustesSolicitados = db.prepare("SELECT COUNT(*) as c FROM demandas WHERE status = 'Ajustes solicitados'").get().c;
+    const dodsValidados = db.prepare("SELECT COUNT(*) as c FROM demandas WHERE status = 'Validado pelo TI'").get().c;
+    const etpsGerados = db.prepare("SELECT COUNT(*) as c FROM demandas WHERE status = 'ETP gerado'").get().c;
+    const reprovados = db.prepare("SELECT COUNT(*) as c FROM demandas WHERE status = 'Reprovado'").get().c;
+    const canceladas = db.prepare("SELECT COUNT(*) as c FROM demandas WHERE status = 'Cancelado'").get().c;
 
     const riscoContagem = db.prepare(`
       SELECT nivel_risco, COUNT(*) as qtd 
@@ -409,6 +749,12 @@ app.get('/api/estatisticas', (req, res) => {
       totalDemandas,
       totalEconomia,
       mediaIrs: Math.round(mediaIrs),
+      aguardandoAnalise,
+      ajustesSolicitados,
+      dodsValidados,
+      etpsGerados,
+      reprovados,
+      canceladas,
       riscoContagem,
       porOrgao
     });

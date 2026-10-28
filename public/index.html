@@ -259,7 +259,7 @@
                 Minhas Requisições de Equipamento
               </h1>
               <p id="subtituloSecaoLicitacoes" class="header-page-subtitle">
-                Acompanhe as solicitações de computadores enviadas para a Diretoria de TIC da Prefeitura.
+                Acompanhe o fluxo: Diagnóstico do Servidor &rarr; DOD Oficial &rarr; Análise Técnica do TI &rarr; ETP.
               </p>
             </div>
 
@@ -267,6 +267,45 @@
               <span class="btn-action-icon">+</span>
               <span>Nova Requisição</span>
             </button>
+          </div>
+
+          <!-- CARDS OPERACIONAIS DE FLUXO / GESTÃO DO TI -->
+          <div class="ti-metrics-row" id="cardsOperacionaisTi">
+            <div class="ti-metric-card" onclick="app.setAbaStatus('aguardando_analise')" title="Solicitações recebidas aguardando triagem do TI">
+              <div class="ti-metric-icon">⏳</div>
+              <div class="ti-metric-body">
+                <span class="ti-metric-label">Aguardando TI</span>
+                <h3 class="ti-metric-val" id="metricAguardandoAnalise">0</h3>
+              </div>
+            </div>
+            <div class="ti-metric-card" onclick="app.setAbaStatus('ajustes')" title="Solicitações com pendências devolvidas ao servidor">
+              <div class="ti-metric-icon">⚠️</div>
+              <div class="ti-metric-body">
+                <span class="ti-metric-label">Com Ajustes</span>
+                <h3 class="ti-metric-val text-warn" id="metricAjustes">0</h3>
+              </div>
+            </div>
+            <div class="ti-metric-card" onclick="app.setAbaStatus('validados')" title="DODs validados pelo TI aptos para gerar ETP">
+              <div class="ti-metric-icon">✅</div>
+              <div class="ti-metric-body">
+                <span class="ti-metric-label">DODs Validados</span>
+                <h3 class="ti-metric-val text-success" id="metricValidados">0</h3>
+              </div>
+            </div>
+            <div class="ti-metric-card" onclick="app.setAbaStatus('etp_gerado')" title="Estudos Técnicos Preliminares já elaborados">
+              <div class="ti-metric-icon">📑</div>
+              <div class="ti-metric-body">
+                <span class="ti-metric-label">ETPs Gerados</span>
+                <h3 class="ti-metric-val text-accent" id="metricEtps">0</h3>
+              </div>
+            </div>
+            <div class="ti-metric-card" onclick="app.setAbaStatus('canceladas')" title="Demandas canceladas ou reprovadas">
+              <div class="ti-metric-icon">🚫</div>
+              <div class="ti-metric-body">
+                <span class="ti-metric-label">Canceladas / Reprovadas</span>
+                <h3 class="ti-metric-val text-danger" id="metricCanceladas">0</h3>
+              </div>
+            </div>
           </div>
 
           <!-- LINHA 2: BARRA INTEGRADA DE PESQUISA, ABAS E STATUS DO USUÁRIO -->
@@ -284,9 +323,21 @@
             <div class="controls-right-group">
               <!-- ABAS DE STATUS COM CONTADORES -->
               <div class="status-tabs-container">
-                <button type="button" class="status-tab-btn active" id="tabStatusTransmitidas" onclick="app.setAbaStatus('transmitidas')">
-                  <span class="tab-label">Transmitidas ao TI</span>
-                  <span class="tab-count-badge" id="badgeQtdTransmitidas">0</span>
+                <button type="button" class="status-tab-btn active" id="tabStatusAguardando" onclick="app.setAbaStatus('aguardando_analise')">
+                  <span class="tab-label">Aguardando TI</span>
+                  <span class="tab-count-badge" id="badgeQtdAguardando">0</span>
+                </button>
+                <button type="button" class="status-tab-btn" id="tabStatusAjustes" onclick="app.setAbaStatus('ajustes')">
+                  <span class="tab-label">Com Ajustes</span>
+                  <span class="tab-count-badge badge-warn" id="badgeQtdAjustes">0</span>
+                </button>
+                <button type="button" class="status-tab-btn" id="tabStatusValidados" onclick="app.setAbaStatus('validados')">
+                  <span class="tab-label">DODs Validados</span>
+                  <span class="tab-count-badge badge-success" id="badgeQtdValidados">0</span>
+                </button>
+                <button type="button" class="status-tab-btn" id="tabStatusEtp" onclick="app.setAbaStatus('etp_gerado')">
+                  <span class="tab-label">ETP Gerado</span>
+                  <span class="tab-count-badge badge-accent" id="badgeQtdEtp">0</span>
                 </button>
                 <button type="button" class="status-tab-btn" id="tabStatusCanceladas" onclick="app.setAbaStatus('canceladas')">
                   <span class="tab-label">Canceladas</span>
@@ -467,55 +518,76 @@
 
 
           <!-- ======================================================== -->
-          <!-- ETAPA 1: DO QUE VOCÊ PRECISA? (CARDS GRANDES E DIRETOS)  -->
+          <!-- ETAPA 1: O QUE VOCÊ PRECISA PARA REALIZAR SEU TRABALHO?   -->
           <!-- ======================================================== -->
           <div class="wizard-pane active" id="pane-passo-1">
-            <h3 class="pane-headline">Do que você precisa?</h3>
-            <p class="pane-sub">Selecione o que você precisa para trabalhar. Vamos identificar o modelo ideal para sua rotina:</p>
+            <h3 class="pane-headline">O que você precisa para realizar seu trabalho?</h3>
+            <p class="pane-sub">Conte o que você precisa para realizar seu trabalho. Vamos ajudar a identificar a melhor solução:</p>
 
             <div class="necessidade-grid">
-              <!-- COMPUTADOR (OPÇÃO PRINCIPAL) -->
+              <!-- COMPUTADOR (OPÇÃO PRINCIPAL QUE SEGUE O DIAGNÓSTICO) -->
               <div class="necessidade-card active" id="cardNecComputador" onclick="app.setTipoNecessidade('computador', this)">
                 <span class="nec-badge-top">✓ RECOMENDADO</span>
                 <div class="nec-icon">💻</div>
-                <div class="nec-title">Computador (Notebook ou Mesa)</div>
-                <div class="nec-desc">Para acessar sistemas, Diário de Classe, documentos e tarefas da sua unidade.</div>
+                <div class="nec-title">Preciso de um computador</div>
+                <div class="nec-desc">Notebook ou Computador de Mesa para minhas tarefas e rotina diária de trabalho.</div>
               </div>
 
               <!-- MONITOR -->
               <div class="necessidade-card" id="cardNecMonitor" onclick="app.setTipoNecessidade('monitor', this)">
                 <div class="nec-icon">🖥️</div>
-                <div class="nec-title">Monitor de Vídeo</div>
-                <div class="nec-desc">Tela avulsa ou tela adicional para trabalhar com mais conforto visual.</div>
+                <div class="nec-title">Preciso de um monitor</div>
+                <div class="nec-desc">Tela avulsa ou tela adicional para trabalhar com mais conforto e produtividade.</div>
               </div>
 
               <!-- IMPRESSORA -->
               <div class="necessidade-card" id="cardNecImpressora" onclick="app.setTipoNecessidade('impressora', this)">
                 <div class="nec-icon">🖨️</div>
-                <div class="nec-title">Impressora ou Acessórios</div>
-                <div class="nec-desc">Impressão de provas, relatórios e documentos pedagógicos.</div>
+                <div class="nec-title">Preciso de uma impressora</div>
+                <div class="nec-desc">Equipamento para impressão, cópia ou digitalização de documentos e relatórios.</div>
+              </div>
+
+              <!-- OUTRO EQUIPAMENTO -->
+              <div class="necessidade-card" id="cardNecOutro" onclick="app.setTipoNecessidade('outro', this)">
+                <div class="nec-icon">📱</div>
+                <div class="nec-title">Preciso de outro equipamento</div>
+                <div class="nec-desc">Nobreak, scanner, periféricos específicos ou equipamentos de rede da unidade.</div>
               </div>
 
               <!-- MANUTENÇÃO -->
               <div class="necessidade-card" id="cardNecManutencao" onclick="app.setTipoNecessidade('manutencao', this)">
                 <div class="nec-icon">🔧</div>
-                <div class="nec-title">Conserto de Máquina Quebrada</div>
-                <div class="nec-desc">O computador da escola estragou, não liga ou precisa de conserto técnico.</div>
+                <div class="nec-title">Preciso de manutenção</div>
+                <div class="nec-desc">O computador da sala estragou, não liga, está travando ou necessita de suporte técnico.</div>
+              </div>
+
+              <!-- SISTEMA / SOFTWARE -->
+              <div class="necessidade-card" id="cardNecSoftware" onclick="app.setTipoNecessidade('software', this)">
+                <div class="nec-icon">💿</div>
+                <div class="nec-title">Preciso de um sistema/software</div>
+                <div class="nec-desc">Instalação, licença ou liberação de acesso a um programa corporativo do município.</div>
+              </div>
+
+              <!-- AINDA NÃO SEI -->
+              <div class="necessidade-card" id="cardNecIndeciso" onclick="app.setTipoNecessidade('indeciso', this)">
+                <div class="nec-icon">❓</div>
+                <div class="nec-title">Ainda não sei exatamente</div>
+                <div class="nec-desc">Estou com dificuldades para trabalhar e preciso de apoio do TI para diagnosticar.</div>
               </div>
             </div>
 
-            <!-- AVISO CONTEXTUAL PARA ITENS NÃO COMPUTADOR -->
+            <!-- AVISO CONTEXTUAL PARA ITENS QUE DIRECIONAM OU COMPLEMENTAM O COMPUTADOR -->
             <div class="aviso-outra-necessidade" id="boxAvisoOutraNecessidade" style="display: none;">
               <div style="font-size: 1.8rem;">💡</div>
               <div>
                 <strong style="color: #60A5FA; font-size: 1.05rem;">Orientação da Diretoria de TIC:</strong>
                 <p id="txtAvisoOutraNecessidade" style="margin-top: 4px; font-size: 0.95rem;">
-                  Se o computador da sua sala estragou ou precisa de substituição, continuaremos o dimensionamento a seguir.
+                  Se a sua demanda envolve substituir uma máquina defeituosa ou estruturar o posto com computador, continuaremos o diagnóstico simples a seguir.
                 </p>
               </div>
             </div>
 
-            <!-- SOLICITANTE IDENTIFICADO (TEMPLATE GRANDE E CLARO) -->
+            <!-- SOLICITANTE IDENTIFICADO -->
             <div class="solicitante-banner-box">
               <div style="display: flex; align-items: center; gap: 14px;">
                 <span style="font-size: 1.6rem;">📍</span>
@@ -530,13 +602,13 @@
 
 
           <!-- ======================================================== -->
-          <!-- ETAPA 2: ENTENDER A ROTINA (TEXTOS RESUMIDOS E GRANDES)  -->
+          <!-- ETAPA 2: COMO VOCÊ UTILIZA O COMPUTADOR NO SEU TRABALHO? -->
           <!-- ======================================================== -->
           <div class="wizard-pane" id="pane-passo-2">
-            <h3 class="pane-headline">Como você utiliza o computador?</h3>
-            <p class="pane-sub">Escolha a categoria que melhor representa sua rotina de trabalho:</p>
+            <h3 class="pane-headline">Como você utiliza o computador no seu trabalho?</h3>
+            <p class="pane-sub">Conte um pouco sobre sua rotina de trabalho para identificarmos o perfil mais adequado:</p>
 
-            <!-- CATEGORIAS DE ROTINA RESUMIDAS E GRANDES -->
+            <!-- CATEGORIAS DE ROTINA (ENTENDENDO A NECESSIDADE, NÃO O HARDWARE) -->
             <div class="nivel-demanda-grid">
 
               <!-- NÍVEL 1: GESTÃO ESCOLAR E ROTINA ADMINISTRATIVA -->
@@ -547,11 +619,11 @@
                   <div class="nivel-header-row">
                     <span class="nivel-title">Gestão Escolar & Rotina Administrativa</span>
                     <span class="rotina-banner-badge" style="background: rgba(52, 211, 153, 0.2); color: var(--dark-accent);">
-                      ✓ RECOMENDADO PARA ESCOLAS
+                      ✓ RECOMENDADO PARA ROTINA PÚBLICA
                     </span>
                   </div>
                   <p class="nivel-desc">
-                    Diário de Classe, Word/textos e provas, planilhas de notas, SGPe, internet e reuniões online.
+                    Diário de Classe, Word/Writer para textos e provas, planilhas de notas, SGPe, internet, e-mails e reuniões online.
                   </p>
                 </div>
               </div>
@@ -568,7 +640,7 @@
                     </span>
                   </div>
                   <p class="nivel-desc">
-                    Grandes planilhas fiscais com dezenas de milhares de linhas, relatórios contábeis e Power BI.
+                    Grandes planilhas fiscais/contábeis com grande volume de dados, cruzamento de cadastros e Power BI.
                   </p>
                 </div>
               </div>
@@ -585,49 +657,49 @@
                     </span>
                   </div>
                   <p class="nivel-desc">
-                    Desenvolvimento de plantas de engenharia civil, topografia e modelagem 3D pesada.
+                    Desenvolvimento de projetos arquitetônicos, plantas de engenharia civil, topografia e modelagem 3D pesada.
                   </p>
                   <div class="nivel-alert-tce" id="alertaNivel3Escola">
-                    🚨 <strong>Alerta TCE/SC:</strong> Equipamento reservado a engenheiros e arquitetos da SEPLAN.
+                    🚨 <strong>Critério TCE/SC:</strong> Perfil reservado exclusivamente a engenheiros e arquitetos da SEPLAN.
                   </div>
                 </div>
               </div>
 
             </div>
 
-            <!-- PERGUNTAS COMPLEMENTARES OBJETIVAS (TEMPLATES GRANDES) -->
+            <!-- PERGUNTAS COMPLEMENTARES SOBRE A ROTINA (SIMPLES E DIRETAS) -->
             <div class="perguntas-complementares-box">
               <div class="perguntas-header-bar">
                 <span class="perguntas-header-title">
-                  <span>📋</span> Perguntas Sobre Sua Rotina
+                  <span>📋</span> Perguntas Sobre Sua Rotina de Trabalho
                 </span>
-                <span class="tag-etapa-indicador">DIAGNÓSTICO RÁPIDO</span>
+                <span class="tag-etapa-indicador">DIAGNÓSTICO ORIENTADO</span>
               </div>
 
-              <!-- PERGUNTA 1: MOBILIDADE (DEFINE NOTEBOOK VS DESKTOP) -->
+              <!-- 1. MOBILIDADE -->
               <div class="pergunta-bloco">
-                <span class="pergunta-titulo">1. Você precisa transportar o computador entre salas ou reuniões?</span>
+                <span class="pergunta-titulo">1. Você precisa transportar o equipamento para reuniões ou outras salas?</span>
                 <div class="pergunta-cards-grid">
                   <div class="pergunta-card-opt active" id="cardMobSim" onclick="app.setMobilidade(true, this)">
                     <div class="opt-radio-circle"></div>
                     <div class="opt-text-wrap">
                       <strong>🚗 Sim, preciso de mobilidade (Notebook)</strong>
-                      <small>Para levar a reuniões pedagógicas, conselho de classe e salas de aula</small>
+                      <small>Para levar a reuniões pedagógicas, conselhos de classe, treinamentos e salas</small>
                     </div>
                   </div>
                   <div class="pergunta-card-opt" id="cardMobNao" onclick="app.setMobilidade(false, this)">
                     <div class="opt-radio-circle"></div>
                     <div class="opt-text-wrap">
                       <strong>🏢 Não, trabalho sempre fixo na mesa (Desktop)</strong>
-                      <small>O computador fica exclusivamente na secretaria ou gabinete escolar</small>
+                      <small>O computador fica exclusivamente no posto de trabalho ou gabinete</small>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- PERGUNTA 2: PROGRAMAS UTILIZADOS (CHIPS GRANDES) -->
+              <!-- 2. PROGRAMAS UTILIZADOS -->
               <div class="pergunta-bloco">
-                <span class="pergunta-titulo">2. Quais ferramentas fazem parte do seu dia a dia?</span>
+                <span class="pergunta-titulo">2. Quais ferramentas fazem parte do seu trabalho diário?</span>
                 <div class="chips-softwares-grid">
                   <button type="button" class="chip-sistema-btn active" onclick="app.toggleSoftwareChip('Diário de Classe & Notas', this)">
                     <span>🎓</span> Diário de Classe & Notas
@@ -644,32 +716,80 @@
                   <button type="button" class="chip-sistema-btn active" onclick="app.toggleSoftwareChip('Reuniões Online (Meet/Teams)', this)">
                     <span>📽️</span> Reuniões Online (Meet/Teams)
                   </button>
+                  <button type="button" class="chip-sistema-btn" onclick="app.toggleSoftwareChip('Power BI / Dashboards', this)">
+                    <span>📈</span> Power BI / Dashboards
+                  </button>
+                  <button type="button" class="chip-sistema-btn" onclick="app.toggleSoftwareChip('AutoCAD / Plantas', this)">
+                    <span>📐</span> AutoCAD / Plantas
+                  </button>
                 </div>
               </div>
 
-              <!-- PERGUNTA 3: SITUAÇÃO ATUAL DO EQUIPAMENTO -->
+              <!-- 3. USO SIMULTÂNEO / MULTITAREFAS -->
               <div class="pergunta-bloco">
-                <span class="pergunta-titulo">3. Qual a situação do computador atual da sua sala?</span>
+                <span class="pergunta-titulo">3. Você costuma utilizar vários sistemas abertos ao mesmo tempo com frequência?</span>
+                <div class="pergunta-cards-grid">
+                  <div class="pergunta-card-opt active" id="cardMultiSim" onclick="app.setMultitarefas(true, this)">
+                    <div class="opt-radio-circle"></div>
+                    <div class="opt-text-wrap">
+                      <strong>⚡ Sim, alterno entre múltiplos sistemas simultaneamente</strong>
+                      <small>Navegadores com várias abas, sistema escolar, planilhas e reuniões ao mesmo tempo</small>
+                    </div>
+                  </div>
+                  <div class="pergunta-card-opt" id="cardMultiNao" onclick="app.setMultitarefas(false, this)">
+                    <div class="opt-radio-circle"></div>
+                    <div class="opt-text-wrap">
+                      <strong>🌱 Não, utilizo um ou dois programas por vez</strong>
+                      <small>Minha rotina é linear e focada em uma tarefa por vez</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4. PLANILHAS GRANDES OU DADOS PESADOS -->
+              <div class="pergunta-bloco">
+                <span class="pergunta-titulo">4. Você trabalha com planilhas grandes ou grande volume de dados?</span>
+                <div class="pergunta-cards-grid">
+                  <div class="pergunta-card-opt" id="cardPlanilhasSim" onclick="app.setPlanilhasGrandes(true, this)">
+                    <div class="opt-radio-circle"></div>
+                    <div class="opt-text-wrap">
+                      <strong>📊 Sim, planilhas pesadas com milhares de linhas</strong>
+                      <small>Controles fiscais complexos, orçamentos municipais ou grandes tabelas</small>
+                    </div>
+                  </div>
+                  <div class="pergunta-card-opt active" id="cardPlanilhasNao" onclick="app.setPlanilhasGrandes(false, this)">
+                    <div class="opt-radio-circle"></div>
+                    <div class="opt-text-wrap">
+                      <strong>📄 Não, planilhas comuns de notas e controles simples</strong>
+                      <small>Tabelas de até poucas centenas de linhas para rotina normal</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 5. SITUAÇÃO DO EQUIPAMENTO ATUAL -->
+              <div class="pergunta-bloco">
+                <span class="pergunta-titulo">5. Qual é a situação do computador atual da sua sala?</span>
                 <div class="pergunta-cards-grid">
                   <div class="pergunta-card-opt active" id="cardSitEstragou" onclick="app.setSituacaoAtual('estragou', this)">
                     <div class="opt-radio-circle"></div>
                     <div class="opt-text-wrap">
                       <strong>🔥 O computador anterior estragou / não liga</strong>
-                      <small>Preciso de substituição urgente para poder trabalhar</small>
+                      <small>Preciso de substituição para retomar as atividades da unidade</small>
                     </div>
                   </div>
                   <div class="pergunta-card-opt" id="cardSitLento" onclick="app.setSituacaoAtual('lento', this)">
                     <div class="opt-radio-circle"></div>
                     <div class="opt-text-wrap">
-                      <strong>⏳ A máquina atual trava muito</strong>
-                      <small>Computador antigo e lento que prejudica o atendimento</small>
+                      <strong>⏳ A máquina atual trava muito / é muito lenta</strong>
+                      <small>Equipamento antigo que atrasa o atendimento e gera perda de tempo</small>
                     </div>
                   </div>
                   <div class="pergunta-card-opt" id="cardSitNovo" onclick="app.setSituacaoAtual('novo', this)">
                     <div class="opt-radio-circle"></div>
                     <div class="opt-text-wrap">
                       <strong>🆕 Novo posto de trabalho</strong>
-                      <small>Não possuo computador disponível na minha mesa</small>
+                      <small>Não possuo computador disponível para minha função na unidade</small>
                     </div>
                   </div>
                 </div>
@@ -680,11 +800,11 @@
 
 
           <!-- ======================================================== -->
-          <!-- ETAPA 3: RECURSOS EXISTENTES (CARDS GRANDES E CLAROS)    -->
+          <!-- ETAPA 3: O QUE VOCÊ JÁ POSSUI NO SEU POSTO DE TRABALHO?   -->
           <!-- ======================================================== -->
           <div class="wizard-pane" id="pane-passo-3">
-            <h3 class="pane-headline">O que você já possui na sua mesa?</h3>
-            <p class="pane-sub">Marque o que já está funcionando para solicitar apenas o que realmente falta:</p>
+            <h3 class="pane-headline">O que você já possui no seu posto de trabalho?</h3>
+            <p class="pane-sub">Marque o que já está funcionando para solicitar apenas o que realmente falta (evita compras desnecessárias):</p>
 
             <div class="recursos-mesa-grid">
               <!-- MONITOR PRINCIPAL -->
@@ -748,11 +868,11 @@
               </div>
             </div>
 
-            <!-- QUANTIDADE DE EQUIPAMENTOS (BARRAS GRANDES) -->
+            <!-- QUANTIDADE DE POSTOS -->
             <div class="quantidade-box-grande">
               <div>
-                <strong class="qtd-box-titulo">Quantas pessoas no seu setor precisam dessa máquina?</strong>
-                <p class="qtd-box-sub">Selecione a quantidade de postos necessários:</p>
+                <strong class="qtd-box-titulo">Quantas pessoas no seu setor precisam dessa solução?</strong>
+                <p class="qtd-box-sub">Selecione a quantidade de postos de trabalho necessários:</p>
               </div>
               <div class="quick-qty-row">
                 <button type="button" class="qty-pill active" onclick="app.setQtd(1, this)">1 equipamento</button>
@@ -765,44 +885,54 @@
 
 
           <!-- ======================================================== -->
-          <!-- ETAPA 4: DIAGNÓSTICO & RECOMENDAÇÃO (TEMPLATES GRANDES)  -->
+          <!-- ETAPA 4: NECESSIDADE IDENTIFICADA & RECOMENDAÇÃO TÉCNICA -->
           <!-- ======================================================== -->
           <div class="wizard-pane" id="pane-passo-4">
-            <h3 class="pane-headline">Diagnóstico da sua Necessidade</h3>
-            <p class="pane-sub">O sistema analisou sua rotina e gerou uma recomendação preliminar para validação do TI:</p>
+            <h3 class="pane-headline">Necessidade Identificada</h3>
+            <p class="pane-sub">Com base nas respostas sobre a sua rotina, o sistema estruturou a seguinte recomendação preliminar:</p>
 
             <div class="diagnostico-container">
-              <!-- BLOCO A: RECOMENDAÇÃO EM DESTAQUE GRANDE -->
+              <!-- CARD PRINCIPAL DE IDENTIFICAÇÃO E RECOMENDAÇÃO -->
               <div class="card-recomendacao-destaque">
-                <span class="diagnostico-tag-topo">EQUIPAMENTO RECOMENDADO</span>
-                <div class="rec-destaque-header">
-                  <div class="rec-destaque-icon" id="recDestaqueIcon">💻</div>
+                
+                <!-- ALERTA DE RECOMENDAÇÃO PRELIMINAR (OBRIGATÓRIO) -->
+                <div class="banner-alerta-preliminar">
+                  <span class="alerta-icon">⚠️</span>
                   <div>
-                    <h3 class="rec-destaque-titulo" id="recDestaqueTitulo">Notebook Corporativo Portátil</h3>
-                    <p class="rec-destaque-sub" id="recDestaqueSub">Ideal para rotina na escola com mobilidade para reuniões pedagógicas.</p>
+                    <strong>Recomendação técnica preliminar — aguardando validação do TI</strong>
+                    <p>Esta indicação foi gerada automaticamente pelo diagnóstico de rotina e será formalmente revisada e validada pela equipe técnica da Diretoria de TIC.</p>
                   </div>
                 </div>
 
-                <!-- POR QUE RECOMENDAMOS ISSO? (TEXTO CLARO E DIRETO) -->
+                <div class="rec-destaque-header" style="margin-top: 14px;">
+                  <div class="rec-destaque-icon" id="recDestaqueIcon">💻</div>
+                  <div>
+                    <span class="label-muted-small">Perfil Identificado:</span>
+                    <h3 class="rec-destaque-titulo" id="recDestaqueTitulo">Notebook Corporativo Portátil</h3>
+                    <p class="rec-destaque-sub" id="recDestaqueSub">Ideal para rotina administrativa/educacional com mobilidade para reuniões pedagógicas.</p>
+                  </div>
+                </div>
+
+                <!-- POR QUE ESSA SOLUÇÃO FOI IDENTIFICADA? -->
                 <div class="por-que-recomendamos-box">
-                  <strong>Por que recomendamos este equipamento?</strong>
+                  <strong>Entendimento da sua necessidade:</strong>
                   <p id="txtPorQueRecomendamos">
-                    Você informou que realiza atividades de gestão escolar e precisa de mobilidade para conselhos de classe e reuniões. O Notebook Corporativo atende perfeitamente sua rotina, com bateria duradoura e início rápido.
+                    Você declarou necessidade de mobilidade entre salas e uso de sistemas corporativos/educacionais diários. A solução atende a sua rotina sem desperdício de recursos públicos.
                   </p>
                 </div>
 
-                <!-- 3 MOTIVOS OBJETIVOS -->
+                <!-- RESUMO OBJETIVO -->
                 <div class="bullets-motivos-box">
-                  <h5>Resumo da sua necessidade:</h5>
+                  <h5>Critérios identificados na sua rotina:</h5>
                   <div class="bullets-list" id="listaMotivosNecessidade">
                     <!-- Preenchido dinamicamente via JS -->
                   </div>
                 </div>
 
-                <!-- ESPECIFICAÇÃO TÉCNICA SUGERIDA RESUMIDA PARA O TI -->
+                <!-- ESPECIFICAÇÃO PRELIMINAR PARA O TI -->
                 <div class="box-specs-tecnicas-ti">
                   <div class="specs-ti-header">
-                    <h4><span>⚙️</span> Perfil Técnico Sugerido para a Diretoria de TIC</h4>
+                    <h4><span>⚙️</span> Recomendação Técnica Preliminar para Análise do TI</h4>
                     <span class="specs-ti-badge">SUGESTÃO PRELIMINAR</span>
                   </div>
                   <div class="specs-ti-grid">
@@ -824,26 +954,22 @@
                     </div>
                     <div class="spec-ti-item">
                       <small>Garantia Homologada</small>
-                      <strong id="specTiGarantia">36 meses presencial na escola</strong>
+                      <strong id="specTiGarantia">36 meses presencial no local</strong>
                     </div>
                   </div>
-
-                  <div class="alerta-validacao-ti">
-                    <span>🛡️</span>
-                    <span>Esta recomendação é preliminar e será validada e homologada tecnicamente pelo setor de TI da Prefeitura.</span>
-                  </div>
                 </div>
+
               </div>
             </div>
           </div>
 
 
           <!-- ======================================================== -->
-          <!-- ETAPA 5: CONFIRMAR & ENVIAR (RESUMO EXECUTIVO GRANDE)    -->
+          <!-- ETAPA 5: CONFIRA SUA SOLICITAÇÃO & ENVIAR PARA O TI       -->
           <!-- ======================================================== -->
           <div class="wizard-pane" id="pane-passo-5">
-            <h3 class="pane-headline">Tudo pronto! Confira sua necessidade</h3>
-            <p class="pane-sub">Revise os dados antes de enviar a solicitação para análise do TI:</p>
+            <h3 class="pane-headline">Confira sua solicitação</h3>
+            <p class="pane-sub">Revise os dados antes de enviar para análise e homologação da Diretoria de TIC:</p>
 
             <div class="resumo-executivo-box">
               <div class="resumo-section-grid">
@@ -853,28 +979,28 @@
                   <p id="resumoUnidade">Escolas Municipais (SME Lages)</p>
                 </div>
                 <div class="resumo-card-info">
-                  <small>Equipamento Recomendado</small>
+                  <small>Necessidade & Equipamento</small>
                   <strong id="resumoPerfilNome" style="color: var(--dark-accent);">Notebook Corporativo Portátil</strong>
                   <p id="resumoQtdText">1 equipamento solicitado</p>
                 </div>
                 <div class="resumo-card-info">
                   <small>O que Você Já Possui na Mesa</small>
                   <strong id="resumoRecursosExistentes">Monitor • Teclado • Mouse</strong>
-                  <p style="color: var(--dark-accent);">✓ Aproveitamento inteligente</p>
+                  <p style="color: var(--dark-accent);">✓ Aproveitamento de periféricos</p>
                 </div>
                 <div class="resumo-card-info">
-                  <small>O que Você Vai Receber</small>
-                  <strong id="resumoRecursosSolicitados">1x Notebook Corporativo</strong>
-                  <p>Com bateria, carregador e webcam</p>
+                  <small>Encaminhamento</small>
+                  <strong style="color: #60A5FA;">Análise Técnica da Diretoria de TIC</strong>
+                  <p>Geração automática do DOD Oficial (SC)</p>
                 </div>
               </div>
 
-              <!-- JUSTIFICATIVA TÉCNICA GERADA (DIRETA E OBJETIVA) -->
+              <!-- JUSTIFICATIVA TÉCNICA GERADA -->
               <div class="justificativa-gerada-box">
-                <label>Justificativa Gerada Automaticamente:</label>
+                <label>Justificativa Gerada Automaticamente (Art. 18 da Lei Federal nº 14.133/2021):</label>
                 <textarea id="txtJustificativa" class="justificativa-textarea" rows="3"></textarea>
                 <small style="color: var(--dark-muted); font-size: 0.85rem; display: block; margin-top: 6px;">
-                  * Fundamentação legal gerada automaticamente em conformidade com o Art. 18 da Lei Federal nº 14.133/2021.
+                  * O Documento de Formalização da Demanda (DOD) será emitido automaticamente e enviado para triagem do técnico de TI responsável.
                 </small>
               </div>
             </div>
@@ -1181,6 +1307,306 @@
       </div>
       <div style="text-align: right; margin-top: 18px;">
         <button type="button" class="btn-ghost" onclick="app.fecharModalVerCancelamento()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL: PAINEL DE ANÁLISE TÉCNICA DA DEMANDA (TI / ADMIN)  -->
+  <!-- ========================================================= -->
+  <div class="modal-overlay" id="modalAnaliseTi">
+    <div class="modal-content modal-drawer-lg">
+      
+      <!-- TOPO DO PAINEL DE ANÁLISE -->
+      <div class="drawer-header-bar">
+        <div class="drawer-header-left">
+          <div class="drawer-badge-ti">🛡️ DIRETORIA DE TIC • ANÁLISE TÉCNICA</div>
+          <div class="drawer-title-row">
+            <h2 class="drawer-title" id="analiseTiTitulo">Análise da Demanda</h2>
+            <span class="drawer-protocolo" id="analiseTiProtocolo">REQ-2026-XXXX</span>
+            <span class="badge-status-chip status-analise" id="analiseTiStatusBadge">Em análise pelo TI</span>
+          </div>
+          <p class="drawer-subtitle" id="analiseTiSubtitulo">
+            Solicitante: Profa. Angelita de Souza • Órgão: Secretaria Municipal de Educação
+          </p>
+        </div>
+
+        <div class="drawer-header-right">
+          <button type="button" class="btn-ghost" onclick="app.fecharModalAnaliseTi()" title="Fechar painel">✕</button>
+        </div>
+      </div>
+
+      <!-- ABAS INTERNAS DO PAINEL DE ANÁLISE -->
+      <div class="drawer-tabs-nav">
+        <button type="button" class="drawer-tab-btn active" id="tabAnaliseDiagnostico" onclick="app.setAbaAnaliseTi('diagnostico')">
+          <span class="tab-icon">📋</span>
+          <span>Diagnóstico Original do Servidor</span>
+        </button>
+        <button type="button" class="drawer-tab-btn" id="tabAnaliseInterpretacao" onclick="app.setAbaAnaliseTi('interpretacao')">
+          <span class="tab-icon">🧠</span>
+          <span>Interpretação & Recomendação</span>
+        </button>
+        <button type="button" class="drawer-tab-btn" id="tabAnaliseDod" onclick="app.setAbaAnaliseTi('dod')">
+          <span class="tab-icon">📄</span>
+          <span>DOD Oficial (SC) com Anexos</span>
+        </button>
+        <button type="button" class="drawer-tab-btn" id="tabAnaliseHistorico" onclick="app.setAbaAnaliseTi('historico')">
+          <span class="tab-icon">🕒</span>
+          <span>Histórico & Rastreabilidade</span>
+        </button>
+      </div>
+
+      <!-- CORPO COM ABAS -->
+      <div class="drawer-body-content">
+        
+        <!-- ABA 1: DIAGNÓSTICO ORIGINAL DO SERVIDOR -->
+        <div class="drawer-tab-pane active" id="paneAnaliseDiagnostico">
+          <div class="analise-cards-grid">
+            
+            <!-- RESPOSTAS DA ROTINA -->
+            <div class="analise-info-card">
+              <div class="info-card-header">
+                <span>💬</span> O que o Servidor Informou
+              </div>
+              <div class="info-card-body" id="analiseCorpoRespostasOriginais">
+                <!-- Preenchido via JS -->
+              </div>
+            </div>
+
+            <!-- RECURSOS DA MESA E APROVEITAMENTO -->
+            <div class="analise-info-card">
+              <div class="info-card-header">
+                <span>🖥️</span> Recursos Declarados no Posto
+              </div>
+              <div class="info-card-body" id="analiseCorpoRecursosPosto">
+                <!-- Preenchido via JS -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ABA 2: INTERPRETAÇÃO & RECOMENDAÇÃO TÉCNICA -->
+        <div class="drawer-tab-pane" id="paneAnaliseInterpretacao">
+          <div class="analise-interpretacao-box" id="analiseCorpoInterpretacao">
+            <!-- Preenchido via JS -->
+          </div>
+        </div>
+
+        <!-- ABA 3: DOD OFICIAL COM ANEXOS I E II -->
+        <div class="drawer-tab-pane" id="paneAnaliseDod">
+          <div class="dod-preview-wrapper" id="analiseCorpoDod">
+            <!-- Preenchido via JS -->
+          </div>
+        </div>
+
+        <!-- ABA 4: HISTÓRICO & RASTREABILIDADE (TRILHA DE AUDITORIA) -->
+        <div class="drawer-tab-pane" id="paneAnaliseHistorico">
+          <div class="historico-timeline-container">
+            <div class="timeline-header-info">
+              <h4 style="margin: 0; color: #FFFFFF; font-size: 1.05rem;">Trilha de Auditoria & Registro Cronológico</h4>
+              <p style="margin: 4px 0 0 0; color: var(--dark-muted); font-size: 0.82rem;">
+                Registro formal de todas as ações de criação, validação, solicitações de ajuste e pareceres emitidos.
+              </p>
+            </div>
+            <div class="audit-timeline-track" id="analiseCorpoHistorico">
+              <!-- Preenchido via JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BARRA DE AÇÕES DO TI (FIXA NO RODAPÉ) -->
+      <div class="drawer-actions-footer">
+        <div class="actions-footer-left">
+          <span class="footer-status-label" id="analiseTiFooterLabel">Ações disponíveis para a equipe técnica de TIC:</span>
+        </div>
+
+        <div class="actions-footer-right" id="analiseTiBotoesAcao">
+          <button type="button" class="btn-ghost" onclick="app.fecharModalAnaliseTi()">
+            Fechar
+          </button>
+          <button type="button" class="btn-action-warn" id="btnAcaoSolicitarAjustes" onclick="app.abrirModalAjustes(app.protocoloAnaliseAtual)">
+            ⚠️ Solicitar Ajustes
+          </button>
+          <button type="button" class="btn-action-danger" id="btnAcaoReprovar" onclick="app.abrirModalReprovar(app.protocoloAnaliseAtual)">
+            ✕ Reprovar Demanda
+          </button>
+          <button type="button" class="btn-action-success" id="btnAcaoValidarDod" onclick="app.validarDodTi(app.protocoloAnaliseAtual)">
+            ✓ Validar DOD
+          </button>
+          <!-- BOTÃO GERAR ETP: ATIVO APENAS APÓS VALIDAÇÃO DO DOD -->
+          <button type="button" class="btn-action-etp" id="btnAcaoGerarEtp" onclick="app.gerarEtpDocumento(app.protocoloAnaliseAtual)">
+            <span id="btnGerarEtpIcon">🔒</span>
+            <span id="btnGerarEtpText">Gerar ETP</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- MODAL: ESTUDO TÉCNICO PRELIMINAR (ETP COMPLETO - 12 SEÇÕES)-->
+  <!-- ========================================================= -->
+  <div class="modal-overlay" id="modalEtpCompleto">
+    <div class="modal-content modal-drawer-xl">
+      
+      <!-- BARRA SUPERIOR DO ETP -->
+      <div class="doc-top-bar no-print">
+        <div>
+          <div class="drawer-badge-ti" style="display: inline-block; margin-bottom: 4px;">ESTUDO TÉCNICO PRELIMINAR • LEI FEDERAL Nº 14.133/2021</div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: #0F172A; margin: 0;">
+            Estudo Técnico Preliminar da Contratação (ETP)
+          </h3>
+          <p style="font-size: 0.82rem; color: #64748B; margin: 2px 0 0 0;">
+            Avaliação comparativa de alternativas, viabilidade técnica/econômica e dimensionamento de hardware TIC.
+          </p>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button type="button" class="btn-ghost" style="color: #0F172A; border-color: #CBD5E1;" id="btnToggleEdicaoEtp" onclick="app.toggleEdicaoEtp()">
+            ✏️ Editar Seções (TI)
+          </button>
+          <button type="button" class="btn-primary-neon" style="color: #0A0E14; padding: 7px 18px; font-size: 0.88rem; font-weight: 700;" onclick="app.imprimirEtp()">
+            🖨️ Imprimir ETP Oficial
+          </button>
+          <button type="button" class="btn-ghost" style="color: #0F172A;" onclick="app.fecharModalEtpCompleto()">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- CORPO DO ETP PREENCHIDO COM 12 SEÇÕES -->
+      <div id="corpoEtpCompleto">
+        <!-- Preenchido via app.renderizarEtpCompleto() -->
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- MODAL: SOLICITAR AJUSTES (TI &rarr; SERVIDOR)             -->
+  <!-- ========================================================= -->
+  <div class="modal-overlay" id="modalSolicitarAjustesTi">
+    <div class="modal-content" style="max-width: 500px; padding: 24px; background: #111822; border: 1px solid var(--dark-border); border-radius: var(--radius-lg); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <span style="font-size: 1.6rem;">⚠️</span>
+        <div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Solicitar Ajustes na Demanda</h3>
+          <span id="labelProtocoloAjustes" style="font-family: monospace; font-size: 0.82rem; color: #FBBF24; font-weight: 700;">REQ-2026-XXXX</span>
+        </div>
+      </div>
+
+      <p style="font-size: 0.84rem; color: var(--dark-muted); line-height: 1.45; margin-bottom: 14px;">
+        Descreva os apontamentos técnicos ou esclarecimentos que o servidor deve complementar no pedido:
+      </p>
+
+      <div class="field-group">
+        <label class="field-label" style="color: #F1F5F9; font-weight: 700;">Orientações do TI (Obrigatório):</label>
+        <textarea id="txtNotasAjustesTi" class="dark-input" rows="4" placeholder="Ex: Favor esclarecer se há monitores disponíveis na unidade para reaproveitamento..." style="resize: vertical;"></textarea>
+      </div>
+
+      <!-- Sugestões rápidas para o técnico de TI -->
+      <div style="margin-top: 8px;">
+        <span style="font-size: 0.72rem; color: var(--dark-muted); text-transform: uppercase; font-weight: 700;">Sugestões de Apontamento:</span>
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px;">
+          <span class="demo-pill-btn" onclick="app.preencherNotaAjuste('Favor confirmar se há monitores e teclados em funcionamento na unidade que possam ser reaproveitados.')">
+            🖥️ Verificar reaproveitamento de monitores/periféricos
+          </span>
+          <span class="demo-pill-btn" onclick="app.preencherNotaAjuste('A quantidade solicitada requer confirmação do número de servidores em exercício na unidade.')">
+            👥 Confirmar número de servidores no posto
+          </span>
+          <span class="demo-pill-btn" onclick="app.preencherNotaAjuste('Para o perfil selecionado, favor detalhar quais sistemas pesados justificam a demanda.')">
+            ⚙️ Justificar necessidade de hardware superior
+          </span>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button type="button" class="btn-ghost" onclick="app.fecharModalAjustes()">Cancelar</button>
+        <button type="button" class="btn-primary-neon" style="background: #F59E0B; border-color: #F59E0B; color: #000000; font-weight: 700;" onclick="app.confirmarSolicitarAjustes()">
+          Enviar Apontamento ao Servidor &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- MODAL: REPROVAR DEMANDA (TI)                              -->
+  <!-- ========================================================= -->
+  <div class="modal-overlay" id="modalReprovarTi">
+    <div class="modal-content" style="max-width: 500px; padding: 24px; background: #111822; border: 1px solid var(--dark-border); border-radius: var(--radius-lg); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(239,68,68,0.15); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+          🚫
+        </div>
+        <div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Reprovar Demanda</h3>
+          <span id="labelProtocoloReprovar" style="font-family: monospace; font-size: 0.82rem; color: #F87171; font-weight: 700;">REQ-2026-XXXX</span>
+        </div>
+      </div>
+
+      <p style="font-size: 0.84rem; color: var(--dark-muted); line-height: 1.45; margin-bottom: 14px;">
+        A reprovação encerra o processo no TI. É obrigatório registrar a justificativa técnica que fundamenta a recusa:
+      </p>
+
+      <div class="field-group">
+        <label class="field-label" style="color: #F1F5F9; font-weight: 700;">Justificativa Técnica da Reprovação (Obrigatória):</label>
+        <textarea id="txtJustificativaReprovacao" class="dark-input" rows="4" placeholder="Ex: Demanda indeferida por incompatibilidade com as diretrizes do PCA de TIC..." style="resize: vertical;"></textarea>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px;">
+        <span class="demo-pill-btn" onclick="app.preencherJustificativaReprovacao('Existe parque computacional disponível para remanejamento imediato na unidade, sem necessidade de nova aquisição.')">
+          📦 Máquinas disponíveis para remanejamento interno
+        </span>
+        <span class="demo-pill-btn" onclick="app.preencherJustificativaReprovacao('O equipamento atual da unidade é plenamente compatível e necessita apenas de manutenção preventiva.')">
+          🔧 Equipamento atual comporta manutenção/recuperação
+        </span>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button type="button" class="btn-ghost" onclick="app.fecharModalReprovar()">Cancelar</button>
+        <button type="button" class="btn-primary-neon" style="background: #EF4444; border-color: #EF4444; color: #FFFFFF;" onclick="app.confirmarReprovacao()">
+          Confirmar Reprovação ✕
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- MODAL: RESPONDER AJUSTES (SERVIDOR &rarr; TI)             -->
+  <!-- ========================================================= -->
+  <div class="modal-overlay" id="modalResponderAjustes">
+    <div class="modal-content" style="max-width: 520px; padding: 24px; background: #111822; border: 1px solid var(--dark-border); border-radius: var(--radius-lg); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <span style="font-size: 1.5rem;">📝</span>
+        <div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Responder Apontamentos do TI</h3>
+          <span id="labelProtocoloResponderAjustes" style="font-family: monospace; font-size: 0.82rem; color: var(--dark-accent); font-weight: 700;">REQ-2026-XXXX</span>
+        </div>
+      </div>
+
+      <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px;">
+        <small style="font-size: 0.72rem; text-transform: uppercase; color: #FBBF24; font-weight: 700;">Apontamento do TI:</small>
+        <p id="txtApontamentoTiExibicao" style="font-size: 0.88rem; color: #F1F5F9; margin-top: 4px; line-height: 1.4;"></p>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" style="color: #F1F5F9; font-weight: 700;">Sua Resposta / Esclarecimentos:</label>
+        <textarea id="txtRespostaAjusteServidor" class="dark-input" rows="4" placeholder="Ex: Confirmamos que na unidade dispomos de monitor e teclado funcionando..." style="resize: vertical;"></textarea>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+        <button type="button" class="btn-ghost" onclick="app.fecharModalResponderAjustes()">Voltar</button>
+        <button type="button" class="btn-primary-neon" onclick="app.confirmarRespostaAjustes()">
+          Reenviar Demanda ao TI &rarr;
+        </button>
       </div>
     </div>
   </div>

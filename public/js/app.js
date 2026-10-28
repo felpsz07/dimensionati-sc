@@ -516,7 +516,7 @@ const app = {
   },
 
   // ==========================================
-  // LISTAGEM DE LICITAÇÕES (FILTRADA POR USUÁRIO)
+  // LISTAGEM DE LICITAÇÕES & CARDS OPERACIONAIS DO TI
   // ==========================================
   async carregarDemandas() {
     try {
@@ -528,9 +528,46 @@ const app = {
 
       const res = await fetch(url);
       this.demandasCarregadas = await res.json();
+      await this.carregarEstatisticasTi();
       this.filtrarTabela();
     } catch (e) {
       console.error(e);
+    }
+  },
+
+  async carregarEstatisticasTi() {
+    try {
+      const res = await fetch('/api/estatisticas');
+      const stats = await res.json();
+
+      const elAg = document.getElementById('metricAguardandoAnalise');
+      const elAj = document.getElementById('metricAjustes');
+      const elVal = document.getElementById('metricValidados');
+      const elEtp = document.getElementById('metricEtps');
+      const elCanc = document.getElementById('metricCanceladas');
+
+      if (elAg) elAg.innerText = stats.aguardandoAnalise || 0;
+      if (elAj) elAj.innerText = stats.ajustesSolicitados || 0;
+      if (elVal) elVal.innerText = stats.dodsValidados || 0;
+      if (elEtp) elEtp.innerText = stats.etpsGerados || 0;
+      if (elCanc) elCanc.innerText = (stats.reprovados || 0) + (stats.canceladas || 0);
+
+      // Atualiza badges das abas
+      const bAg = document.getElementById('badgeQtdAguardando');
+      const bAj = document.getElementById('badgeQtdAjustes');
+      const bVal = document.getElementById('badgeQtdValidados');
+      const bEtp = document.getElementById('badgeQtdEtp');
+      const bCancTab = document.getElementById('badgeQtdCanceladas');
+      const bTodas = document.getElementById('badgeQtdTodas');
+
+      if (bAg) bAg.innerText = stats.aguardandoAnalise || 0;
+      if (bAj) bAj.innerText = stats.ajustesSolicitados || 0;
+      if (bVal) bVal.innerText = stats.dodsValidados || 0;
+      if (bEtp) bEtp.innerText = stats.etpsGerados || 0;
+      if (bCancTab) bCancTab.innerText = (stats.reprovados || 0) + (stats.canceladas || 0);
+      if (bTodas) bTodas.innerText = stats.totalDemandas || 0;
+    } catch (e) {
+      console.error('Erro ao carregar estatísticas do TI:', e);
     }
   },
 
@@ -540,13 +577,17 @@ const app = {
     this.abaStatusAtual = aba;
     document.querySelectorAll('.status-tab-btn').forEach(btn => btn.classList.remove('active'));
 
-    if (aba === 'transmitidas') {
-      document.getElementById('tabStatusTransmitidas')?.classList.add('active');
-    } else if (aba === 'canceladas') {
-      document.getElementById('tabStatusCanceladas')?.classList.add('active');
-    } else {
-      document.getElementById('tabStatusTodas')?.classList.add('active');
-    }
+    const btnMap = {
+      'aguardando_analise': 'tabStatusAguardando',
+      'ajustes': 'tabStatusAjustes',
+      'validados': 'tabStatusValidados',
+      'etp_gerado': 'tabStatusEtp',
+      'canceladas': 'tabStatusCanceladas',
+      'todas': 'tabStatusTodas'
+    };
+
+    const targetId = btnMap[aba] || 'tabStatusTodas';
+    document.getElementById(targetId)?.classList.add('active');
 
     this.filtrarTabela();
   },
@@ -555,23 +596,7 @@ const app = {
     const term = (document.getElementById('inputBusca')?.value || '').toLowerCase().trim();
     const todas = this.demandasCarregadas || [];
 
-    const isCancelado = (status) => {
-      const s = String(status || '').toUpperCase().trim();
-      return s === 'CANCELADO' || s === 'CANCELADA';
-    };
-
-    // Atualiza contadores das abas
-    const qtdTransmitidas = todas.filter(d => !isCancelado(d.status)).length;
-    const qtdCanceladas = todas.filter(d => isCancelado(d.status)).length;
-    const qtdTodas = todas.length;
-
-    const bTrans = document.getElementById('badgeQtdTransmitidas');
-    const bCanc = document.getElementById('badgeQtdCanceladas');
-    const bTodas = document.getElementById('badgeQtdTodas');
-
-    if (bTrans) bTrans.innerText = qtdTransmitidas;
-    if (bCanc) bCanc.innerText = qtdCanceladas;
-    if (bTodas) bTodas.innerText = qtdTodas;
+    const norm = (s) => String(s || '').toUpperCase().trim();
 
     // Filtra pelo termo de busca
     let filtradas = todas.filter(d => 
@@ -583,10 +608,16 @@ const app = {
     );
 
     // Filtra pela aba de status
-    if (this.abaStatusAtual === 'transmitidas') {
-      filtradas = filtradas.filter(d => !isCancelado(d.status));
+    if (this.abaStatusAtual === 'aguardando_analise') {
+      filtradas = filtradas.filter(d => norm(d.status) === 'ENVIADO PARA TI' || norm(d.status) === 'EM ANÁLISE PELO TI' || norm(d.status) === 'AGUARDANDO ANÁLISE PELO TI');
+    } else if (this.abaStatusAtual === 'ajustes') {
+      filtradas = filtradas.filter(d => norm(d.status) === 'AJUSTES SOLICITADOS');
+    } else if (this.abaStatusAtual === 'validados') {
+      filtradas = filtradas.filter(d => d.dod_validado === 1 || norm(d.status) === 'VALIDADO PELO TI');
+    } else if (this.abaStatusAtual === 'etp_gerado') {
+      filtradas = filtradas.filter(d => d.etp_gerado === 1 || norm(d.status) === 'ETP GERADO');
     } else if (this.abaStatusAtual === 'canceladas') {
-      filtradas = filtradas.filter(d => isCancelado(d.status));
+      filtradas = filtradas.filter(d => norm(d.status) === 'CANCELADO' || norm(d.status) === 'CANCELADA' || norm(d.status) === 'REPROVADO');
     }
 
     this.renderizarTabela(filtradas);
@@ -598,6 +629,8 @@ const app = {
 
     const footer = document.getElementById('tableCardFooter');
     const footerText = document.getElementById('footerCountText');
+    const u = this.usuarioLogado;
+    const ehAdmin = u && (u.tipo_usuario === 'admin' || (u.email && u.email.includes('admin')));
 
     if (!demandas || demandas.length === 0) {
       if (footer) footer.style.display = 'none';
@@ -606,14 +639,22 @@ const app = {
       let title = 'Nenhuma requisição encontrada';
       let msg = 'Não há registros com os filtros atuais. Clique em <strong>+ Nova Requisição</strong> para emitir um pedido.';
 
-      if (this.abaStatusAtual === 'transmitidas') {
-        icon = '🚀';
-        title = 'Nenhuma requisição transmitida ativa';
-        msg = 'Todas as solicitações ativas foram concluídas ou canceladas. Clique em <strong>+ Nova Requisição</strong> para iniciar um processo.';
+      if (this.abaStatusAtual === 'aguardando_analise') {
+        icon = '⏳';
+        title = 'Nenhuma demanda aguardando análise';
+        msg = 'Todas as requisições recebidas já foram avaliadas pelo setor de TI.';
+      } else if (this.abaStatusAtual === 'ajustes') {
+        icon = '⚠️';
+        title = 'Nenhuma demanda com ajustes pendentes';
+        msg = 'Não há solicitações aguardando resposta ou complementação do servidor.';
+      } else if (this.abaStatusAtual === 'validados') {
+        icon = '✅';
+        title = 'Nenhum DOD validado';
+        msg = 'Os DODs validados pela equipe de TI aparecerão listados aqui para geração de ETP.';
       } else if (this.abaStatusAtual === 'canceladas') {
         icon = '🚫';
-        title = 'Nenhuma requisição cancelada';
-        msg = 'Todas as suas solicitações continuam ativas e em atendimento regular pela Diretoria de TIC.';
+        title = 'Nenhuma requisição cancelada ou reprovada';
+        msg = 'Todas as solicitações continuam ativas no fluxo de atendimento.';
       }
 
       tbody.innerHTML = `
@@ -637,24 +678,39 @@ const app = {
     }
 
     tbody.innerHTML = demandas.map((d, index) => {
-      const statusUpper = String(d.status || '').toUpperCase().trim();
+      const statusRaw = String(d.status || '').trim();
+      const statusUpper = statusRaw.toUpperCase();
       const ehCancelado = statusUpper === 'CANCELADO' || statusUpper === 'CANCELADA';
+      const ehReprovado = statusUpper === 'REPROVADO';
+      const ehValidado = d.dod_validado === 1 || statusUpper === 'VALIDADO PELO TI';
+      const ehEtpGerado = d.etp_gerado === 1 || statusUpper === 'ETP GERADO';
+      const ehAjustes = statusUpper === 'AJUSTES SOLICITADOS';
+      const ehEmAnalise = statusUpper === 'EM ANÁLISE PELO TI';
 
-      let stClass = 'status-homologado';
-      let stText = 'Homologado TI';
+      let stClass = 'status-analise';
+      let stText = statusRaw || 'Enviado para TI';
 
       if (ehCancelado) {
         stClass = 'status-cancelado';
         stText = 'Cancelado';
-      } else if (statusUpper.includes('ANÁLISE') || statusUpper.includes('ANALISE') || d.nivel_risco === 'MEDIO') {
-        stClass = 'status-analise';
-        stText = 'Em Análise TI';
-      } else if (statusUpper.includes('BLOQUEADO') || statusUpper.includes('REVIS') || d.nivel_risco === 'ALTO') {
-        stClass = 'status-revisao';
-        stText = 'Revisão Exigida';
-      } else {
+      } else if (ehReprovado) {
+        stClass = 'status-cancelado';
+        stText = 'Reprovado pelo TI';
+      } else if (ehEtpGerado) {
         stClass = 'status-homologado';
-        stText = 'Homologado TI';
+        stText = 'ETP Gerado';
+      } else if (ehValidado) {
+        stClass = 'status-homologado';
+        stText = 'Validado pelo TI';
+      } else if (ehAjustes) {
+        stClass = 'status-revisao';
+        stText = 'Ajustes Solicitados';
+      } else if (ehEmAnalise) {
+        stClass = 'status-analise';
+        stText = 'Em Análise pelo TI';
+      } else {
+        stClass = 'status-analise';
+        stText = 'Enviado para TI';
       }
 
       let nomeEquip = 'Notebook Corporativo';
@@ -667,11 +723,10 @@ const app = {
         descEquip = 'Nível 3 • Engenharia (SEPLAN)';
       }
 
-      // Abre para cima apenas quando houver 3 ou mais registros e for a última linha
       const isDropUp = totalRows >= 3 && index === totalRows - 1;
 
       return `
-        <tr class="table-row-item ${ehCancelado ? 'row-canceled' : ''}">
+        <tr class="table-row-item ${(ehCancelado || ehReprovado) ? 'row-canceled' : ''}">
           <td class="col-protocolo">
             <span class="badge-protocolo">${d.protocolo}</span>
           </td>
@@ -695,9 +750,19 @@ const app = {
               <span class="status-dot"></span>
               <span class="status-label">${stText}</span>
             </span>
-            ${ehCancelado && d.motivo_cancelamento ? `
+            ${(ehCancelado && d.motivo_cancelamento) ? `
               <div class="canceled-reason-preview" title="${d.motivo_cancelamento}">
                 ${d.motivo_cancelamento}
+              </div>
+            ` : ''}
+            ${(ehReprovado && d.motivo_reprovacao) ? `
+              <div class="canceled-reason-preview" style="color: #F87171;" title="${d.motivo_reprovacao}">
+                ${d.motivo_reprovacao}
+              </div>
+            ` : ''}
+            ${(ehAjustes && d.ajustes_solicitados) ? `
+              <div class="canceled-reason-preview" style="color: #FBBF24;" title="${d.ajustes_solicitados}">
+                ⚠️ ${d.ajustes_solicitados}
               </div>
             ` : ''}
           </td>
@@ -710,15 +775,87 @@ const app = {
                 </svg>
               </button>
               <div class="acoes-menu-dropdown ${isDropUp ? 'drop-up' : ''}" id="menu-acoes-${d.protocolo}">
+                
+                ${ehAdmin ? `
+                  <!-- AÇÕES EXCLUSIVAS DE TI / ADMIN -->
+                  <button type="button" class="acoes-menu-item" style="color: #38BDF8;" onclick="app.abrirPainelAnaliseTi('${d.protocolo}')">
+                    <span class="item-icon">🛡️</span>
+                    <div class="item-label">
+                      <strong>Analisar Solicitação (TI)</strong>
+                      <small>Diagnóstico, DOD Oficial e Validação</small>
+                    </div>
+                  </button>
+
+                  ${!ehValidado && !ehCancelado && !ehReprovado ? `
+                    <button type="button" class="acoes-menu-item" style="color: #34D399;" onclick="app.validarDodTi('${d.protocolo}')">
+                      <span class="item-icon">✓</span>
+                      <div class="item-label">
+                        <strong>Validar DOD</strong>
+                        <small>Aprovar formalmente e liberar ETP</small>
+                      </div>
+                    </button>
+                  ` : ''}
+
+                  <!-- BOTÃO GERAR ETP: ATIVO APENAS SE O DOD ESTIVER VALIDADO -->
+                  ${ehValidado ? `
+                    <button type="button" class="acoes-menu-item" style="color: #38BDF8;" onclick="app.gerarEtpDocumento('${d.protocolo}')">
+                      <span class="item-icon">📑</span>
+                      <div class="item-label">
+                        <strong>${ehEtpGerado ? 'Visualizar / Editar ETP' : 'Gerar ETP'}</strong>
+                        <small>Estudo Técnico Preliminar (12 seções)</small>
+                      </div>
+                    </button>
+                  ` : `
+                    <button type="button" class="acoes-menu-item" style="opacity: 0.6; cursor: not-allowed;" onclick="alert('🔒 A geração do ETP requer a validação prévia do DOD pela equipe técnica de TI.')" title="Disponível após validação do DOD">
+                      <span class="item-icon">🔒</span>
+                      <div class="item-label">
+                        <strong style="color: #94A3B8;">Gerar ETP</strong>
+                        <small>Disponível após validação do DOD</small>
+                      </div>
+                    </button>
+                  `}
+                ` : `
+                  <!-- AÇÕES DO SERVIDOR SOLICITANTE -->
+                  ${ehAjustes ? `
+                    <button type="button" class="acoes-menu-item" style="color: #FBBF24;" onclick="app.abrirModalResponderAjustes('${d.protocolo}')">
+                      <span class="item-icon">⚠️</span>
+                      <div class="item-label">
+                        <strong>Responder Ajustes do TI</strong>
+                        <small>Enviar esclarecimentos solicitados</small>
+                      </div>
+                    </button>
+                  ` : ''}
+
+                  ${ehEtpGerado ? `
+                    <button type="button" class="acoes-menu-item" style="color: #38BDF8;" onclick="app.abrirModalEtpCompleto('${d.protocolo}')">
+                      <span class="item-icon">📑</span>
+                      <div class="item-label">
+                        <strong>Visualizar ETP</strong>
+                        <small>Estudo Técnico Preliminar aprovado</small>
+                      </div>
+                    </button>
+                  ` : ''}
+                `}
+
                 <button type="button" class="acoes-menu-item" onclick="app.abrirMinuta('${d.protocolo}')">
                   <span class="item-icon">📄</span>
                   <div class="item-label">
                     <strong>Visualizar DOD Oficial</strong>
-                    <small>Documento de Formalização da Demanda (SC)</small>
+                    <small>Documento com Anexos I e II (SC)</small>
                   </div>
                 </button>
+
+                <button type="button" class="acoes-menu-item" onclick="app.abrirHistoricoAuditoria('${d.protocolo}')">
+                  <span class="item-icon">🕒</span>
+                  <div class="item-label">
+                    <strong>Trilha de Auditoria</strong>
+                    <small>Histórico e rastreabilidade</small>
+                  </div>
+                </button>
+
                 <div class="menu-divider"></div>
-                ${!ehCancelado ? `
+
+                ${(!ehCancelado && !ehReprovado) ? `
                   <button type="button" class="acoes-menu-item item-danger" onclick="app.abrirModalCancelar('${d.protocolo}')">
                     <span class="item-icon">🚫</span>
                     <div class="item-label">
@@ -730,11 +867,12 @@ const app = {
                   <button type="button" class="acoes-menu-item" onclick="app.verMotivoCancelamento('${d.protocolo}')">
                     <span class="item-icon">ℹ️</span>
                     <div class="item-label">
-                      <strong>Motivo do Cancelamento</strong>
+                      <strong>Motivo de Encerramento</strong>
                       <small>Ver justificativa registrada</small>
                     </div>
                   </button>
                 `}
+
               </div>
             </div>
           </td>
@@ -941,7 +1079,7 @@ const app = {
   },
 
   // ==========================================
-  // ETAPA 1: DO QUE VOCÊ PRECISA?
+  // ETAPA 1: DO QUE VOCÊ PRECISA? (7 OPÇÕES DIRETAS)
   // ==========================================
   setTipoNecessidade(tipo, elem) {
     this.demanda.tipoNecessidade = tipo;
@@ -957,18 +1095,24 @@ const app = {
       if (boxAviso) boxAviso.style.display = 'flex';
       if (txtAviso) {
         if (tipo === 'manutencao') {
-          txtAviso.innerHTML = 'Caso seu computador tenha estragado ou queimado, você pode solicitar a substituição por um novo equipamento dimensionado aqui mesmo no sistema, ou um reparo técnico avulso.';
+          txtAviso.innerHTML = '<strong>Manutenção de Equipamento:</strong> Caso seu computador tenha queimado, estragado ou não ligue mais, continuaremos o diagnóstico simples a seguir para avaliar se é caso de substituição por um novo equipamento ou conserto técnico avulso.';
         } else if (tipo === 'monitor') {
-          txtAviso.innerHTML = 'O sistema permite solicitar telas dedicadas ou periféricos avulsos para complementar sua mesa de trabalho. Avançaremos para registrar os dados do setor.';
+          txtAviso.innerHTML = '<strong>Monitor de Vídeo:</strong> Vamos registrar sua necessidade de tela avulsa ou tela adicional ergonômica. O sistema identificará se há monitores disponíveis para reaproveitamento no parque municipal.';
+        } else if (tipo === 'impressora') {
+          txtAviso.innerHTML = '<strong>Equipamento de Impressão:</strong> As impressoras corporativas são fornecidas via contrato centralizado de outsourcing ou aquisição conforme a demanda de páginas da unidade.';
+        } else if (tipo === 'software') {
+          txtAviso.innerHTML = '<strong>Sistema / Software:</strong> Demandas de sistemas e licenças de software corporativo serão direcionadas para triagem e liberação de acesso da equipe de sistemas da TIC.';
+        } else if (tipo === 'indeciso') {
+          txtAviso.innerHTML = '<strong>Apoio da Equipe de TI:</strong> Não se preocupe! Vamos fazer perguntas bem simples sobre o seu dia a dia de trabalho para ajudar a identificar a solução ideal para você.';
         } else {
-          txtAviso.innerHTML = 'Esta contratação é prioritariamente voltada a computadores de trabalho. Vamos continuar para registrar sua necessidade e encaminhá-la para avaliação da Diretoria de TIC.';
+          txtAviso.innerHTML = '<strong>Outros Equipamentos:</strong> Registraremos sua solicitação para avaliação técnica individual pela Diretoria de TIC da Prefeitura.';
         }
       }
     }
   },
 
   // ==========================================
-  // ETAPA 2 & 3: ROTINA & PERGUNTAS COMPLEMENTARES
+  // ETAPA 2: ROTINA & PERGUNTAS COMPLEMENTARES
   // ==========================================
   setMobilidade(precisa, elem) {
     this.demanda.precisaMobilidade = precisa;
@@ -978,6 +1122,22 @@ const app = {
     const cardNao = document.getElementById('cardMobNao');
     if (cardSim) cardSim.classList.toggle('active', precisa);
     if (cardNao) cardNao.classList.toggle('active', !precisa);
+  },
+
+  setMultitarefas(sim, elem) {
+    this.demanda.multitarefas = sim;
+    const cardSim = document.getElementById('cardMultiSim');
+    const cardNao = document.getElementById('cardMultiNao');
+    if (cardSim) cardSim.classList.toggle('active', sim);
+    if (cardNao) cardNao.classList.toggle('active', !sim);
+  },
+
+  setPlanilhasGrandes(sim, elem) {
+    this.demanda.planilhasGrandes = sim;
+    const cardSim = document.getElementById('cardPlanilhasSim');
+    const cardNao = document.getElementById('cardPlanilhasNao');
+    if (cardSim) cardSim.classList.toggle('active', sim);
+    if (cardNao) cardNao.classList.toggle('active', !sim);
   },
 
   toggleSoftwareChip(nome, elem) {
@@ -990,14 +1150,6 @@ const app = {
       this.demanda.programasUtilizados.push(nome);
       elem?.classList.add('active');
     }
-  },
-
-  setMultitarefa(sim, elem) {
-    this.demanda.multitarefa = sim;
-    const btnSim = document.getElementById('btnMultiSim');
-    const btnNao = document.getElementById('btnMultiNao');
-    if (btnSim) btnSim.classList.toggle('active', sim);
-    if (btnNao) btnNao.classList.toggle('active', !sim);
   },
 
   setSituacaoAtual(sit, elem) {
@@ -1383,6 +1535,70 @@ const app = {
 
   async salvarLicitação() {
     const txtJust = document.getElementById('txtJustificativa')?.value.trim() || '';
+    const ehNotebook = (this.demanda.precisaMobilidade !== false);
+    const nivel = this.demanda.perfilEscolhidoId || 1;
+    const nomeEquip = ehNotebook ? 'Notebook Corporativo Portátil' : 'Computador de Mesa (Desktop)';
+
+    const respostasDiagnostico = {
+      tipoNecessidade: this.demanda.tipoNecessidade || 'computador',
+      perfilRotinaNivel: nivel,
+      rotinaDescricao: nivel === 1 
+        ? 'Gestão Escolar & Rotina Administrativa' 
+        : nivel === 2 
+          ? 'Análise de Dados & Relatórios Gerenciais' 
+          : 'Projetos de Engenharia, Plantas e CAD (3D)',
+      precisaMobilidade: ehNotebook,
+      formatoEquipamento: ehNotebook ? 'notebook' : 'desktop',
+      programasUtilizados: (this.demanda.programasUtilizados && this.demanda.programasUtilizados.length > 0)
+        ? this.demanda.programasUtilizados
+        : ['Diário de Classe & Notas', 'Word / Textos & Provas', 'Planilhas & Médias', 'Internet & SGPe', 'Reuniões Online (Meet/Teams)'],
+      multitarefas: this.demanda.multitarefas !== false,
+      planilhasGrandes: this.demanda.planilhasGrandes === true,
+      situacaoAtual: this.demanda.situacaoAtual || 'estragou',
+      situacaoDescricao: this.demanda.situacaoAtual === 'estragou'
+        ? 'O computador anterior estragou / não liga (substituição urgente)'
+        : this.demanda.situacaoAtual === 'lento'
+          ? 'A máquina atual trava muito / é lenta'
+          : 'Novo posto de trabalho estruturado na unidade'
+    };
+
+    const recursosExistentes = {
+      monitor: this.demanda.opcaoMonitor || 'none',
+      monitorDescricao: this.demanda.opcaoMonitor === 'none' ? 'Já possui monitor na mesa' : 'Precisa de monitor novo',
+      teclado: this.demanda.temTeclado !== false,
+      tecladoDescricao: this.demanda.temTeclado !== false ? 'Já possui teclado na mesa' : 'Precisa de teclado novo',
+      mouse: this.demanda.temMouse !== false,
+      mouseDescricao: this.demanda.temMouse !== false ? 'Já possui mouse na mesa' : 'Precisa de mouse novo',
+      webcam: this.demanda.temWebcam !== false,
+      webcamDescricao: this.demanda.temWebcam !== false ? 'Já possui câmera ou integrada' : 'Precisa de câmera USB',
+      segundoMonitor: this.demanda.segundoMonitor === true,
+      segundoMonitorDescricao: this.demanda.segundoMonitor === true ? 'Precisa de 2º monitor' : 'Não necessita de tela secundária',
+      quantidadePostos: this.demanda.quantidade || 1
+    };
+
+    const diagnosticoInterpretado = {
+      perfilSugerido: nomeEquip,
+      categoriaTrabalho: respostasDiagnostico.rotinaDescricao,
+      justificativaUso: txtJust,
+      resumoCriterios: [
+        `Necessidade declarada: ${respostasDiagnostico.tipoNecessidade}`,
+        `Mobilidade: ${ehNotebook ? 'Requer mobilidade entre salas e reuniões' : 'Posto fixo de atendimento'}`,
+        `Softwares declarados: ${respostasDiagnostico.programasUtilizados.join(', ')}`,
+        `Situação da máquina anterior: ${respostasDiagnostico.situacaoDescricao}`,
+        `Reaproveitamento de periféricos ativos: ${recursosExistentes.monitor === 'none' ? 'Monitor preservado' : 'Sem monitor'}`
+      ]
+    };
+
+    const recomendacaoPreliminar = {
+      equipamento: nomeEquip,
+      formato: ehNotebook ? 'notebook' : 'desktop',
+      so: 'Windows 11 Pro 64-bit homologado',
+      cpu: nivel === 1 ? 'Quad-Core x86-64 moderno' : nivel === 2 ? 'Hexa-Core x86-64' : 'Octa-Core 5.0GHz+',
+      ram: nivel === 1 ? '8 GB Alta Velocidade' : nivel === 2 ? '16 GB Dual-Channel' : '32 GB DDR5',
+      ssd: nivel === 1 ? 'SSD 256GB NVMe M.2' : nivel === 2 ? 'SSD 512GB NVMe PCIe 4.0' : 'SSD 1TB Gen4 NVMe',
+      garantia: '36 meses presencial no local (on-site)',
+      avisoImportante: 'Recomendação técnica preliminar gerada pelo sistema — aguardando validação do TI'
+    };
 
     try {
       const res = await fetch('/api/demandas', {
@@ -1399,22 +1615,27 @@ const app = {
           quantidadeUsuarios: this.demanda.quantidade,
           custoUnitario: this.demanda.custo_unitario || 1850.00,
           custoTotal: this.demanda.custo_total || (1850.00 * this.demanda.quantidade),
-          softwares: (this.demanda.programasUtilizados && this.demanda.programasUtilizados.length > 0)
-            ? this.demanda.programasUtilizados 
-            : ['Gestão Escolar & Rotina Administrativa'],
-          perfilRecomendadoId: this.demanda.perfilEscolhidoId || 1,
-          perfilEscolhidoId: this.demanda.perfilEscolhidoId || 1,
-          justificativaUsuario: txtJust || 'Solicitação escolar encaminhada para análise e validação técnica da Diretoria de TIC.',
-          status: 'Sob Análise',
+          softwares: respostasDiagnostico.programasUtilizados,
+          perfilRecomendadoId: nivel,
+          perfilEscolhidoId: nivel,
+          justificativaUsuario: txtJust || 'Solicitação encaminhada para análise e validação técnica da Diretoria de TIC.',
+          status: 'Enviado para TI',
           irs: 5,
-          nivelRisco: 'BAIXO'
+          nivelRisco: 'BAIXO',
+          tipoNecessidade: respostasDiagnostico.tipoNecessidade,
+          respostasDiagnostico: JSON.stringify(respostasDiagnostico),
+          diagnosticoInterpretado: JSON.stringify(diagnosticoInterpretado),
+          recomendacaoPreliminar: JSON.stringify(recomendacaoPreliminar),
+          recursosExistentes: JSON.stringify(recursosExistentes)
         })
       });
 
       const data = await res.json();
       if (data.success) {
-        // Recarrega a tabela de pedidos
+        // Recarrega a tabela de pedidos e estatísticas
         await this.carregarDemandas();
+        // Volta para a tela de licitações
+        this.navegar('licitacoes');
         // Abre a minuta técnica oficial (DOD) para visualização/impressão
         this.renderizarModalEtp(data.demanda, this.demanda.perfilEscolhido || this.demanda.perfilRecomendado);
       }
@@ -1847,6 +2068,101 @@ const app = {
           * As Notas Explicativas exibidas no modelo oficial de Documento de Formalização da Demanda (DOD) do Estado de Santa Catarina foram integralmente atendidas e consolidadas para instrução processual do pedido, em conformidade com o Art. 12, VII e Art. 18, I da Lei Federal nº 14.133/2021.
         </div>
 
+        <!-- ============================================================ -->
+        <!-- ANEXO I: DIAGNÓSTICO PRELIMINAR DE NECESSIDADE E ROTINA     -->
+        <!-- ============================================================ -->
+        <div class="dod-anexo-block">
+          <div class="dod-anexo-title">
+            ANEXO I — DIAGNÓSTICO PRELIMINAR DE NECESSIDADE E ROTINA DE TRABALHO
+          </div>
+          <table class="dod-official-table" style="margin-bottom: 16px;">
+            <tr>
+              <td colspan="2" class="dod-section-header">1. Respostas Declaradas pelo Servidor Solicitante</td>
+            </tr>
+            <tr>
+              <td style="width: 35%; padding: 6px 10px; border: 1px solid #000; font-weight: 700; background: #F8FAFC;">Tipo de Necessidade:</td>
+              <td style="padding: 6px 10px; border: 1px solid #000;">${tipoNec.toUpperCase()} (${tipoNec === 'computador' ? 'Equipamento Computacional' : 'Acessórios / Serviços'})</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 10px; border: 1px solid #000; font-weight: 700; background: #F8FAFC;">Mobilidade Declarada:</td>
+              <td style="padding: 6px 10px; border: 1px solid #000;">${ehNotebook ? 'Sim — Transporte frequente entre salas, conselhos de classe e reuniões pedagógicas (Exige Notebook)' : 'Não — Trabalho fixo contínuo na mesa da secretaria / posto (Indica Computador de Mesa Desktop)'}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 10px; border: 1px solid #000; font-weight: 700; background: #F8FAFC;">Softwares / Ferramentas em Uso:</td>
+              <td style="padding: 6px 10px; border: 1px solid #000;">${(demanda.softwares || this.demanda.programasUtilizados || ['Gestão Escolar & Rotina Administrativa']).join(' • ')}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 10px; border: 1px solid #000; font-weight: 700; background: #F8FAFC;">Situação do Equipamento Anterior:</td>
+              <td style="padding: 6px 10px; border: 1px solid #000;">${sitAtual === 'estragou' ? 'Máquina anterior avariada / queimou / não liga' : sitAtual === 'lento' ? 'Máquina anterior obsoleta com lentidão crítica e travamentos constantes' : 'Novo posto de trabalho sem equipamento prévio'}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 10px; border: 1px solid #000; font-weight: 700; background: #F8FAFC;">Conclusão do Diagnóstico Preliminar:</td>
+              <td style="padding: 6px 10px; border: 1px solid #000; color: #1E293B;">
+                Necessidade classificada como compatível com a rotina pública do órgão solicitante. Recomendação preliminar gerada sem compromisso prévio, sujeita à validação da Diretoria de TIC.
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ANEXO II: RECURSOS EXISTENTES NO POSTO DE TRABALHO          -->
+        <!-- ============================================================ -->
+        <div class="dod-anexo-block" style="page-break-before: auto; margin-top: 24px;">
+          <div class="dod-anexo-title" style="background: #1E293B;">
+            ANEXO II — DECLARAÇÃO DE RECURSOS EXISTENTES NO POSTO DE TRABALHO
+          </div>
+          <table class="dod-official-table">
+            <thead>
+              <tr>
+                <th style="background: #F1F5F9; border: 1px solid #000; padding: 6px 10px; text-align: left; width: 45%;">RECURSO / PERIFÉRICO</th>
+                <th style="background: #F1F5F9; border: 1px solid #000; padding: 6px 10px; text-align: center; width: 25%;">SITUAÇÃO DECLARADA</th>
+                <th style="background: #F1F5F9; border: 1px solid #000; padding: 6px 10px; text-align: left; width: 30%;">TRATAMENTO LICITATÓRIO</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 6px 10px; border: 1px solid #000;"><strong>Monitor de Vídeo Principal</strong></td>
+                <td style="padding: 6px 10px; border: 1px solid #000; text-align: center; font-weight: 700; color: ${monOpt === 'none' ? '#15803D' : '#0F172A'};">
+                  ${monOpt === 'none' ? 'Disponível e Operacional' : 'Inexistente no Posto'}
+                </td>
+                <td style="padding: 6px 10px; border: 1px solid #000; font-size: 8.5pt;">
+                  ${monOpt === 'none' ? 'Preservado / Reaproveitamento de Ativo Existente' : 'Incluso para Aquisição'}
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 10px; border: 1px solid #000;"><strong>Teclado e Mouse Óptico</strong></td>
+                <td style="padding: 6px 10px; border: 1px solid #000; text-align: center; font-weight: 700; color: ${tecOpt ? '#15803D' : '#0F172A'};">
+                  ${tecOpt ? 'Disponível na Mesa' : 'Inexistente / Danificado'}
+                </td>
+                <td style="padding: 6px 10px; border: 1px solid #000; font-size: 8.5pt;">
+                  ${tecOpt ? 'Reaproveitamento de periféricos em boas condições' : 'Incluso para Fornecimento'}
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 10px; border: 1px solid #000;"><strong>Câmera / Microfone para Reuniões</strong></td>
+                <td style="padding: 6px 10px; border: 1px solid #000; text-align: center; font-weight: 700; color: ${webcamOpt ? '#15803D' : '#0F172A'};">
+                  ${webcamOpt ? 'Já Possui ou Integrada' : 'Necessita de Câmera USB'}
+                </td>
+                <td style="padding: 6px 10px; border: 1px solid #000; font-size: 8.5pt;">
+                  ${ehNotebook ? 'Dispensado (Incluso nativamente no Notebook)' : (webcamOpt ? 'Reaproveitamento de webcam existente' : 'Item avulso a validar pelo TI')}
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 10px; border: 1px solid #000;"><strong>Segundo Monitor de Vídeo</strong></td>
+                <td style="padding: 6px 10px; border: 1px solid #000; text-align: center; font-weight: 700;">
+                  ${segundoMon ? 'Solicitado' : 'Não Solicitado'}
+                </td>
+                <td style="padding: 6px 10px; border: 1px solid #000; font-size: 8.5pt;">
+                  ${segundoMon ? 'Sujeito à análise de ergonomia e justificação do TI' : 'Dispensado da contratação'}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size: 8pt; color: #475569; margin: 8px 0 0 0; text-align: justify;">
+            Declaração firmada pelo solicitante sob as penas da lei, em observância ao Art. 11 da Lei Federal nº 14.133/2021, atestando a veracidade das informações relativas aos bens permanentes existentes e funcionais no posto requisitante.
+          </p>
+        </div>
+
       </div>
     `;
 
@@ -2184,6 +2500,929 @@ const app = {
 
   imprimirDocumento() {
     this.executarImpressaoLimpa('corpoDocumentoEtp', 'Documento de Formalização da Demanda (DOD - SC)');
+  },
+
+  // ==========================================================
+  // PAINEL DE ANÁLISE TÉCNICA DA DEMANDA (DIRETORIA DE TIC)
+  // ==========================================================
+  protocoloAnaliseAtual: null,
+  abaAnaliseAtual: 'diagnostico',
+  demandaAnaliseAtual: null,
+  modoEdicaoEtp: false,
+
+  async abrirPainelAnaliseTi(protocolo) {
+    this.fecharTodosMenusAcoes();
+    this.protocoloAnaliseAtual = protocolo;
+
+    try {
+      const res = await fetch(`/api/demandas/${protocolo}`);
+      const data = await res.json();
+      if (!data.demanda) {
+        alert('Demanda não localizada.');
+        return;
+      }
+
+      this.demandaAnaliseAtual = data.demanda;
+      const d = data.demanda;
+
+      // Se for a primeira visualização técnica e estiver como "Enviado para TI", atualiza para "Em análise pelo TI"
+      const statusNorm = String(d.status || '').toUpperCase().trim();
+      if (statusNorm === 'ENVIADO PARA TI' || statusNorm === 'SOB ANÁLISE') {
+        try {
+          await fetch(`/api/demandas/${protocolo}/em-analise`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              usuarioNome: this.usuarioLogado?.nome || 'Técnico de TIC',
+              usuarioCargo: this.usuarioLogado?.cargo || 'Analista de Infraestrutura TIC'
+            })
+          });
+          d.status = 'Em análise pelo TI';
+          await this.carregarDemandas();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Preenche cabeçalho do Drawer
+      const elTit = document.getElementById('analiseTiTitulo');
+      const elProt = document.getElementById('analiseTiProtocolo');
+      const elBadge = document.getElementById('analiseTiStatusBadge');
+      const elSub = document.getElementById('analiseTiSubtitulo');
+
+      if (elTit) elTit.innerText = `Análise Técnica — ${d.setor || 'Unidade Solicitante'}`;
+      if (elProt) elProt.innerText = d.protocolo;
+      if (elSub) elSub.innerText = `Solicitante: ${d.usuario_nome} • Cargo: ${d.cargo || 'Servidor'} • Órgão: ${d.orgao}`;
+
+      if (elBadge) {
+        elBadge.innerText = d.status;
+        elBadge.className = 'badge-status-chip ' + (
+          d.dod_validado === 1 ? 'status-homologado' :
+          d.status === 'Cancelado' || d.status === 'Reprovado' ? 'status-cancelado' :
+          d.status === 'Ajustes solicitados' ? 'status-revisao' : 'status-analise'
+        );
+      }
+
+      // Preenche Aba 1: Respostas Originais do Servidor
+      this.preencherAbaDiagnosticoTi(d);
+
+      // Preenche Aba 2: Interpretação & Recomendação
+      this.preencherAbaInterpretacaoTi(d);
+
+      // Preenche Aba 3: DOD Oficial
+      this.preencherAbaDodTi(d, data.perfilEsc);
+
+      // Preenche Aba 4: Histórico & Rastreabilidade
+      await this.carregarHistoricoDemanda(protocolo);
+
+      // Atualiza botões do rodapé
+      this.atualizarBotoesAcaoTi(d);
+
+      // Abre modal
+      this.setAbaAnaliseTi('diagnostico');
+      document.getElementById('modalAnaliseTi')?.classList.add('active');
+    } catch (e) {
+      alert('Erro ao carregar análise da demanda: ' + e.message);
+    }
+  },
+
+  fecharModalAnaliseTi() {
+    document.getElementById('modalAnaliseTi')?.classList.remove('active');
+  },
+
+  setAbaAnaliseTi(aba) {
+    this.abaAnaliseAtual = aba;
+    document.querySelectorAll('.drawer-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.drawer-tab-pane').forEach(p => p.classList.remove('active'));
+
+    const tabMap = {
+      'diagnostico': 'tabAnaliseDiagnostico',
+      'interpretacao': 'tabAnaliseInterpretacao',
+      'dod': 'tabAnaliseDod',
+      'historico': 'tabAnaliseHistorico'
+    };
+
+    const paneMap = {
+      'diagnostico': 'paneAnaliseDiagnostico',
+      'interpretacao': 'paneAnaliseInterpretacao',
+      'dod': 'paneAnaliseDod',
+      'historico': 'paneAnaliseHistorico'
+    };
+
+    document.getElementById(tabMap[aba])?.classList.add('active');
+    document.getElementById(paneMap[aba])?.classList.add('active');
+  },
+
+  preencherAbaDiagnosticoTi(d) {
+    let resp = {};
+    let recs = {};
+    try { resp = typeof d.respostas_diagnostico === 'string' ? JSON.parse(d.respostas_diagnostico) : (d.respostas_diagnostico || {}); } catch(e){}
+    try { recs = typeof d.recursos_existentes === 'string' ? JSON.parse(d.recursos_existentes) : (d.recursos_existentes || {}); } catch(e){}
+
+    const corpoResp = document.getElementById('analiseCorpoRespostasOriginais');
+    const corpoRecs = document.getElementById('analiseCorpoRecursosPosto');
+
+    if (corpoResp) {
+      corpoResp.innerHTML = `
+        <div class="info-item-row">
+          <span class="info-item-label">O que o Servidor Solicitou:</span>
+          <div class="info-item-value" style="color: var(--dark-accent); font-weight: 700;">
+            ${(d.tipo_necessidade || resp.tipoNecessidade || 'computador').toUpperCase()} — ${resp.rotinaDescricao || 'Rotina Administrativa'}
+          </div>
+        </div>
+        <div class="info-item-row">
+          <span class="info-item-label">Mobilidade Declarada:</span>
+          <div class="info-item-value">
+            ${resp.precisaMobilidade !== false ? '🚗 Sim — Necessidade de deslocamento frequente entre salas e reuniões' : '🏢 Não — Posto fixo contínuo na mesa'}
+          </div>
+        </div>
+        <div class="info-item-row">
+          <span class="info-item-label">Sistemas e Softwares Diários:</span>
+          <div class="info-item-value">
+            ${(d.softwares || resp.programasUtilizados || ['Gestão Escolar & Rotina Administrativa']).map(s => `<span class="tag-software" style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; margin-right: 4px; display: inline-block; margin-bottom: 4px;">${s}</span>`).join('')}
+          </div>
+        </div>
+        <div class="info-item-row">
+          <span class="info-item-label">Multitarefas e Carga de Trabalho:</span>
+          <div class="info-item-value">
+            ${resp.multitarefas !== false ? 'Sim — Múltiplos programas abertos simultaneamente' : 'Não — Uso sequencial'}
+          </div>
+        </div>
+        <div class="info-item-row">
+          <span class="info-item-label">Situação da Máquina Anterior:</span>
+          <div class="info-item-value">
+            ${resp.situacaoDescricao || 'Equipamento anterior avariado / queimado (substituição urgente)'}
+          </div>
+        </div>
+      `;
+    }
+
+    if (corpoRecs) {
+      corpoRecs.innerHTML = `
+        <div class="info-item-row">
+          <span class="info-item-label">Monitor na Mesa:</span>
+          <div class="info-item-value" style="color: ${recs.monitor === 'none' ? '#34D399' : '#FBBF24'};">
+            ${recs.monitor === 'none' ? '✓ Já possui monitor funcionando (Dispensado da compra)' : '⚠️ Precisa de monitor de vídeo'}
+          </div>
+        </div>
+        <div class="info-item-row">
+          <span class="info-item-label">Teclado e Mouse:</span>
+          <div class="info-item-value" style="color: ${recs.teclado !== false ? '#34D399' : '#FBBF24'};">
+            ${recs.teclado !== false ? '✓ Periféricos existentes preservados' : '⚠️ Precisa de kit teclado/mouse'}
+          </div>
+        </div>
+        <div class="info-item-row">
+          <span class="info-item-label">Webcam / Reuniões Online:</span>
+          <div class="info-item-value">
+            ${recs.webcam !== false ? '✓ Câmera disponível ou integrada' : 'Precisa de webcam avulsa'}
+          </div>
+        </div>
+        <div class="info-item-row">
+          <span class="info-item-label">Segundo Monitor:</span>
+          <div class="info-item-value">
+            ${recs.segundoMonitor ? 'Solicitado pelo servidor (Sujeito a validação do TI)' : 'Não solicitado'}
+          </div>
+        </div>
+        <div class="info-item-row">
+          <span class="info-item-label">Quantidade Requisitada:</span>
+          <div class="info-item-value" style="font-size: 1.1rem; font-weight: 800; color: #FFFFFF;">
+            ${d.quantidade_usuarios || recs.quantidadePostos || 1} equipamento(s)
+          </div>
+        </div>
+      `;
+    }
+  },
+
+  preencherAbaInterpretacaoTi(d) {
+    let diag = {};
+    let rec = {};
+    try { diag = typeof d.diagnostico_interpretado === 'string' ? JSON.parse(d.diagnostico_interpretado) : (d.diagnostico_interpretado || {}); } catch(e){}
+    try { rec = typeof d.recomendacao_preliminar === 'string' ? JSON.parse(d.recomendacao_preliminar) : (d.recomendacao_preliminar || {}); } catch(e){}
+
+    const corpo = document.getElementById('analiseCorpoInterpretacao');
+    if (!corpo) return;
+
+    corpo.innerHTML = `
+      <div style="background: #141C28; border: 1px solid var(--dark-border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 20px;">
+        <span class="label-muted-small" style="color: var(--dark-accent); font-weight: 800;">DIAGNÓSTICO SISTÊMICO DA NECESSIDADE</span>
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; margin: 4px 0 10px 0;">
+          ${diag.perfilSugerido || 'Notebook Corporativo Portátil'}
+        </h3>
+        <p style="font-size: 0.9rem; color: #CBD5E1; line-height: 1.5; margin-bottom: 16px;">
+          ${diag.justificativaUso || d.justificativa_usuario || 'Necessidade identificada para rotina operacional e educacional.'}
+        </p>
+
+        <h5 style="font-size: 0.85rem; color: #FFFFFF; text-transform: uppercase; margin-bottom: 8px;">Critérios de Adequação Técnica:</h5>
+        <ul style="margin: 0; padding-left: 20px; color: #94A3B8; font-size: 0.85rem; line-height: 1.6;">
+          ${(diag.resumoCriterios || [
+            'Proporcionalidade entre carga de trabalho e capacidade do processador',
+            'Sustentabilidade com reaproveitamento de monitores e cabos existentes',
+            'Conformidade com o Art. 18 da Lei Federal nº 14.133/2021'
+          ]).map(c => `<li>${c}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="box-specs-tecnicas-ti" style="margin-top: 14px;">
+        <div class="specs-ti-header">
+          <h4><span>⚙️</span> Recomendação de Hardware TIC Analisada</h4>
+          <span class="specs-ti-badge" style="background: rgba(56, 189, 248, 0.2); color: #38BDF8;">PRELIMINAR</span>
+        </div>
+        <div class="specs-ti-grid">
+          <div class="spec-ti-item">
+            <small>Sistema Operacional</small>
+            <strong>${rec.so || 'Windows 11 Pro 64-bit'}</strong>
+          </div>
+          <div class="spec-ti-item">
+            <small>Processador</small>
+            <strong>${rec.cpu || 'Quad-Core Moderno x86-64'}</strong>
+          </div>
+          <div class="spec-ti-item">
+            <small>Memória RAM</small>
+            <strong>${rec.ram || '8 GB Alta Velocidade'}</strong>
+          </div>
+          <div class="spec-ti-item">
+            <small>Armazenamento</small>
+            <strong>${rec.ssd || 'SSD 256GB NVMe M.2'}</strong>
+          </div>
+          <div class="spec-ti-item">
+            <small>Garantia e Suporte</small>
+            <strong>${rec.garantia || '36 meses on-site'}</strong>
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+  preencherAbaDodTi(d, perfil) {
+    const corpo = document.getElementById('analiseCorpoDod');
+    if (!corpo) return;
+
+    // Reaproveita renderização oficial do DOD
+    this.renderizarModalEtp(d, perfil);
+    const corpoEtp = document.getElementById('corpoDocumentoEtp');
+    if (corpoEtp) {
+      corpo.innerHTML = `<div style="background: #FFFFFF; border-radius: 8px; padding: 20px; color: #000;">${corpoEtp.innerHTML}</div>`;
+    }
+  },
+
+  async carregarHistoricoDemanda(protocolo) {
+    const corpo = document.getElementById('analiseCorpoHistorico');
+    if (!corpo) return;
+
+    try {
+      const res = await fetch(`/api/demandas/${protocolo}/historico`);
+      const historico = await res.json();
+      this.renderizarHistoricoTimeline(historico);
+    } catch (e) {
+      corpo.innerHTML = `<p style="color: var(--dark-muted);">Não foi possível carregar o histórico de auditoria.</p>`;
+    }
+  },
+
+  renderizarHistoricoTimeline(historico) {
+    const corpo = document.getElementById('analiseCorpoHistorico');
+    if (!corpo) return;
+
+    if (!historico || historico.length === 0) {
+      corpo.innerHTML = `
+        <div class="audit-timeline-item">
+          <div class="audit-node-point info">●</div>
+          <div class="audit-item-box">
+            <div class="audit-item-title">Solicitação Registrada</div>
+            <p class="audit-item-detail">Processo iniciado no sistema e encaminhado à triagem técnica da TIC.</p>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    corpo.innerHTML = historico.map(h => {
+      let iconClass = 'info';
+      if (h.acao.includes('Validado') || h.acao.includes('ETP')) iconClass = '';
+      if (h.acao.includes('Ajuste')) iconClass = 'warn';
+      if (h.acao.includes('Reprovad') || h.acao.includes('Cancel')) iconClass = 'danger';
+
+      return `
+        <div class="audit-timeline-item">
+          <div class="audit-node-point ${iconClass}">✓</div>
+          <div class="audit-item-box">
+            <div class="audit-item-header">
+              <span class="audit-item-title">${h.acao}</span>
+              <span class="audit-item-date">${h.data_hora}</span>
+            </div>
+            <div class="audit-item-author">
+              👤 ${h.usuario_nome} (${h.usuario_cargo || 'TI / Sistema'}) • ${h.tipo_usuario === 'admin' ? 'DIRETORIA DE TIC' : 'SOLICITANTE'}
+            </div>
+            <div class="audit-item-detail">
+              ${h.detalhes || 'Sem observações adicionais registradas.'}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  },
+
+  atualizarBotoesAcaoTi(d) {
+    const ehValidado = d.dod_validado === 1 || String(d.status).toUpperCase() === 'VALIDADO PELO TI';
+    const ehCancelado = String(d.status).toUpperCase() === 'CANCELADO' || String(d.status).toUpperCase() === 'REPROVADO';
+
+    const btnVal = document.getElementById('btnAcaoValidarDod');
+    const btnAj = document.getElementById('btnAcaoSolicitarAjustes');
+    const btnRep = document.getElementById('btnAcaoReprovar');
+    const btnEtp = document.getElementById('btnAcaoGerarEtp');
+    const iconEtp = document.getElementById('btnGerarEtpIcon');
+    const txtEtp = document.getElementById('btnGerarEtpText');
+
+    if (btnVal) {
+      btnVal.style.display = (ehValidado || ehCancelado) ? 'none' : 'inline-block';
+    }
+    if (btnAj) {
+      btnAj.style.display = ehCancelado ? 'none' : 'inline-block';
+    }
+    if (btnRep) {
+      btnRep.style.display = ehCancelado ? 'none' : 'inline-block';
+    }
+
+    if (btnEtp) {
+      if (ehValidado) {
+        btnEtp.className = 'btn-action-etp unlocked';
+        if (iconEtp) iconEtp.innerText = '📑';
+        if (txtEtp) txtEtp.innerText = d.etp_gerado === 1 ? 'Visualizar / Editar ETP' : 'Gerar ETP';
+        btnEtp.title = 'Clique para gerar o Estudo Técnico Preliminar (ETP)';
+      } else {
+        btnEtp.className = 'btn-action-etp locked';
+        if (iconEtp) iconEtp.innerText = '🔒';
+        if (txtEtp) txtEtp.innerText = 'Gerar ETP';
+        btnEtp.title = 'Bloqueado: Requer validação prévia do DOD pelo TI';
+      }
+    }
+  },
+
+  async validarDodTi(protocolo) {
+    if (!confirm(`Deseja validar formalmente o DOD da demanda ${protocolo}?\n\nEsta ação atesta a conformidade das respostas e libera a geração do Estudo Técnico Preliminar (ETP).`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/demandas/${protocolo}/validar-dod`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          usuarioNome: this.usuarioLogado?.nome || 'Técnico de TIC Responsável',
+          usuarioCargo: this.usuarioLogado?.cargo || 'Analista de Governança TIC'
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert(`✓ DOD do protocolo ${protocolo} validado com sucesso!\nA geração de ETP está agora liberada.`);
+        await this.carregarDemandas();
+        await this.abrirPainelAnaliseTi(protocolo);
+      } else {
+        alert(data.error || 'Erro ao validar DOD.');
+      }
+    } catch (e) {
+      alert('Erro na comunicação com o servidor: ' + e.message);
+    }
+  },
+
+  // ==========================================
+  // MODAIS DE AJUSTES E REPROVAÇÃO
+  // ==========================================
+  protocoloAjusteAtual: null,
+
+  abrirModalAjustes(protocolo) {
+    this.protocoloAjusteAtual = protocolo;
+    const lbl = document.getElementById('labelProtocoloAjustes');
+    if (lbl) lbl.innerText = protocolo;
+    const txt = document.getElementById('txtNotasAjustesTi');
+    if (txt) txt.value = '';
+    document.getElementById('modalSolicitarAjustesTi')?.classList.add('active');
+  },
+
+  fecharModalAjustes() {
+    document.getElementById('modalSolicitarAjustesTi')?.classList.remove('active');
+  },
+
+  preencherNotaAjuste(txt) {
+    const el = document.getElementById('txtNotasAjustesTi');
+    if (el) el.value = txt;
+  },
+
+  async confirmarSolicitarAjustes() {
+    const nota = document.getElementById('txtNotasAjustesTi')?.value.trim();
+    if (!nota) {
+      alert('Informe os apontamentos técnicos para o servidor.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/demandas/${this.protocoloAjusteAtual}/solicitar-ajustes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ajustesSolicitados: nota,
+          usuarioNome: this.usuarioLogado?.nome || 'Técnico de TIC',
+          usuarioCargo: this.usuarioLogado?.cargo || 'Analista de TIC'
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert(`✓ Apontamentos enviados ao servidor com sucesso! Demanda ${this.protocoloAjusteAtual} alterada para "Ajustes solicitados".`);
+        this.fecharModalAjustes();
+        this.fecharModalAnaliseTi();
+        await this.carregarDemandas();
+      } else {
+        alert(data.error || 'Erro ao solicitar ajustes.');
+      }
+    } catch (e) {
+      alert('Erro ao solicitar ajustes: ' + e.message);
+    }
+  },
+
+  abrirModalReprovar(protocolo) {
+    this.protocoloAjusteAtual = protocolo;
+    const lbl = document.getElementById('labelProtocoloReprovar');
+    if (lbl) lbl.innerText = protocolo;
+    const txt = document.getElementById('txtJustificativaReprovacao');
+    if (txt) txt.value = '';
+    document.getElementById('modalReprovarTi')?.classList.add('active');
+  },
+
+  fecharModalReprovar() {
+    document.getElementById('modalReprovarTi')?.classList.remove('active');
+  },
+
+  preencherJustificativaReprovacao(txt) {
+    const el = document.getElementById('txtJustificativaReprovacao');
+    if (el) el.value = txt;
+  },
+
+  async confirmarReprovacao() {
+    const motivo = document.getElementById('txtJustificativaReprovacao')?.value.trim();
+    if (!motivo) {
+      alert('A justificativa técnica de reprovação é obrigatória.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/demandas/${this.protocoloAjusteAtual}/reprovar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          motivoReprovacao: motivo,
+          usuarioNome: this.usuarioLogado?.nome || 'Técnico de TIC',
+          usuarioCargo: this.usuarioLogado?.cargo || 'Analista de TIC'
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert(`Demanda ${this.protocoloAjusteAtual} reprovada e arquivada com sucesso.`);
+        this.fecharModalReprovar();
+        this.fecharModalAnaliseTi();
+        await this.carregarDemandas();
+      } else {
+        alert(data.error || 'Erro ao reprovar demanda.');
+      }
+    } catch (e) {
+      alert('Erro ao reprovar: ' + e.message);
+    }
+  },
+
+  abrirModalResponderAjustes(protocolo) {
+    this.fecharTodosMenusAcoes();
+    this.protocoloAjusteAtual = protocolo;
+    const d = this.demandasCarregadas.find(item => item.protocolo === protocolo);
+
+    const lbl = document.getElementById('labelProtocoloResponderAjustes');
+    if (lbl) lbl.innerText = protocolo;
+
+    const elApon = document.getElementById('txtApontamentoTiExibicao');
+    if (elApon) elApon.innerText = d?.ajustes_solicitados || 'Favor complementar os dados do pedido conforme orientação do TI.';
+
+    const elResp = document.getElementById('txtRespostaAjusteServidor');
+    if (elResp) elResp.value = '';
+
+    document.getElementById('modalResponderAjustes')?.classList.add('active');
+  },
+
+  fecharModalResponderAjustes() {
+    document.getElementById('modalResponderAjustes')?.classList.remove('active');
+  },
+
+  async confirmarRespostaAjustes() {
+    const resp = document.getElementById('txtRespostaAjusteServidor')?.value.trim();
+    if (!resp) {
+      alert('Por favor, informe seus esclarecimentos antes de reenviar.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/demandas/${this.protocoloAjusteAtual}/responder-ajustes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          respostaServidor: resp,
+          usuarioNome: this.usuarioLogado?.nome || 'Servidor Solicitante',
+          usuarioCargo: this.usuarioLogado?.cargo || 'Servidor'
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert(`✓ Resposta enviada com sucesso! A demanda retornou para a fila de atendimento da Diretoria de TIC.`);
+        this.fecharModalResponderAjustes();
+        await this.carregarDemandas();
+      } else {
+        alert(data.error || 'Erro ao responder ajustes.');
+      }
+    } catch (e) {
+      alert('Erro na comunicação: ' + e.message);
+    }
+  },
+
+  async abrirHistoricoAuditoria(protocolo) {
+    this.fecharTodosMenusAcoes();
+    await this.abrirPainelAnaliseTi(protocolo);
+    this.setAbaAnaliseTi('historico');
+  },
+
+  // ==========================================================
+  // ESTUDO TÉCNICO PRELIMINAR (ETP COMPLETO - 12 SEÇÕES)
+  // ==========================================================
+  etpAtual: null,
+
+  async gerarEtpDocumento(protocolo) {
+    const d = this.demandasCarregadas.find(item => item.protocolo === protocolo) || this.demandaAnaliseAtual;
+
+    if (!d || d.dod_validado !== 1) {
+      alert('🔒 A geração do Estudo Técnico Preliminar (ETP) está bloqueada!\n\nConforme a governança pública e a Lei nº 14.133/2021, o Documento de Formalização da Demanda (DOD) precisa ser validado e aprovado tecnicamente pela Diretoria de TIC antes da elaboração do ETP.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/demandas/${protocolo}/gerar-etp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          usuarioNome: this.usuarioLogado?.nome || 'Equipe de Planejamento TIC',
+          usuarioCargo: this.usuarioLogado?.cargo || 'Responsável Técnico TIC'
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        await this.carregarDemandas();
+        await this.abrirModalEtpCompleto(protocolo);
+      } else {
+        alert(data.error || 'Erro ao gerar ETP.');
+      }
+    } catch (e) {
+      alert('Erro ao gerar ETP: ' + e.message);
+    }
+  },
+
+  async abrirModalEtpCompleto(protocolo) {
+    this.fecharTodosMenusAcoes();
+    try {
+      const res = await fetch(`/api/demandas/${protocolo}`);
+      const data = await res.json();
+      const d = data.demanda;
+      if (!d) return;
+
+      this.etpAtual = d;
+      let etpConteudo = null;
+      try {
+        etpConteudo = typeof d.etp_conteudo === 'string' ? JSON.parse(d.etp_conteudo) : d.etp_conteudo;
+      } catch(e){}
+
+      this.renderizarEtpCompleto(d, etpConteudo);
+      document.getElementById('modalEtpCompleto')?.classList.add('active');
+    } catch (e) {
+      alert('Erro ao abrir ETP: ' + e.message);
+    }
+  },
+
+  fecharModalEtpCompleto() {
+    document.getElementById('modalEtpCompleto')?.classList.remove('active');
+  },
+
+  renderizarEtpCompleto(d, etp) {
+    const corpo = document.getElementById('corpoEtpCompleto');
+    if (!corpo) return;
+
+    const ano = new Date().getFullYear();
+    const protocolo = d.protocolo;
+    const qtd = d.quantidade_usuarios || 1;
+    const ehNotebook = (d.formato_equipamento === 'notebook' || (d.respostas_diagnostico && d.respostas_diagnostico.includes('notebook')));
+    const nomeEquip = ehNotebook ? 'Notebook Corporativo Portátil' : 'Computador de Mesa (Desktop)';
+    const orgao = d.orgao || 'Prefeitura Municipal de Lages';
+    const setor = d.setor || 'Escolas Municipais (SME)';
+    const solicitante = d.usuario_nome || 'Servidor Solicitante';
+
+    // Custos estimados
+    const custoUnit = d.custo_unitario || 1850.00;
+    const custoTotalAquisicao = custoUnit * qtd;
+    const custoMensalLocacao = 145.00 * qtd;
+    const custoTotalLocacao36m = custoMensalLocacao * 36;
+    const custoUpgradeExistente = 650.00 * qtd;
+
+    corpo.innerHTML = `
+      <div class="etp-doc-container">
+        
+        <!-- CABEÇALHO DO ETP -->
+        <div class="etp-doc-header">
+          <div style="font-size: 0.85rem; font-weight: 800; color: #475569; letter-spacing: 0.5px;">
+            MUNICÍPIO DE LAGES • ESTADO DE SANTA CATARINA
+          </div>
+          <div style="font-size: 0.8rem; color: #64748B;">
+            SECRETARIA DE ADMINISTRAÇÃO E FAZENDA • DIRETORIA DE TECNOLOGIA DA INFORMAÇÃO E COMUNICAÇÕES
+          </div>
+          <h1 class="etp-doc-title">
+            ESTUDO TÉCNICO PRELIMINAR DA CONTRATAÇÃO (ETP)
+          </h1>
+          <p class="etp-doc-sub">
+            Art. 18, Inciso I e § 1º da Lei Federal nº 14.133/2021 • Protocolo: <strong>${protocolo}</strong>
+          </p>
+        </div>
+
+        <!-- 1. DESCRIÇÃO DA NECESSIDADE -->
+        <div class="etp-section-box">
+          <h3 class="etp-section-title">1. Descrição da Necessidade da Contratação</h3>
+          <div class="etp-section-body">
+            <p>
+              O presente Estudo Técnico Preliminar visa a fundamentar a contratação de solução de Tecnologia da Informação e Comunicação (TIC) para suprir as necessidades operacionais e pedagógicas da unidade <strong>${setor}</strong> (${orgao}).
+            </p>
+            <p>
+              A servidora requisitante <strong>${solicitante}</strong> declarou a necessidade de atendimento às rotinas de trabalho com sistemas corporativos municipais, Diário de Classe, redação de documentos pedagógicos e navegação no sistema estadual SGPe. O equipamento anteriormente alocado no posto apresentou inoperância/desgaste que inviabiliza sua continuidade operacional sem risco de perda de dados e atraso no atendimento ao público.
+            </p>
+          </div>
+        </div>
+
+        <!-- 2. ALINHAMENTO COM O PLANO DE CONTRATAÇÕES ANUAL (PCA) -->
+        <div class="etp-section-box">
+          <h3 class="etp-section-title">2. Alinhamento com o Plano de Contratações Anual (PCA)</h3>
+          <div class="etp-section-body">
+            <p>
+              A demanda encontra-se expressamente alinhada ao Plano de Contratações Anual (PCA) do Município de Lages do exercício de <strong>${ano}</strong>, na Meta Estratégica de Modernização e Continuidade do Parque Computacional Escolar e Administrativo, em conformidade com o Art. 12, VII da Lei nº 14.133/2021.
+            </p>
+          </div>
+        </div>
+
+        <!-- 3. REQUISITOS DA CONTRATAÇÃO -->
+        <div class="etp-section-box">
+          <h3 class="etp-section-title">3. Requisitos da Contratação e Padrões de TIC</h3>
+          <div class="etp-section-body">
+            <p>
+              Os bens a serem fornecidos devem observar rigorosamente os seguintes requisitos mínimos de desempenho, ergonomia e confiabilidade homologados pela Diretoria de TIC:
+            </p>
+            <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
+              <li><strong>Arquitetura x86-64 bits:</strong> Processador moderno com pontuação PassMark compatível com a rotina pública;</li>
+              <li><strong>Sistema Operacional Corporativo:</strong> Microsoft Windows 11 Pro 64-bit nativo de fábrica, homologado no domínio municipal;</li>
+              <li><strong>Armazenamento Rápido:</strong> Unidade de estado sólido SSD padrão NVMe M.2 com taxa de leitura superior a 2.000 MB/s para inicialização ágil;</li>
+              <li><strong>Garantia Integral On-Site de 36 Meses:</strong> Atendimento presencial nas dependências da unidade escolar em Lages/SC, com prazo máximo de reparo/substituição de 48 horas;</li>
+              <li><strong>Reaproveitamento de Ativos:</strong> Priorização do aproveitamento de monitores e periféricos existentes na mesa do servidor.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 4. LEVANTAMENTO DE MERCADO E ESTUDO DE 3 ALTERNATIVAS -->
+        <div class="etp-section-box">
+          <h3 class="etp-section-title">4. Levantamento de Mercado e Comparativo de Alternativas Possíveis</h3>
+          <div class="etp-section-body">
+            <p>
+              Em observância ao Art. 18, § 1º, IV da Lei nº 14.133/2021, a equipe de planejamento de TIC avaliou 3 (três) alternativas viáveis de mercado para o atendimento da demanda:
+            </p>
+
+            <table class="etp-matrix-table">
+              <thead>
+                <tr>
+                  <th style="width: 25%;">ALTERNATIVA ESTUDADA</th>
+                  <th style="width: 45%;">DESCRIÇÃO OPERACIONAL</th>
+                  <th style="width: 30%;">ESTIMATIVA FINANCEIRA</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="background: rgba(52, 211, 153, 0.08);">
+                  <td>
+                    <strong>Alternativa 1 (Recomendada):</strong><br>
+                    Aquisição Definitiva de Hardware Novo com Garantia de 36 Meses
+                  </td>
+                  <td>
+                    Compra de equipamentos novos homologados de primeira linha, incorporando o bem ao patrimônio municipal, com cobertura total de peças e suporte on-site durante 3 anos de garantia.
+                  </td>
+                  <td>
+                    <strong>R$ ${custoTotalAquisicao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong><br>
+                    <small>Custo unitário: R$ ${custoUnit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (incorporação patrimonial durável)</small>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Alternativa 2:</strong><br>
+                    Locação de Computadores / DaaS (Device as a Service)
+                  </td>
+                  <td>
+                    Contratação de locação mensal de equipamentos por 36 meses, com substituição em caso de falha.
+                  </td>
+                  <td>
+                    <strong>R$ ${custoTotalLocacao36m.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong><br>
+                    <small>R$ ${custoMensalLocacao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/mês por 36 meses. Custo 182% superior sem geração de ativo ao término.</small>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Alternativa 3:</strong><br>
+                    Remanejamento Interno e Upgrade de Máquinas Antigas
+                  </td>
+                  <td>
+                    Troca de componentes em máquinas do depósito municipal de sucatas (adição de SSD e memória).
+                  </td>
+                  <td>
+                    <strong>R$ ${custoUpgradeExistente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong><br>
+                    <small>Inviável tecnicamente: parque defasado não possui suporte oficial para Windows 11 e placas-mãe sem peças de reposição.</small>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 5. MATRIZ DE VANTAGENS E DESVANTAGENS -->
+        <div class="etp-section-box">
+          <h3 class="etp-section-title">5. Matriz Comparativa de Vantagens e Desvantagens</h3>
+          <div class="etp-section-body">
+            <table class="etp-matrix-table">
+              <thead>
+                <tr>
+                  <th style="width: 25%;">CRITÉRIO</th>
+                  <th style="width: 25%;">ALTERNATIVA 1 (AQUISIÇÃO)</th>
+                  <th style="width: 25%;">ALTERNATIVA 2 (LOCAÇÃO / DAAS)</th>
+                  <th style="width: 25%;">ALTERNATIVA 3 (UPGRADE INTERNO)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Custo Total de Propriedade (TCO)</strong></td>
+                  <td style="color: #15803D; font-weight: 700;">Menor custo global comprovado para o ciclo de 36 a 60 meses.</td>
+                  <td>Elevado custo recorrente; ultrapassa o valor de compra em 18 meses.</td>
+                  <td>Baixo custo inicial, mas alto índice de reincidência de chamados e paradas.</td>
+                </tr>
+                <tr>
+                  <td><strong>Continuidade do Serviço Público</strong></td>
+                  <td style="color: #15803D; font-weight: 700;">Alta disponibilidade assegurada por garantia on-site de 3 anos.</td>
+                  <td>Alta disponibilidade conforme SLA de locação contratual.</td>
+                  <td style="color: #B91C1C;">Baixa confiabilidade; peças antigas sujeitas a queima de placa e fonte.</td>
+                </tr>
+                <tr>
+                  <td><strong>Patrimônio Municipal</strong></td>
+                  <td style="color: #15803D; font-weight: 700;">O bem integra o patrimônio ativo de Lages.</td>
+                  <td>Nenhum bem adquirido; encerra contrato sem ativos.</td>
+                  <td>Preserva bens depreciados e amortizados.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 6. ESTIMATIVA DO VALOR DA CONTRATAÇÃO -->
+        <div class="etp-section-box">
+          <h3 class="etp-section-title">6. Estimativa do Valor da Contratação e Dimensionamento</h3>
+          <div class="etp-section-body">
+            <p>
+              Com base nos preços de compras públicas recentes registradas em atas e pregões similares no Estado de Santa Catarina (Banco de Preços de SC), o valor de referência estimado totaliza:
+            </p>
+            <div style="background: #F1F5F9; border-left: 4px solid #0F172A; padding: 12px 18px; margin: 10px 0; font-size: 1.1rem; font-weight: 800; color: #0F172A;">
+              Valor Global Estimado: R$ ${custoTotalAquisicao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${this.valorPorExtenso(custoTotalAquisicao)})
+            </div>
+            <p style="font-size: 0.85rem; color: #64748B;">
+              * Dimensionamento proporcional de ${qtd} unidade(s) de ${nomeEquip} calculado conforme número de postos de trabalho em exercício.
+            </p>
+          </div>
+        </div>
+
+        <!-- 7. JUSTIFICATIVA DA ESCOLHA DA SOLUÇÃO -->
+        <div class="etp-section-box">
+          <h3 class="etp-section-title">7. Justificativa da Escolha da Solução</h3>
+          <div class="etp-section-body">
+            <p>
+              A <strong>Alternativa 1 (Aquisição Definitiva de Hardware Novo com Garantia de 36 Meses)</strong> revela-se a mais vantajosa sob os aspectos técnico, econômico e jurídico para o Município de Lages, pois assegura a incorporação patrimonial do equipamento, menor custo global comprovado em comparação à locação e imunidade a custos imprevistos de reparo em decorrência da garantia técnica com atendimento presencial na unidade escolar.
+            </p>
+          </div>
+        </div>
+
+        <!-- 8. SUSTENTABILIDADE E LOGÍSTICA REVERSA -->
+        <div class="etp-section-box">
+          <h3 class="etp-section-title">8. Critérios de Sustentabilidade e Logística Reversa</h3>
+          <div class="etp-section-body">
+            <p>
+              O edital exigirá conformidade com a Política Nacional de Resíduos Sólidos (Lei nº 12.305/2010), comprovação de certificação Energy Star ou similar de baixo consumo de energia elétrica e obrigatoriedade de recolhimento de embalagens e baterias pelo fornecedor sob regime de logística reversa.
+            </p>
+          </div>
+        </div>
+
+        <!-- 9. VIABILIDADE TÉCNICA E ECONÔMICA (DECLARAÇÃO FORMAL) -->
+        <div class="etp-section-box" style="background: #F0FDF4; border: 1.5px solid #86EFAC; border-radius: 8px; padding: 16px;">
+          <h3 class="etp-section-title" style="background: transparent; border: none; padding: 0; color: #166534;">
+            9. Declaração de Viabilidade Técnica e Econômica da Contratação
+          </h3>
+          <div class="etp-section-body" style="color: #14532D; font-weight: 600;">
+            <p>
+              Diante do estudo comparativo realizado, a Equipe de Planejamento da Diretoria de TIC declara formalmente que a contratação proposta é <strong>TOTALMENTE VIÁVEL E ADEQUADA</strong> sob as perspectivas técnica, operacional e financeira, inexistindo soluções alternativas com melhor relação custo-benefício para a Administração Pública Municipal.
+            </p>
+          </div>
+        </div>
+
+        <!-- 10. GESTÃO DE RISCOS -->
+        <div class="etp-section-box">
+          <h3 class="etp-section-title">10. Gestão de Riscos do Fornecimento</h3>
+          <div class="etp-section-body">
+            <p>
+              Identificou-se como risco principal o atraso na entrega pelo fabricante ou fornecimento de modelos fora do padrão. Mitigação: exigência de apresentação de catálogo do fabricante, comprovação de canais oficiais de assistência técnica autorizada em Santa Catarina e previsão de penalidades contratuais nos moldes do Art. 156 da Lei nº 14.133/2021.
+            </p>
+          </div>
+        </div>
+
+        <!-- 11. PROVIDÊNCIAS PRÉVIAS -->
+        <div class="etp-section-box">
+          <h3 class="etp-section-title">11. Providências Prévias e Infraestrutura no Posto</h3>
+          <div class="etp-section-body">
+            <p>
+              A unidade escolar requisitante já dispõe de rede local de computadores em funcionamento, pontos de tomada elétrica aterrada conforme padrão ABNT NBR 14136 e infraestrutura de cabeamento estruturado apta a receber a solução sem obras civis complementares.
+            </p>
+          </div>
+        </div>
+
+        <!-- 12. ASSINATURAS DA EQUIPE DE PLANEJAMENTO TIC -->
+        <div class="etp-section-box" style="border: none;">
+          <h3 class="etp-section-title">12. Responsáveis pela Elaboração do ETP</h3>
+          
+          <div class="etp-sign-grid">
+            <div class="etp-sign-block">
+              <div class="etp-sign-line"></div>
+              <strong>${this.usuarioLogado?.nome || 'Equipe Técnica de TIC'}</strong><br>
+              <span style="font-size: 0.8rem; color: #64748B;">Diretoria de Tecnologia da Informação e Comunicação • Lages/SC</span>
+            </div>
+            <div class="etp-sign-block">
+              <div class="etp-sign-line"></div>
+              <strong>Secretaria de Administração e Fazenda</strong><br>
+              <span style="font-size: 0.8rem; color: #64748B;">Autoridade Competente para Aprovação da Fase Preparatória</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    `;
+  },
+
+  toggleEdicaoEtp() {
+    this.modoEdicaoEtp = !this.modoEdicaoEtp;
+    const btn = document.getElementById('btnToggleEdicaoEtp');
+    if (btn) {
+      btn.innerText = this.modoEdicaoEtp ? '💾 Salvar Alterações' : '✏️ Editar Seções (TI)';
+      btn.style.color = this.modoEdicaoEtp ? '#059669' : '#0F172A';
+    }
+
+    const sections = document.querySelectorAll('.etp-section-body');
+    sections.forEach(sec => {
+      sec.contentEditable = this.modoEdicaoEtp ? 'true' : 'false';
+      sec.style.background = this.modoEdicaoEtp ? '#FEFCE8' : 'transparent';
+      sec.style.border = this.modoEdicaoEtp ? '1px dashed #EAB308' : 'none';
+      sec.style.padding = this.modoEdicaoEtp ? '8px' : '0';
+    });
+
+    if (!this.modoEdicaoEtp) {
+      this.salvarEdicaoEtp();
+    }
+  },
+
+  async salvarEdicaoEtp() {
+    if (!this.etpAtual) return;
+    const protocolo = this.etpAtual.protocolo;
+    const corpo = document.getElementById('corpoEtpCompleto');
+    if (!corpo) return;
+
+    try {
+      const res = await fetch(`/api/demandas/${protocolo}/etp`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          etpConteudo: JSON.stringify({ html: corpo.innerHTML }),
+          usuarioNome: this.usuarioLogado?.nome || 'Técnico de TIC Responsável'
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert('✓ Alterações no ETP salvas com sucesso na trilha de auditoria!');
+      }
+    } catch (e) {
+      console.error('Erro ao salvar edições do ETP:', e);
+    }
+  },
+
+  imprimirEtp() {
+    this.executarImpressaoLimpa('corpoEtpCompleto', 'Estudo Técnico Preliminar (ETP Oficial TIC - Lages SC)');
   },
 
   // ==========================================

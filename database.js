@@ -459,11 +459,115 @@ function initDatabase() {
 
     try {
       db.exec('ALTER TABLE demandas ADD COLUMN motivo_cancelamento TEXT;');
-    } catch (colErr) {
-      // Coluna já existe
+    } catch (colErr) {}
+
+    // Migração de novas colunas para o fluxo Diagnóstico -> DOD -> Validação TI -> ETP
+    const novasColunasDemandas = [
+      "ALTER TABLE demandas ADD COLUMN tipo_necessidade TEXT DEFAULT 'computador';",
+      "ALTER TABLE demandas ADD COLUMN respostas_diagnostico TEXT;",
+      "ALTER TABLE demandas ADD COLUMN diagnostico_interpretado TEXT;",
+      "ALTER TABLE demandas ADD COLUMN recomendacao_preliminar TEXT;",
+      "ALTER TABLE demandas ADD COLUMN recursos_existentes TEXT;",
+      "ALTER TABLE demandas ADD COLUMN dod_conteudo TEXT;",
+      "ALTER TABLE demandas ADD COLUMN dod_validado INTEGER DEFAULT 0;",
+      "ALTER TABLE demandas ADD COLUMN dod_validado_por TEXT;",
+      "ALTER TABLE demandas ADD COLUMN dod_validado_em DATETIME;",
+      "ALTER TABLE demandas ADD COLUMN etp_gerado INTEGER DEFAULT 0;",
+      "ALTER TABLE demandas ADD COLUMN etp_conteudo TEXT;",
+      "ALTER TABLE demandas ADD COLUMN etp_gerado_por TEXT;",
+      "ALTER TABLE demandas ADD COLUMN etp_gerado_em DATETIME;",
+      "ALTER TABLE demandas ADD COLUMN ajustes_solicitados TEXT;",
+      "ALTER TABLE demandas ADD COLUMN motivo_reprovacao TEXT;",
+      "ALTER TABLE demandas ADD COLUMN responsavel_analise TEXT;"
+    ];
+
+    for (const sql of novasColunasDemandas) {
+      try {
+        db.exec(sql);
+      } catch (err) {
+        // Coluna já existe
+      }
+    }
+
+    // Cria tabela de rastreabilidade e histórico de auditoria
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS historico_demandas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        demanda_id INTEGER,
+        protocolo TEXT NOT NULL,
+        data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+        acao TEXT NOT NULL,
+        usuario_nome TEXT NOT NULL,
+        usuario_cargo TEXT,
+        tipo_usuario TEXT,
+        detalhes TEXT,
+        status_resultante TEXT NOT NULL
+      );
+    `);
+
+    // Normalização dos status das demandas existentes para o novo fluxo
+    db.exec(`
+      UPDATE demandas SET status = 'Validado pelo TI', dod_validado = 1, dod_validado_por = 'Téc. Roberto Valente - TIC', dod_validado_em = datetime('now', '-2 hours')
+      WHERE status IN ('AUTORIZADA', 'Aprovado Direto', 'HOMOLOGADO TI', 'Homologado TI');
+
+      UPDATE demandas SET status = 'Em análise pelo TI'
+      WHERE status IN ('SOB ANÁLISE', 'Sob Análise', 'Requer Justificativa', 'Bloqueado TCE');
+
+      UPDATE demandas SET status = 'Cancelado'
+      WHERE status IN ('CANCELADA', 'CANCELADO');
+    `);
+
+    // Popula histórico inicial para demandas sem histórico
+    const totalHistorico = db.prepare('SELECT COUNT(*) as c FROM historico_demandas').get().c;
+    if (totalHistorico === 0) {
+      const todasDemandas = db.prepare('SELECT id, protocolo, usuario_nome, cargo, status, created_at, dod_validado, dod_validado_por FROM demandas').all();
+      const insertHist = db.prepare(`
+        INSERT INTO historico_demandas (demanda_id, protocolo, data_hora, acao, usuario_nome, usuario_cargo, tipo_usuario, detalhes, status_resultante)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      for (const d of todasDemandas) {
+        insertHist.run(
+          d.id,
+          d.protocolo,
+          d.created_at || new Date().toISOString(),
+          'Solicitação criada pelo servidor e DOD gerado automaticamente',
+          d.usuario_nome || 'Servidor Solicitante',
+          d.cargo || 'Servidor',
+          'servidor',
+          'Diagnóstico de rotina concluído. Documento de Formalização da Demanda (DOD) gerado automaticamente.',
+          'Enviado para TI'
+        );
+
+        if (d.dod_validado === 1) {
+          insertHist.run(
+            d.id,
+            d.protocolo,
+            new Date(Date.now() - 3600000).toISOString(),
+            'DOD validado pelo Técnico de TI',
+            d.dod_validado_por || 'Téc. Roberto Valente (TIC)',
+            'Diretoria de TIC',
+            'admin',
+            'Análise técnica concluída e aprovada. Liberação concedida para elaboração do ETP.',
+            'Validado pelo TI'
+          );
+        } else if (d.status === 'Cancelado') {
+          insertHist.run(
+            d.id,
+            d.protocolo,
+            new Date().toISOString(),
+            'Solicitação cancelada',
+            d.usuario_nome || 'Servidor Solicitante',
+            d.cargo || 'Servidor',
+            'servidor',
+            'Cancelamento formalizado pelo solicitante.',
+            'Cancelado'
+          );
+        }
+      }
     }
   } catch (e) {
-    console.warn('Aviso atualização perfis:', e.message);
+    console.warn('Aviso atualização perfis e migrações:', e.message);
   }
 
   // Reativa chaves estrangeiras
@@ -474,4 +578,16 @@ function initDatabase() {
 
 initDatabase();
 
-module.exports = { db };
+function registrarHistorico(demandaId, protocolo, acao, usuarioNome, usuarioCargo, tipoUsuario, detalhes, statusResultante) {
+  try {
+    const stmt = db.prepare(`
+      INSERT INTO historico_demandas (demanda_id, protocolo, data_hora, acao, usuario_nome, usuario_cargo, tipo_usuario, detalhes, status_resultante)
+      VALUES (?, ?, datetime('now', 'localtime'), ?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(demandaId, protocolo, acao, usuarioNome, usuarioCargo, tipoUsuario, detalhes, statusResultante);
+  } catch (err) {
+    console.error('Erro ao registrar histórico da demanda:', err.message);
+  }
+}
+
+module.exports = { db, registrarHistorico };
