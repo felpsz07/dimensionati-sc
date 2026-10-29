@@ -18,7 +18,7 @@ body.is-user-admin #view-licitacoes .btn-primary-action { background:var(--centr
 body.is-user-admin #view-licitacoes .btn-secondary-glass { background:transparent!important; color:var(--central-text)!important; border:1px solid var(--central-border)!important; box-shadow:none; border-radius:14px; padding:16px 24px; }
 body.is-user-admin #view-licitacoes .header-controls-row { display:flex; flex-wrap:wrap; justify-content:flex-start; align-items:center; gap:16px; margin:24px 0; }
 body.is-user-admin #view-licitacoes .search-pro-box { flex:1 1 320px; min-width:0; max-width:none; height:56px; background:var(--central-surface)!important; border:1px solid var(--central-border)!important; border-radius:12px; }
-body.is-user-admin #view-licitacoes .search-pro-field { color:var(--central-text)!important; background:transparent!important; width:100%; }
+body.is-user-admin #view-licitacoes .search-pro-field { color:var(--central-text)!important; background:transparent!important; border:none!important; outline:none!important; box-shadow:none!important; min-height:unset!important; width:100%; }
 body.is-user-admin #view-licitacoes input::placeholder { color:var(--central-muted)!important; opacity:1; }
 body.is-user-admin #view-licitacoes #filtrosAdminWrap { flex:1 1 460px; min-width:0; flex-direction:row; flex-wrap:nowrap; }
 body.is-user-admin #view-licitacoes #filtrosAdminWrap select { flex:1 1 0; min-width:0; width:0; max-width:none; height:56px; margin:0; background:var(--central-surface)!important; color:var(--central-text)!important; border:1px solid var(--central-border)!important; border-radius:12px; padding:0 16px; }
