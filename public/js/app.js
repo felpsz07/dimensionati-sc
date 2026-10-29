@@ -907,7 +907,7 @@ const app = {
     document.getElementById('tabStatusAguardando')?.classList.add('active');
 
     if (ehAdmin) {
-      if (tituloSecao) tituloSecao.innerText = 'Demandas';
+      if (tituloSecao) tituloSecao.innerText = 'Central de Gestão de TIC';
       if (subSecao) subSecao.innerText = 'Painel Global de Auditoria, Análise Técnica de DODs e Agrupamento de ETPs de Lages / SC';
       if (badgePapel) {
         badgePapel.innerText = 'ADMIN / DIRETORIA TIC';

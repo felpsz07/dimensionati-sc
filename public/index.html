@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DimensionaTI - Licitações de Hardware TIC</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/product-identity.css"><link rel="stylesheet" href="css/central-tic.css"><link rel="stylesheet" href="css/login-identity.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -217,7 +217,7 @@
                 <label class="glass-label" for="loginSenha">Senha</label>
                 <div class="glass-password-wrap">
                   <input type="password" id="loginSenha" class="glass-input" placeholder="Digite sua senha" value="" required autocomplete="current-password">
-                  <button type="button" class="glass-eye-btn" onclick="app.toggleSenha()" tabindex="-1" title="Mostrar/ocultar senha">👁</button>
+                  <button type="button" class="glass-eye-btn" onclick="app.toggleSenha()" title="Mostrar/ocultar senha">👁</button>
                 </div>
                 <div class="glass-forgot-row">
                   <span>Esqueceu a senha?</span>
@@ -229,7 +229,7 @@
               </button>
             </form>
 
-            <div class="error-text" id="loginErrorMsg" style="text-align: center; margin-top: 8px; min-height: 16px; color: #FFD1D1;"></div>
+            <div class="error-text" id="loginErrorMsg" role="alert" style="text-align: center; margin-top: 8px; min-height: 16px; color: #FFD1D1;"></div>
 
             <div class="glass-register-footer">
               Ainda não tem uma conta? <a href="#" class="glass-switch-link" onclick="app.alternarModoCadastro(true); return false;">Criar conta</a>
@@ -288,7 +288,7 @@
                   <label class="glass-label" for="cadSenha">Senha</label>
                   <div class="glass-password-wrap">
                     <input type="password" id="cadSenha" class="glass-input" placeholder="Mín. 4 caracteres" required autocomplete="new-password">
-                    <button type="button" class="glass-eye-btn" onclick="app.toggleSenhaCadastro()" tabindex="-1" title="Mostrar/ocultar senha">👁</button>
+                    <button type="button" class="glass-eye-btn" onclick="app.toggleSenhaCadastro()" title="Mostrar/ocultar senha">👁</button>
                   </div>
                 </div>
 
@@ -499,35 +499,35 @@
 
           <!-- CARDS OPERACIONAIS DE FLUXO / GESTÃO DO TI (Métricas em background) -->
           <div class="ti-metrics-row" id="cardsOperacionaisTi" style="display: none;">
-            <div class="ti-metric-card" onclick="app.setAbaStatus('aguardando_analise')" title="Solicitações recebidas aguardando triagem do TI">
+            <div class="ti-metric-card" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="app.setAbaStatus('aguardando_analise')" title="Solicitações recebidas aguardando triagem do TI">
               <div class="ti-metric-icon">⏳</div>
               <div class="ti-metric-body">
                 <span class="ti-metric-label">Aguardando TI</span>
                 <div class="ti-metric-val" id="metricAguardandoAnalise">0</div>
               </div>
             </div>
-            <div class="ti-metric-card" onclick="app.setAbaStatus('ajustes')" title="Solicitações com pendências devolvidas ao servidor">
+            <div class="ti-metric-card" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="app.setAbaStatus('ajustes')" title="Solicitações com pendências devolvidas ao servidor">
               <div class="ti-metric-icon">⚠️</div>
               <div class="ti-metric-body">
                 <span class="ti-metric-label">Com Ajustes</span>
                 <div class="ti-metric-val text-warn" id="metricAjustes">0</div>
               </div>
             </div>
-            <div class="ti-metric-card" onclick="app.setAbaStatus('validados')" title="DODs validados pelo TI aptos para gerar ETP">
+            <div class="ti-metric-card" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="app.setAbaStatus('validados')" title="DODs validados pelo TI aptos para gerar ETP">
               <div class="ti-metric-icon">✅</div>
               <div class="ti-metric-body">
                 <span class="ti-metric-label">DODs Validados</span>
                 <div class="ti-metric-val text-success" id="metricValidados">0</div>
               </div>
             </div>
-            <div class="ti-metric-card" onclick="app.setAbaStatus('etp_gerado')" title="Estudos Técnicos Preliminares já elaborados">
+            <div class="ti-metric-card" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="app.setAbaStatus('etp_gerado')" title="Estudos Técnicos Preliminares já elaborados">
               <div class="ti-metric-icon">📑</div>
               <div class="ti-metric-body">
                 <span class="ti-metric-label">ETPs Gerados</span>
                 <div class="ti-metric-val text-accent" id="metricEtps">0</div>
               </div>
             </div>
-            <div class="ti-metric-card" onclick="app.setAbaStatus('canceladas')" title="Demandas canceladas ou reprovadas">
+            <div class="ti-metric-card" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="app.setAbaStatus('canceladas')" title="Demandas canceladas ou reprovadas">
               <div class="ti-metric-icon">🚫</div>
               <div class="ti-metric-body">
                 <span class="ti-metric-label">Canceladas / Reprovadas</span>
@@ -544,13 +544,13 @@
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
-              <input type="text" id="inputBusca" class="search-pro-field" placeholder="Buscar por protocolo, unidade, solicitante... (Ctrl+K ou /)" autocomplete="off" oninput="app.filtrarTabela()">
+              <input type="text" id="inputBusca" aria-label="Buscar demandas" class="search-pro-field" placeholder="Buscar por protocolo, unidade, solicitante... (Ctrl+K ou /)" autocomplete="off" oninput="app.filtrarTabela()">
               <button type="button" id="btnLimparBusca" class="btn-clear-search" onclick="app.limparBusca()" style="display: none;" title="Limpar busca">&times;</button>
             </div>
 
             <!-- FILTROS AVANÇADOS EXCLUSIVOS PARA ADMIN/TI -->
             <div id="filtrosAdminWrap" style="display: none; align-items: center; gap: 8px;">
-              <select id="filtroSecretariaAdmin" class="dark-input filter-select-glass" autocomplete="off" onchange="app.aplicarFiltrosAdmin()">
+              <select id="filtroSecretariaAdmin" aria-label="Filtrar por secretaria" class="dark-input filter-select-glass" autocomplete="off" onchange="app.aplicarFiltrosAdmin()">
                 <option value="">Secretarias</option>
                 <option value="Secretaria Municipal de Educação">Educação</option>
                 <option value="Secretaria Municipal de Saúde">Saúde</option>
@@ -558,7 +558,7 @@
                 <option value="Secretaria da Fazenda">Fazenda</option>
               </select>
 
-              <select id="filtroInstituicaoAdmin" class="dark-input filter-select-glass" autocomplete="off" onchange="app.aplicarFiltrosAdmin()">
+              <select id="filtroInstituicaoAdmin" aria-label="Filtrar por instituição" class="dark-input filter-select-glass" autocomplete="off" onchange="app.aplicarFiltrosAdmin()">
                 <option value="">Unidades</option>
                 <!-- Preenchido via app.carregarInstituicoesFiltro() -->
               </select>

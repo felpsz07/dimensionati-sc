@@ -1,0 +1,67 @@
+/* Entrada do produto: mesma materialidade da Central, sem dependência da sessão. */
+#screen-login .glass-login-bg { background:radial-gradient(ellipse at 15% 15%,#6944a633,transparent 52%),radial-gradient(ellipse at 90% 85%,#7763aa22,transparent 45%),#100e16!important; min-height:100vh; height:auto; padding:48px 24px; color:#f0edfc; }
+#screen-login .glass-login-stage { display:flex; align-items:center; justify-content:center; width:100%; max-width:1280px; min-height:calc(100vh - 96px); height:auto; padding:32px; background:transparent!important; border:0; box-shadow:none; overflow:visible; }
+#screen-login :is(.tech-blueprint-grid,.login-flow-circuit-svg,.bg-theme-card) { display:none!important; }
+#screen-login .glass-login-card { position:relative; inset:auto; transform:none; width:100%; max-width:560px; margin:0; padding:40px; border:1px solid #514361!important; border-radius:28px; background:linear-gradient(145deg,#30273ed9,#1d1927ed)!important; box-shadow:inset 0 1px 0 #ffffff20,0 28px 90px #0005; backdrop-filter:blur(22px); color:#f0edfc; }
+#screen-login .glass-login-card.register-mode { max-width:700px; }
+#screen-login .glass-logo-top { margin-bottom:38px; text-align:left; }
+#screen-login .glass-brand-row { justify-content:flex-start; gap:14px; }
+#screen-login .glass-brand-badge-icon { background:linear-gradient(145deg,#efe4ff,#ac8ce7 65%,#6c4e9a)!important; color:#27183c!important; border:1px solid #deccff; border-radius:12px; width:44px; height:44px; box-shadow:inset 0 1px 1px #fffa,0 5px 14px #0003; }
+#screen-login .glass-logo-text { color:#f0edfc!important; font-size:32px; letter-spacing:-.055em; font-weight:700; }
+#screen-login .glass-logo-sub { display:block; color:#c1b9df!important; font-size:18px; line-height:1.6; margin-top:16px; }
+#screen-login .glass-login-heading { color:#f0edfc!important; font-size:36px; letter-spacing:-.04em; font-weight:600; margin-bottom:28px; }
+#screen-login .glass-field-group { margin-bottom:22px; }
+#screen-login .glass-label { color:#e7dff4!important; font-size:19px; line-height:1.5; margin-bottom:10px; }
+#screen-login .glass-input { min-height:58px; height:auto; padding:16px 18px; font-size:19px; line-height:1.4; border:1px solid #574b66!important; border-radius:13px; background:#15111f!important; color:#f0edfc!important; box-shadow:inset 0 2px 4px #0002; }
+#screen-login .glass-input::placeholder { color:#aaa1bd!important; opacity:1; }
+#screen-login select.glass-input { color-scheme:dark; }
+#screen-login .glass-password-wrap .glass-input { padding-right:60px; }
+#screen-login .glass-eye-btn { color:#d7c7ef!important; width:48px; min-height:48px; }
+#screen-login .glass-signin-btn { min-height:60px; font-size:21px; font-weight:700; border:1px solid #e3d6ff88; border-radius:14px; background:linear-gradient(165deg,#e3d6ff,#bca0f6 60%,#a780ec)!important; color:#27183c!important; box-shadow:inset 0 1px 1px #fff9,0 8px 24px #0003; }
+#screen-login .glass-signin-btn:hover { filter:brightness(1.06); transform:none; }
+#screen-login :is(.glass-register-footer,.glass-forgot-row) { color:#c1b9df!important; font-size:18px; line-height:1.6; }
+#screen-login .glass-register-footer { margin-top:24px; padding-top:24px; border-top:1px solid #514361; }
+#screen-login .glass-switch-link { color:#ddcaff!important; text-underline-offset:4px; }
+#screen-login :focus-visible { outline:3px solid #d6bcff!important; outline-offset:4px; }
+@media(max-width:600px) { #screen-login .glass-login-bg { padding:24px 16px; } #screen-login .glass-login-stage { padding:0; min-height:calc(100vh - 48px); } #screen-login .glass-login-card { padding:28px 22px; border-radius:24px; } #screen-login .glass-logo-text { font-size:29px; } #screen-login .glass-grid-2col { grid-template-columns:1fr; } }
+@media(prefers-reduced-motion:reduce) { #screen-login * { animation:none!important; transition:none!important; } }
+/* Contexto visual recuperado do login original, com a identidade violeta. */
+#screen-login .glass-login-bg { background:radial-gradient(ellipse at 50% 45%,#7045a94d,transparent 62%),radial-gradient(ellipse at 10% 10%,#9671c924,transparent 40%),#100e16!important; }
+#screen-login .glass-login-stage { max-width:1600px; border:1px solid #bda0e324; border-radius:36px; background:linear-gradient(140deg,#b494d909,#18122244)!important; box-shadow:inset 0 1px 0 #ffffff08; }
+#screen-login .glass-login-card { z-index:3; box-shadow:inset 0 1px 0 #ffffff30,0 28px 90px #0005,0 0 80px #9d6cd51a; }
+#screen-login .glass-login-stage::before { content:''; position:absolute; width:min(72vw,900px); aspect-ratio:1; border-radius:50%; border:1px solid #bfa2ec18; box-shadow:0 0 0 80px #bfa2ec04,0 0 0 81px #bfa2ec0b; pointer-events:none; }
+@media(min-width:1200px) {
+ #screen-login .glass-login-stage { display:grid; grid-template-columns:minmax(210px,1fr) minmax(440px,560px) minmax(210px,1fr); grid-template-rows:1fr 1fr; gap:32px; padding:40px 28px; }
+ #screen-login .glass-login-card { grid-column:2; grid-row:1/3; }
+ #screen-login .bg-theme-card { display:block!important; position:relative; inset:auto; width:100%; max-width:290px; justify-self:center; opacity:1; transform:none; animation:none; background:linear-gradient(145deg,#48345599,#241b36bb); border:1px solid #ab8bc547; border-radius:22px; padding:22px; box-shadow:inset 0 1px 0 #ffffff12,0 16px 36px #0003; }
+ #screen-login .bg-theme-card.pos-top-left { grid-column:1; grid-row:1; align-self:center; }
+ #screen-login .bg-theme-card.pos-bottom-left { grid-column:1; grid-row:2; align-self:center; }
+ #screen-login .bg-theme-card.pos-top-right { grid-column:3; grid-row:1; align-self:center; }
+ #screen-login .bg-theme-card.pos-bottom-right { grid-column:3; grid-row:2; align-self:center; }
+ #screen-login .login-flow-circuit-svg { display:block!important; opacity:.3; }
+ #screen-login .btc-step-tag { color:#d2b9f1; font-size:13px; letter-spacing:.02em; }
+ #screen-login .btc-title { color:#f0e8fc; font-size:18px; line-height:1.35; }
+ #screen-login .btc-icon-box { background:#b68ae826; border-color:#c4a3ed66; color:#d8bdf9; }
+ #screen-login .btc-mini-pill { background:#b392d71a; border-color:#bd9ae533; color:#e0d2ef; font-size:14px; }
+ #screen-login .glass-login-stage:has(.register-mode) { display:flex; }
+ #screen-login .glass-login-stage:has(.register-mode) .bg-theme-card { display:none!important; }
+}
+@media(max-width:1199px) { #screen-login .glass-login-stage { border:0; background:transparent!important; box-shadow:none; } }
+/* Centro geométrico independente da largura dos cartões laterais. */
+#screen-login .glass-login-bg { min-height:100svh; align-items:center; justify-content:center; }
+#screen-login .glass-login-stage { margin-inline:auto; align-items:center; justify-items:center; }
+#screen-login .glass-login-card { justify-self:center; align-self:center; margin-inline:auto; }
+@media(min-width:1200px) {
+ #screen-login .glass-login-stage { grid-template-columns:minmax(0,1fr) minmax(440px,560px) minmax(0,1fr); }
+}
+@keyframes authReveal { from { opacity:0; translate:0 12px; } to { opacity:1; translate:0 0; } }
+@keyframes authFloat { 0%,100% { translate:0 0; } 50% { translate:0 -6px; } }
+@media(prefers-reduced-motion:no-preference) {
+ #screen-login.active .glass-login-card { animation:authReveal .55s ease-out both; }
+ #screen-login .bg-theme-card { animation:authFloat 7s ease-in-out infinite; }
+ #screen-login .bg-theme-card.pos-bottom-left, #screen-login .bg-theme-card.pos-top-right { animation-delay:-3.5s; }
+ #screen-login .glass-signin-btn { transition:filter .18s ease,box-shadow .18s ease; }
+ #screen-login .glass-signin-btn:hover { box-shadow:inset 0 1px 1px #fff9,0 8px 28px #b589ef30; }
+ #screen-login .glass-input { transition:border-color .18s ease,box-shadow .18s ease; }
+}
+@media(prefers-reduced-motion:reduce) { #screen-login * { animation:none!important; transition:none!important; } }

@@ -1,0 +1,128 @@
+/* Direção D. Escopo exclusivo da Central administrativa. */
+body.is-user-admin:has(#view-licitacoes.active) { --central-bg:#191724; --central-surface:#221f30; --central-text:#f0edfc; --central-muted:#c1b9df; --central-border:#48415d; --central-accent:#d1c2ff; background:var(--central-bg); color:var(--central-text); }
+body.is-user-admin.theme-light:has(#view-licitacoes.active) { --central-bg:#f3f1f8; --central-surface:#fff; --central-text:#252034; --central-muted:#665d79; --central-border:#d5cfe2; --central-accent:#6044a4; }
+body.is-user-admin:has(#view-licitacoes.active) .dark-navbar { background:var(--central-bg)!important; border-bottom:1px solid var(--central-border); box-shadow:none; padding:24px 5vw; flex-wrap:wrap; gap:20px; }
+body.is-user-admin:has(#view-licitacoes.active) .dark-navbar :is(.brand-text,.user-name,.nav-link-btn,.btn-theme-toggle) { color:var(--central-text)!important; }
+body.is-user-admin:has(#view-licitacoes.active) .dark-navbar :is(.user-pill-badge,.btn-theme-toggle,.nav-link-btn.active) { background:var(--central-surface)!important; border-color:var(--central-border)!important; }
+body.is-user-admin:has(#view-licitacoes.active) .user-sector { color:var(--central-muted)!important; }
+body.is-user-admin:has(#view-licitacoes.active) .dark-main-container { max-width:1700px; width:100%; padding:48px 5vw; }
+body.is-user-admin #view-licitacoes { color:var(--central-text); font-size:18px; }
+body.is-user-admin #view-licitacoes .view-header-corporate { margin-bottom:24px; }
+body.is-user-admin #view-licitacoes .header-main-row { display:flex; align-items:center; justify-content:space-between; gap:32px; margin-bottom:40px; }
+body.is-user-admin #view-licitacoes .header-title-wrap { flex:1; }
+body.is-user-admin #view-licitacoes .header-page-title { color:var(--central-text)!important; font-size:clamp(36px,4vw,60px)!important; line-height:1.08; letter-spacing:-.045em; font-weight:650; max-width:14ch; }
+body.is-user-admin #view-licitacoes .header-page-subtitle { color:var(--central-muted)!important; font-size:18px; max-width:56ch; line-height:1.6; }
+body.is-user-admin #view-licitacoes .header-main-row > div:last-child { flex-wrap:wrap; justify-content:flex-end; }
+body.is-user-admin #view-licitacoes :is(button,input,select) { font-size:18px!important; min-height:48px; }
+body.is-user-admin #view-licitacoes .btn-primary-action { background:var(--central-accent)!important; color:var(--central-bg)!important; border:0; box-shadow:none!important; border-radius:14px; padding:16px 24px; }
+body.is-user-admin #view-licitacoes .btn-secondary-glass { background:transparent!important; color:var(--central-text)!important; border:1px solid var(--central-border)!important; box-shadow:none; border-radius:14px; padding:16px 24px; }
+body.is-user-admin #view-licitacoes .header-controls-row { display:flex; flex-wrap:wrap; justify-content:flex-start; align-items:center; gap:16px; margin:24px 0; }
+body.is-user-admin #view-licitacoes .search-pro-box { flex:1 1 320px; min-width:0; max-width:none; height:56px; background:var(--central-surface)!important; border:1px solid var(--central-border)!important; border-radius:12px; }
+body.is-user-admin #view-licitacoes .search-pro-field { color:var(--central-text)!important; background:transparent!important; width:100%; }
+body.is-user-admin #view-licitacoes input::placeholder { color:var(--central-muted)!important; opacity:1; }
+body.is-user-admin #view-licitacoes #filtrosAdminWrap { flex:1 1 460px; min-width:0; flex-direction:row; flex-wrap:nowrap; }
+body.is-user-admin #view-licitacoes #filtrosAdminWrap select { flex:1 1 0; min-width:0; width:0; max-width:none; height:56px; margin:0; background:var(--central-surface)!important; color:var(--central-text)!important; border:1px solid var(--central-border)!important; border-radius:12px; padding:0 16px; }
+body.is-user-admin #view-licitacoes .controls-right-group { display:none; }
+body.is-user-admin #view-licitacoes .status-tabs-wrapper { margin:0; }
+body.is-user-admin #view-licitacoes .status-tabs-container { display:flex; flex-wrap:wrap; gap:8px; background:transparent!important; border:0!important; padding:0; box-shadow:none; }
+body.is-user-admin #view-licitacoes .status-tab-btn { color:var(--central-muted)!important; border:1px solid transparent; background:transparent!important; padding:12px 18px; border-radius:12px; box-shadow:none!important; }
+body.is-user-admin #view-licitacoes .status-tab-btn.active { color:var(--central-text)!important; border-color:var(--central-border); background:var(--central-surface)!important; }
+body.is-user-admin #view-licitacoes .tab-count-badge { background:transparent!important; color:inherit!important; font-size:17px; }
+body.is-user-admin #view-licitacoes .table-card-panel { background:var(--central-surface)!important; border:1px solid var(--central-border)!important; border-radius:18px; box-shadow:none!important; overflow:hidden; }
+body.is-user-admin #view-licitacoes .enterprise-table { background:transparent!important; color:var(--central-text)!important; }
+body.is-user-admin #view-licitacoes .enterprise-table :is(th,td) { background:transparent!important; color:var(--central-text)!important; border-color:var(--central-border)!important; padding:24px 18px; font-size:18px; }
+body.is-user-admin #view-licitacoes .enterprise-table th { color:var(--central-muted)!important; font-size:16px; text-transform:capitalize; letter-spacing:0; font-weight:500; }
+body.is-user-admin #view-licitacoes .enterprise-table td :is(strong,.req-unidade,.req-solicitante) { color:inherit!important; }
+body.is-user-admin #view-licitacoes .table-card-footer { background:transparent!important; border-color:var(--central-border)!important; color:var(--central-muted)!important; padding:20px; }
+body.is-user-admin #view-licitacoes :focus-visible { outline:3px solid var(--central-accent)!important; outline-offset:4px; }
+body.is-user-admin #view-licitacoes button:hover { filter:brightness(1.1); transform:none!important; }
+@media(max-width:1000px) { body.is-user-admin #view-licitacoes .header-main-row { align-items:flex-start; flex-direction:column; } body.is-user-admin #view-licitacoes .header-page-title { max-width:22ch; } }
+@media(max-width:760px) { body.is-user-admin:has(#view-licitacoes.active) .dark-main-container { padding:28px 20px; } body.is-user-admin #view-licitacoes #filtrosAdminWrap { flex:none; width:100%; flex-wrap:wrap; } body.is-user-admin #view-licitacoes #filtrosAdminWrap select { flex:1 1 220px; width:100%; height:56px!important; } body.is-user-admin #view-licitacoes .search-pro-box { flex:none; width:100%; } body.is-user-admin #view-licitacoes .enterprise-table { min-width:960px; } body.is-user-admin #view-licitacoes .table-responsive { overflow-x:auto; } }
+/* Neutraliza regras móveis antigas que usam !important. */
+body.is-user-admin #view-licitacoes #filtrosAdminWrap { flex-direction:row!important; align-items:center; }
+body.is-user-admin #view-licitacoes #filtrosAdminWrap select { flex-grow:1; flex-shrink:1; flex-basis:0; }
+@media(max-width:760px) { body.is-user-admin #view-licitacoes #filtrosAdminWrap { flex-direction:column!important; align-items:stretch; } body.is-user-admin #view-licitacoes #filtrosAdminWrap select { flex:none; width:100%!important; min-height:56px; } body.is-user-admin #view-licitacoes .header-main-row > div:last-child { width:100%; } }
+body.is-user-admin:has(#view-licitacoes.active) #screen-app { background:var(--central-bg)!important; }
+body.is-user-admin #view-licitacoes .status-tabs-container { flex-wrap:wrap!important; overflow:visible!important; width:100%!important; }
+body.is-user-admin #view-licitacoes .status-tabs-wrapper { overflow:visible!important; }
+body.is-user-admin #view-licitacoes .header-main-row { margin-bottom:28px!important; }
+/* Refinamento solicitado: superfícies modulares e violeta expressivo. */
+body.is-user-admin:has(#view-licitacoes.active) { --central-bg:#151020; --central-surface:#211a31; --central-border:#443653; --central-accent:#c9b7ff; }
+body.is-user-admin.theme-light:has(#view-licitacoes.active) { --central-bg:#f0edf6; --central-surface:#fff; --central-border:#ded5ec; --central-accent:#6943cb; }
+body.is-user-admin:has(#view-licitacoes.active) .dark-navbar { padding:20px 4vw; background:var(--central-bg)!important; }
+body.is-user-admin:has(#view-licitacoes.active) .dark-main-container { padding:36px 4vw 56px; }
+body.is-user-admin #view-licitacoes .header-main-row { padding:32px; background:var(--central-surface); border:1px solid var(--central-border); border-radius:28px; margin-bottom:24px!important; min-height:200px; }
+body.is-user-admin #view-licitacoes .header-page-title { font-weight:600; max-width:18ch; font-size:clamp(36px,3.6vw,58px)!important; }
+body.is-user-admin #view-licitacoes .header-main-row > div:last-child { max-width:480px; }
+body.is-user-admin #view-licitacoes .btn-primary-action { background:#bca3ff!important; color:#24133e!important; border-radius:999px; padding:17px 26px; }
+body.is-user-admin.theme-light #view-licitacoes .btn-primary-action { background:#6943cb!important; color:#fff!important; }
+body.is-user-admin #view-licitacoes .btn-secondary-glass { border-radius:999px; padding:17px 26px; }
+body.is-user-admin #view-licitacoes .btn-action-icon { font-size:22px; }
+body.is-user-admin #view-licitacoes .header-controls-row { padding:20px; background:var(--central-surface); border:1px solid var(--central-border); border-radius:22px; margin:0 0 24px; gap:14px; }
+body.is-user-admin #view-licitacoes .search-pro-box { background:var(--central-bg)!important; border-color:transparent!important; border-radius:14px; }
+body.is-user-admin #view-licitacoes #filtrosAdminWrap select { background:var(--central-bg)!important; border-color:transparent!important; border-radius:14px; }
+body.is-user-admin #view-licitacoes .status-tabs-container { display:grid!important; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px!important; }
+body.is-user-admin #view-licitacoes .status-tab-btn { display:flex; align-items:center; justify-content:space-between; gap:12px; min-width:0!important; white-space:normal!important; background:var(--central-surface)!important; border:1px solid var(--central-border)!important; border-radius:18px; padding:20px 16px!important; }
+body.is-user-admin #view-licitacoes .status-tab-btn.active { background:var(--central-accent)!important; color:var(--central-bg)!important; border-color:var(--central-accent)!important; }
+body.is-user-admin #view-licitacoes .tab-count-badge { font-size:24px!important; font-weight:650; min-width:28px; }
+body.is-user-admin #view-licitacoes .table-card-panel { border-radius:24px; margin-top:24px; }
+body.is-user-admin #view-licitacoes .enterprise-table th { padding-top:22px; padding-bottom:22px; }
+body.is-user-admin #view-licitacoes .enterprise-table tbody tr:hover { background:color-mix(in srgb,var(--central-accent) 7%,transparent)!important; }
+body.is-user-admin #view-licitacoes .btn-table-action { min-height:46px; border-radius:999px!important; padding:10px 18px!important; }
+@media(max-width:1150px) { body.is-user-admin #view-licitacoes .status-tabs-container { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(max-width:760px) { body.is-user-admin #view-licitacoes .header-main-row { padding:24px; border-radius:24px; gap:24px; } body.is-user-admin #view-licitacoes .header-controls-row { padding:16px; } body.is-user-admin #view-licitacoes .status-tabs-container { grid-template-columns:repeat(2,minmax(0,1fr)); } body.is-user-admin #view-licitacoes .status-tab-btn { font-size:18px!important; padding:16px!important; } body.is-user-admin #view-licitacoes .header-main-row > div:last-child { max-width:none; } }
+@media(prefers-reduced-motion:reduce) { body.is-user-admin #view-licitacoes * { transition:none!important; animation:none!important; } }
+/* Materialidade: vidro fumê, luz violeta e controles com profundidade. */
+body.is-user-admin:has(#view-licitacoes.active) { --central-bg:#100e16; --central-surface:#1d1927; --central-border:#463d56; --central-accent:#c8b3ff; }
+body.is-user-admin.theme-light:has(#view-licitacoes.active) { --central-bg:#eeeaf4; --central-surface:#faf8ff; --central-border:#cbc2da; --central-accent:#6440b6; }
+body.is-user-admin:has(#view-licitacoes.active) #screen-app { background:radial-gradient(ellipse at 85% 0%,#6d46a62b,transparent 48%),var(--central-bg)!important; }
+body.is-user-admin:has(#view-licitacoes.active) .dark-navbar { background:color-mix(in srgb,var(--central-bg) 85%,transparent)!important; backdrop-filter:blur(20px); border-bottom-color:var(--central-border); }
+body.is-user-admin:has(#view-licitacoes.active) .brand-text { font-weight:700; letter-spacing:-.055em; font-size:27px; }
+body.is-user-admin:has(#view-licitacoes.active) .brand-icon { background:linear-gradient(145deg,#f5eeff,#ab8be8 55%,#654a96)!important; color:#251437!important; border:1px solid #e3d5ff; border-radius:12px; box-shadow:inset 0 1px 2px #fff9,0 4px 16px #0003; }
+body.is-user-admin:has(#view-licitacoes.active) .user-avatar-mini { background:#c8b3ff!important; color:#27183c!important; }
+body.is-user-admin #view-licitacoes .header-main-row { position:relative; isolation:isolate; overflow:hidden; padding:38px; border-radius:28px; background:linear-gradient(120deg,color-mix(in srgb,var(--central-surface) 95%,#fff),var(--central-surface) 65%); box-shadow:inset 0 1px 0 #ffffff12,0 16px 48px #00000018; }
+body.is-user-admin #view-licitacoes .header-main-row::after { content:''; position:absolute; z-index:-1; pointer-events:none; right:-100px; top:-180px; width:480px; height:480px; border-radius:50%; border:1px solid #bb9de838; box-shadow:0 0 0 44px #bb9de808,0 0 0 45px #bb9de818,0 0 0 90px #bb9de807,0 0 0 91px #bb9de814; }
+body.is-user-admin #view-licitacoes .header-page-title { letter-spacing:-.055em; font-weight:650; line-height:1.05; }
+body.is-user-admin #view-licitacoes .btn-primary-action { background:linear-gradient(165deg,#e3d6ff,#bca0f6 60%,#a780ec)!important; color:#27183c!important; border:1px solid #e3d6ff88; box-shadow:inset 0 1px 1px #fff9,0 6px 20px #0003!important; }
+body.is-user-admin #view-licitacoes .btn-secondary-glass { background:linear-gradient(165deg,#ffffff12,#ffffff03)!important; border-color:var(--central-border)!important; box-shadow:inset 0 1px 0 #ffffff19!important; backdrop-filter:blur(12px); }
+body.is-user-admin #view-licitacoes .header-controls-row { background:color-mix(in srgb,var(--central-surface) 80%,transparent); box-shadow:inset 0 1px 0 #ffffff0c; }
+body.is-user-admin #view-licitacoes .status-tab-btn { min-height:88px; border-radius:18px!important; background:linear-gradient(150deg,color-mix(in srgb,var(--central-surface) 95%,#fff),var(--central-surface))!important; box-shadow:inset 0 1px 0 #ffffff0c!important; }
+body.is-user-admin #view-licitacoes .status-tab-btn.active { background:linear-gradient(145deg,#dfd0ff,#b69aee)!important; color:#27183c!important; border-color:#dfd0ff!important; box-shadow:0 6px 22px #0002,inset 0 1px 0 #ffffff88!important; }
+body.is-user-admin #view-licitacoes .tab-count-badge { font-size:30px!important; font-weight:500; letter-spacing:-.04em; }
+body.is-user-admin #view-licitacoes .table-card-panel { box-shadow:0 16px 40px #00000014,inset 0 1px 0 #ffffff0b!important; }
+body.is-user-admin #view-licitacoes .enterprise-table th { text-transform:lowercase!important; }
+body.is-user-admin #view-licitacoes .enterprise-table th::first-letter { text-transform:uppercase; }
+@media(max-width:760px) { body.is-user-admin #view-licitacoes .header-main-row { padding:26px; } body.is-user-admin #view-licitacoes .header-main-row::after { right:-280px; } }
+@media(prefers-contrast:more) { body.is-user-admin #view-licitacoes :is(.header-main-row,.status-tab-btn,.header-controls-row,.table-card-panel) { border:2px solid var(--central-text)!important; box-shadow:none!important; } }
+/* Cabeçalho compacto para priorizar a lista de demandas. */
+body.is-user-admin:has(#view-licitacoes.active) .dark-main-container { padding-top:24px; }
+body.is-user-admin #view-licitacoes .header-main-row { min-height:0; padding:22px 28px; margin-bottom:16px!important; gap:24px; }
+body.is-user-admin #view-licitacoes .header-page-title { font-size:clamp(32px,2.6vw,42px)!important; max-width:none; line-height:1.15; }
+body.is-user-admin #view-licitacoes .header-title-wrap { min-width:0; }
+body.is-user-admin #view-licitacoes .header-controls-row { padding:14px 18px; margin-bottom:16px; }
+body.is-user-admin #view-licitacoes .view-header-corporate { margin-bottom:16px; }
+body.is-user-admin #view-licitacoes .status-tab-btn { min-height:64px; padding:12px 16px!important; }
+body.is-user-admin #view-licitacoes .table-card-panel { margin-top:16px; }
+@media(max-width:760px) {
+ body.is-user-admin #view-licitacoes .header-main-row { padding:20px; gap:16px; }
+ body.is-user-admin #view-licitacoes .header-controls-row { padding:12px; }
+ body.is-user-admin #view-licitacoes .status-tab-btn { min-height:58px; padding:12px!important; }
+}
+/* Vidro violeta: transparência sobre iluminação difusa, sem ampliar o cabeçalho. */
+body.is-user-admin:not(.theme-light):has(#view-licitacoes.active) { --central-bg:#100d25; --central-surface:#24203c; --central-border:#b09be53d; --central-muted:#cec5e5; }
+body.is-user-admin:not(.theme-light):has(#view-licitacoes.active) #screen-app { background:radial-gradient(ellipse at 0% 12%,#782fbd55,transparent 43%),radial-gradient(ellipse at 100% 48%,#5749bc40,transparent 50%),#100d25!important; }
+body.is-user-admin:not(.theme-light):has(#view-licitacoes.active) .dark-navbar { background:#211a3c88!important; backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px); box-shadow:inset 0 -1px 0 #ffffff0a; }
+body.is-user-admin:not(.theme-light) #view-licitacoes :is(.header-main-row,.header-controls-row,.table-card-panel) { background:linear-gradient(125deg,#6d4b9938,#24203caa 65%)!important; backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px); border-color:#c7b1f038!important; box-shadow:inset 0 1px 0 #ffffff15,0 12px 32px #00000020!important; }
+body.is-user-admin:not(.theme-light) #view-licitacoes .status-tab-btn { background:linear-gradient(135deg,#70509c40,#292240a6)!important; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-color:#c7b1f030!important; }
+body.is-user-admin:not(.theme-light) #view-licitacoes .status-tab-btn.active { background:linear-gradient(135deg,#ddcaff,#b39ae9)!important; color:#251439!important; border-color:#e3d6ff99!important; }
+body.is-user-admin:not(.theme-light) #view-licitacoes .search-pro-box,
+body.is-user-admin:not(.theme-light) #view-licitacoes #filtrosAdminWrap select { background:#100c2399!important; border:1px solid #bba5e32e!important; }
+body.is-user-admin:not(.theme-light) #view-licitacoes #filtrosAdminWrap select option { background:#241d38; color:#f0edfc; }
+@supports not (backdrop-filter:blur(1px)) {
+ body.is-user-admin:not(.theme-light) #view-licitacoes :is(.header-main-row,.header-controls-row,.table-card-panel,.status-tab-btn) { background:#282039!important; }
+ body.is-user-admin:not(.theme-light) #view-licitacoes .status-tab-btn.active { background:#c8b3ff!important; }
+}
+@media(prefers-reduced-transparency:reduce) {
+ body.is-user-admin:not(.theme-light) #view-licitacoes :is(.header-main-row,.header-controls-row,.table-card-panel,.status-tab-btn) { backdrop-filter:none; background:#282039!important; }
+ body.is-user-admin:not(.theme-light) #view-licitacoes .status-tab-btn.active { background:#c8b3ff!important; }
+}

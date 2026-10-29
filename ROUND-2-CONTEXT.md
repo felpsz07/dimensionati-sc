@@ -1,0 +1,2 @@
+# Direção D confirmada
+Aprovada pelo usuário, mantendo letras grandes. Fonte efetivamente usada: Segoe UI local, fallback sans-serif, sem redistribuição. Base #191724; texto #f0edfc; secundário #c1b9df. Cabeçalho amplo à esquerda, ações à direita; filas e tabela abaixo. Sem faixa de etapas. Controles mínimos 48px; corpo 18px; título responsivo 36–60px. Bordas discretas delimitam controles e registros; nenhuma animação automática. Escopo: Central administrativa; regras de negócio intactas. Tema claro continua disponível. Validação humana da implementação pendente.
