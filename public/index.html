@@ -46,23 +46,23 @@
 
           <!-- Trilha Superior Esquerda (Instituições -> Centro) -->
           <path d="M 220 165 L 330 165 L 395 235" stroke="url(#gradLineLeft)" stroke-width="2.2" stroke-dasharray="5 5" />
-          <circle cx="330" cy="165" r="4" fill="#38BDF8" filter="url(#glowNode)" />
-          <circle cx="395" cy="235" r="5" fill="#34D399" filter="url(#glowNode)" />
+          <circle cx="330" cy="165" r="4" fill="#38BDF8" />
+          <circle cx="395" cy="235" r="5" fill="#34D399" />
 
           <!-- Trilha Inferior Esquerda (Dimensionamento Hardware -> Centro) -->
           <path d="M 230 515 L 335 515 L 395 445" stroke="url(#gradLineLeft)" stroke-width="2.2" />
-          <circle cx="335" cy="515" r="4" fill="#38BDF8" filter="url(#glowNode)" />
-          <circle cx="395" cy="445" r="5" fill="#38BDF8" filter="url(#glowNode)" />
+          <circle cx="335" cy="515" r="4" fill="#38BDF8" />
+          <circle cx="395" cy="445" r="5" fill="#38BDF8" />
 
           <!-- Trilha Superior Direita (Centro -> DOD Oficial) -->
           <path d="M 745 235 L 810 165 L 915 165" stroke="url(#gradLineRight)" stroke-width="2.2" />
-          <circle cx="745" cy="235" r="5" fill="#34D399" filter="url(#glowNode)" />
-          <circle cx="810" cy="165" r="4" fill="#38BDF8" filter="url(#glowNode)" />
+          <circle cx="745" cy="235" r="5" fill="#34D399" />
+          <circle cx="810" cy="165" r="4" fill="#38BDF8" />
 
           <!-- Trilha Inferior Direita (Centro -> Agrupamento ETP) -->
           <path d="M 745 445 L 810 515 L 910 515" stroke="url(#gradLineRight)" stroke-width="2.2" stroke-dasharray="5 5" />
-          <circle cx="745" cy="445" r="5" fill="#38BDF8" filter="url(#glowNode)" />
-          <circle cx="810" cy="515" r="4" fill="#34D399" filter="url(#glowNode)" />
+          <circle cx="745" cy="445" r="5" fill="#38BDF8" />
+          <circle cx="810" cy="515" r="4" fill="#34D399" />
 
           <!-- Linha vertical conectando DOD -> ETP na direita -->
           <path d="M 920 225 L 920 450" stroke="rgba(56, 189, 248, 0.22)" stroke-width="1.5" stroke-dasharray="4 6" />
@@ -503,35 +503,35 @@
               <div class="ti-metric-icon">⏳</div>
               <div class="ti-metric-body">
                 <span class="ti-metric-label">Aguardando TI</span>
-                <h3 class="ti-metric-val" id="metricAguardandoAnalise">0</h3>
+                <div class="ti-metric-val" id="metricAguardandoAnalise">0</div>
               </div>
             </div>
             <div class="ti-metric-card" onclick="app.setAbaStatus('ajustes')" title="Solicitações com pendências devolvidas ao servidor">
               <div class="ti-metric-icon">⚠️</div>
               <div class="ti-metric-body">
                 <span class="ti-metric-label">Com Ajustes</span>
-                <h3 class="ti-metric-val text-warn" id="metricAjustes">0</h3>
+                <div class="ti-metric-val text-warn" id="metricAjustes">0</div>
               </div>
             </div>
             <div class="ti-metric-card" onclick="app.setAbaStatus('validados')" title="DODs validados pelo TI aptos para gerar ETP">
               <div class="ti-metric-icon">✅</div>
               <div class="ti-metric-body">
                 <span class="ti-metric-label">DODs Validados</span>
-                <h3 class="ti-metric-val text-success" id="metricValidados">0</h3>
+                <div class="ti-metric-val text-success" id="metricValidados">0</div>
               </div>
             </div>
             <div class="ti-metric-card" onclick="app.setAbaStatus('etp_gerado')" title="Estudos Técnicos Preliminares já elaborados">
               <div class="ti-metric-icon">📑</div>
               <div class="ti-metric-body">
                 <span class="ti-metric-label">ETPs Gerados</span>
-                <h3 class="ti-metric-val text-accent" id="metricEtps">0</h3>
+                <div class="ti-metric-val text-accent" id="metricEtps">0</div>
               </div>
             </div>
             <div class="ti-metric-card" onclick="app.setAbaStatus('canceladas')" title="Demandas canceladas ou reprovadas">
               <div class="ti-metric-icon">🚫</div>
               <div class="ti-metric-body">
                 <span class="ti-metric-label">Canceladas / Reprovadas</span>
-                <h3 class="ti-metric-val text-danger" id="metricCanceladas">0</h3>
+                <div class="ti-metric-val text-danger" id="metricCanceladas">0</div>
               </div>
             </div>
           </div>
@@ -771,7 +771,7 @@
           <!-- ETAPA 1: O QUE VOCÊ PRECISA PARA REALIZAR SEU TRABALHO?   -->
           <!-- ======================================================== -->
           <div class="wizard-pane active" id="pane-passo-1">
-            <h3 class="pane-headline">O que você precisa?</h3>
+            <h2 class="pane-headline">O que você precisa?</h2>
             <p class="pane-sub">Conte o que você precisa para realizar seu trabalho. Vamos ajudar a identificar a melhor solução:</p>
 
             <div class="necessidade-grid">
@@ -855,7 +855,7 @@
           <!-- ETAPA 2: COMO VOCÊ UTILIZA O COMPUTADOR NO SEU TRABALHO? -->
           <!-- ======================================================== -->
           <div class="wizard-pane" id="pane-passo-2">
-            <h3 class="pane-headline">Perfil de Uso</h3>
+            <h2 class="pane-headline">Perfil de Uso</h2>
             <p class="pane-sub">Conte um pouco sobre sua rotina de trabalho para identificarmos o perfil mais adequado:</p>
 
             <!-- CATEGORIAS DE ROTINA (ENTENDENDO A NECESSIDADE, NÃO O HARDWARE) -->
@@ -1011,7 +1011,7 @@
           <!-- ETAPA 3: O QUE VOCÊ JÁ POSSUI NO SEU POSTO DE TRABALHO?   -->
           <!-- ======================================================== -->
           <div class="wizard-pane" id="pane-passo-3">
-            <h3 class="pane-headline">Itens no Posto</h3>
+            <h2 class="pane-headline">Itens no Posto</h2>
             <p class="pane-sub">Marque o que já está funcionando para solicitar apenas o que realmente falta (evita compras desnecessárias):</p>
 
             <div class="recursos-mesa-grid">
@@ -1096,7 +1096,7 @@
           <!-- ETAPA 4: NECESSIDADE IDENTIFICADA & RECOMENDAÇÃO TÉCNICA -->
           <!-- ======================================================== -->
           <div class="wizard-pane" id="pane-passo-4">
-            <h3 class="pane-headline">Perfil Recomendado</h3>
+            <h2 class="pane-headline">Perfil Recomendado</h2>
             <p class="pane-sub">Com base nas respostas sobre a sua rotina, o sistema estruturou a seguinte recomendação preliminar:</p>
 
             <div class="diagnostico-container">
@@ -1131,7 +1131,7 @@
 
                 <!-- RESUMO OBJETIVO -->
                 <div class="bullets-motivos-box">
-                  <h5>Critérios identificados na sua rotina:</h5>
+                  <h4>Critérios identificados na sua rotina:</h4>
                   <div class="bullets-list" id="listaMotivosNecessidade">
                     <!-- Preenchido dinamicamente via JS -->
                   </div>
@@ -1176,7 +1176,7 @@
           <!-- ETAPA 5: CONFIRA SUA SOLICITAÇÃO & ENVIAR PARA O TI       -->
           <!-- ======================================================== -->
           <div class="wizard-pane" id="pane-passo-5">
-            <h3 class="pane-headline">Resumo</h3>
+            <h2 class="pane-headline">Resumo</h2>
             <p class="pane-sub">Revise os dados antes de enviar para análise e homologação da Diretoria de TIC:</p>
 
             <div class="resumo-executivo-box">
@@ -1280,13 +1280,13 @@
           <div class="roi-divider"></div>
           <div class="roi-metric">
             <span class="roi-label">IMPACTO CONVERSÍVEL NA EDUCAÇÃO</span>
-            <h3 class="roi-subval">🎓 +293 Computadores Escolares</h3>
+            <div class="roi-subval">🎓 +293 Computadores Escolares</div>
             <span class="roi-sub">Verba preservada suficiente para equipar 15 novos laboratórios de informática em Lages</span>
           </div>
           <div class="roi-divider"></div>
           <div class="roi-metric">
             <span class="roi-label">TEMPO DE ANÁLISE DO AUDITOR</span>
-            <h3 class="roi-subval">⚡ 3 Segundos</h3>
+            <div class="roi-subval">⚡ 3 Segundos</div>
             <span class="roi-sub">Redução de 15 dias de perícia técnica manual para triagem preditiva instantânea</span>
           </div>
         </div>
@@ -1294,33 +1294,33 @@
         <!-- KPIS DO AUDITOR -->
         <div class="kpi-grid">
           <div class="kpi-box">
-            <span>PROCESSOS FISCALIZADOS</span>
-            <h3 id="kpiTotal">--</h3>
+            <span class="kpi-label">PROCESSOS FISCALIZADOS</span>
+            <div class="kpi-val" id="kpiTotal">--</div>
           </div>
           <div class="kpi-box">
-            <span>SOBREPREÇO EVITADO</span>
-            <h3 class="neon-text" id="kpiEco">R$ --</h3>
+            <span class="kpi-label">SOBREPREÇO EVITADO</span>
+            <div class="kpi-val text-success-strong" id="kpiEco">R$ --</div>
           </div>
           <div class="kpi-box">
-            <span>MÉDIA DE RISCO (IRS)</span>
-            <h3 id="kpiRisco">--%</h3>
+            <span class="kpi-label">MÉDIA DE RISCO (IRS)</span>
+            <div class="kpi-val" id="kpiRisco">--%</div>
           </div>
           <div class="kpi-box">
-            <span>ALERTAS CRÍTICOS</span>
-            <h3 style="color: #EF4444;" id="kpiAlertas">--</h3>
+            <span class="kpi-label">ALERTAS CRÍTICOS</span>
+            <div class="kpi-val text-danger-strong" id="kpiAlertas">--</div>
           </div>
         </div>
 
         <!-- GRÁFICOS ANALÍTICOS -->
         <div class="grid-2col" style="margin-top: 20px;">
           <div class="dark-card-box">
-            <h4 class="card-subtitle">Classificação dos Editais por Nível de Risco (TCE/SC)</h4>
+            <h3 class="card-subtitle">Classificação dos Editais por Nível de Risco (TCE/SC)</h3>
             <div style="height: 220px; position: relative; margin-top: 14px;">
               <canvas id="chartRisco"></canvas>
             </div>
           </div>
           <div class="dark-card-box">
-            <h4 class="card-subtitle">Volume Financeiro Licitado por Secretaria Municipal</h4>
+            <h3 class="card-subtitle">Volume Financeiro Licitado por Secretaria Municipal</h3>
             <div style="height: 220px; position: relative; margin-top: 14px;">
               <canvas id="chartOrgaos"></canvas>
             </div>
@@ -1376,7 +1376,7 @@
       <!-- VISTA 4: PÁGINA DE CONFIGURAÇÕES E DADOS DO USUÁRIO          -->
       <!-- ============================================================ -->
       <section id="view-configuracoes" class="dark-view">
-        <div class="wizard-container-box" style="max-width: 760px;">
+        <div class="settings-page-wrapper" style="max-width: 760px; margin: 0 auto; width: 100%;">
           
           <!-- CABEÇALHO -->
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px;">
@@ -1716,7 +1716,7 @@
         <div class="drawer-tab-pane" id="paneAnaliseHistorico">
           <div class="historico-timeline-container">
             <div class="timeline-header-info">
-              <h4 style="margin: 0; color: var(--dark-text); font-size: 1.05rem;">Trilha de Auditoria & Registro Cronológico</h4>
+              <h3 style="margin: 0; color: var(--dark-text); font-size: 1.05rem;">Trilha de Auditoria & Registro Cronológico</h3>
               <p style="margin: 4px 0 0 0; color: var(--dark-muted); font-size: 0.82rem;">
                 Registro formal de todas as ações de criação, validação, solicitações de ajuste e pareceres emitidos.
               </p>

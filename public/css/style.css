@@ -156,7 +156,8 @@ body {
 
 .dark-input:focus {
   border-color: var(--dark-accent);
-  box-shadow: 0 0 0 3px var(--dark-accent-glow);
+  outline: 2px solid var(--dark-accent);
+  outline-offset: 1px;
 }
 
 .dark-input::placeholder {
@@ -190,7 +191,7 @@ body {
 
 .btn-primary-neon {
   background: var(--dark-accent);
-  color: #0A0E14;
+  color: #FFFFFF;
   border: none;
   border-radius: var(--radius-sm);
   padding: 12px 24px;
@@ -206,8 +207,9 @@ body {
 
 .btn-primary-neon:hover {
   background: var(--dark-accent-hover);
+  color: #FFFFFF;
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(52, 211, 153, 0.25);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 }
 
 .btn-ghost {
@@ -454,9 +456,8 @@ body {
 }
 
 .dark-pill.active {
-  border-color: var(--dark-accent);
+  border: 2px solid var(--dark-accent);
   background: rgba(52, 211, 153, 0.08);
-  box-shadow: 0 0 0 2px var(--dark-accent);
 }
 
 .pill-ico {
@@ -650,7 +651,7 @@ body {
 /* BOTÃO DE AÇÃO PRIMÁRIO (+ NOVA REQUISIÇÃO) */
 .btn-primary-action {
   background: var(--dark-accent);
-  color: #0A0E14;
+  color: #FFFFFF;
   border: none;
   border-radius: 10px;
   padding: 12px 24px;
@@ -661,14 +662,15 @@ body {
   gap: 10px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 18px rgba(52, 211, 153, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
   white-space: nowrap;
 }
 
 .btn-primary-action:hover {
   background: var(--dark-accent-hover);
+  color: #FFFFFF;
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(52, 211, 153, 0.5);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24);
 }
 
 .btn-primary-action:active {
@@ -838,7 +840,7 @@ body {
 }
 
 .status-tab-btn.active#tabStatusCanceladas .tab-count-badge {
-  background: #EF4444;
+  background: #DC2626;
   color: #FFFFFF;
 }
 
@@ -1939,15 +1941,16 @@ body {
 
 .btn-doc-print {
   background: var(--dark-accent);
-  color: #0A0E14;
-  border: 1px solid rgba(52, 211, 153, 0.5);
-  box-shadow: 0 2px 10px rgba(52, 211, 153, 0.25);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .btn-doc-print:hover {
   background: var(--dark-accent-hover);
+  color: #FFFFFF;
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(52, 211, 153, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .btn-doc-close {
@@ -1979,7 +1982,7 @@ body {
   margin: 0 auto;
   background: #FFFFFF;
   color: #0F172A;
-  font-family: Arial, Helvetica, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, -apple-system, sans-serif;
   padding: 36px 44px;
   border-radius: 6px;
   box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
@@ -2155,7 +2158,7 @@ body {
   margin: 0 auto;
   background: #FFFFFF;
   color: #000000;
-  font-family: Arial, Helvetica, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, -apple-system, sans-serif;
   padding: 10px 14px;
 }
 
@@ -4017,7 +4020,7 @@ body {
     border: none !important;
     background: #FFFFFF !important;
     color: #000000 !important;
-    font-family: Arial, Helvetica, sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif !important;
   }
 
   .lages-header-logos {
@@ -4608,7 +4611,7 @@ body {
 }
 
 .btn-action-danger:hover {
-  background: #EF4444;
+  background: #DC2626;
   color: #FFFFFF;
 }
 
@@ -5652,6 +5655,7 @@ select.glass-input {
   body:not(.theme-dark) .btn-primary-neon:hover {
     background: #1E40AF !important;
     border-color: #1E40AF !important;
+    color: #FFFFFF !important;
     transform: translateY(-1px) !important;
     box-shadow: 0 6px 16px rgba(29, 78, 216, 0.26) !important;
   }
@@ -7788,7 +7792,7 @@ select.glass-input {
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.15);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* 1. Fundação Mobile & Touch Refinada */
@@ -8108,11 +8112,207 @@ body.theme-dark textarea:focus-visible {
 
 .necessidade-card.active,
 .nivel-card.active {
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2) !important;
+  outline: 2px solid #2563EB !important;
+  outline-offset: 1px !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.12) !important;
 }
 
 body.theme-dark .necessidade-card.active,
 body.theme-dark .nivel-card.active {
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.24) !important;
+  outline: 2px solid #38BDF8 !important;
+  outline-offset: 1px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+}
+
+
+/* ==========================================================================
+   IMPECCABLE DESIGN SYSTEM & CRAFT FLOOR REFINEMENTS (EMIL KOWALSKI CRAFT)
+   ========================================================================== */
+
+/* 1. Tipografia de Alto Nível & Ritmo Editorial */
+h1, h2, h3, h4,
+.header-page-title,
+.pane-headline,
+.drawer-title,
+.brand-text,
+.card-subtitle {
+  text-wrap: balance !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.25 !important;
+}
+
+p,
+.header-page-desc,
+.pane-sub,
+.nivel-desc,
+.nec-desc,
+.aviso-nec-text,
+.rec-destaque-sub,
+.bullet-item {
+  text-wrap: pretty !important;
+  line-height: 1.55 !important;
+}
+
+/* 2. Remoção de Halos Neon Artificiais (Substituído por Elevação Física Real) */
+.stepper-item.active .stepper-icon-wrap {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18) !important;
+  border-width: 2px !important;
+}
+
+.stepper-item.active .stepper-label-text::after {
+  box-shadow: none !important;
+}
+
+.footer-dot-sync,
+.status-homologado .status-dot,
+.status-analise .status-dot,
+.status-revisao .status-dot {
+  box-shadow: none !important;
+}
+
+.equip-choice-card.active,
+.btn-action-success:hover,
+.btn-action-etp.unlocked {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16) !important;
+}
+
+/* 3. Achatamento de Hierarquia (Zero Nested Cards) */
+/* Elimina bordas e caixas redundantes dentro de containers principais */
+.por-que-recomendamos-box,
+.bullets-motivos-box,
+.box-specs-tecnicas-ti {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 16px 18px !important;
+  border-top: 1px solid rgba(226, 232, 240, 0.15) !important;
+  border-radius: 0 !important;
+}
+
+body:not(.theme-dark) .por-que-recomendamos-box,
+body:not(.theme-dark) .bullets-motivos-box,
+body:not(.theme-dark) .box-specs-tecnicas-ti {
+  border-top: 1px solid #E2E8F0 !important;
+  background: transparent !important;
+}
+
+.card-recomendacao-destaque {
+  border: 1px solid var(--dark-border) !important;
+  border-radius: 14px !important;
+  padding: 24px 28px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 8px 24px -4px rgba(0, 0, 0, 0.12) !important;
+}
+
+body:not(.theme-dark) .card-recomendacao-destaque {
+  border: 1px solid #E2E8F0 !important;
+  background: #FFFFFF !important;
+}
+
+/* Sub-itens de especificações transformados em lista limpa com espaçamento harmônico */
+.spec-ti-item {
+  border: none !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-radius: 8px !important;
+  padding: 12px 14px !important;
+}
+
+body:not(.theme-dark) .spec-ti-item {
+  background: #F8FAFC !important;
+  border: 1px solid #F1F5F9 !important;
+}
+
+/* Resumo da demanda (Passo 5) simplificado sem caixas empilhadas */
+.resumo-card-info {
+  border: 1px solid var(--dark-border) !important;
+  background: var(--dark-surface) !important;
+  border-radius: 12px !important;
+  padding: 16px 20px !important;
+  box-shadow: none !important;
+}
+
+body:not(.theme-dark) .resumo-card-info {
+  border: 1px solid #E2E8F0 !important;
+  background: #FFFFFF !important;
+}
+
+/* 4. Contraste Rigoroso em Estados :hover e Botões (WCAG AA) */
+body:not(.theme-dark) .btn-primary-action:hover,
+body:not(.theme-dark) .btn-primary-neon:hover {
+  background: #1E3A8A !important;
+  border-color: #1E3A8A !important;
+  color: #FFFFFF !important;
+}
+
+body:not(.theme-dark) .btn-table-action:hover {
+  background: #E0E7FF !important;
+  color: #3730A3 !important;
+  border-color: #A5B4FC !important;
+}
+
+body.theme-dark .btn-table-action:hover {
+  background: rgba(124, 58, 237, 0.3) !important;
+  color: #EDE9FE !important;
+  border-color: #A78BFA !important;
+}
+
+/* 5. Inset e Padding Confortável em Janelas Modais */
+.modal-content {
+  padding: 32px 36px !important;
+  border-radius: 16px !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 640px) {
+  .modal-content {
+    padding: 20px 18px !important;
+    border-radius: 12px !important;
+  }
+}
+
+/* 6. Estilização Elegante do Painel KPI do Auditor */
+.kpi-box {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  padding: 16px 18px !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--dark-border) !important;
+}
+
+body:not(.theme-dark) .kpi-box {
+  background: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+}
+
+.kpi-label {
+  font-size: 0.76rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: var(--dark-muted) !important;
+}
+
+.kpi-val {
+  font-size: 1.55rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.03em !important;
+  line-height: 1.1 !important;
+  color: var(--dark-text) !important;
+}
+
+.text-success-strong {
+  color: #059669 !important;
+}
+
+body.theme-dark .text-success-strong {
+  color: #34D399 !important;
+}
+
+.text-danger-strong {
+  color: #DC2626 !important;
+}
+
+body.theme-dark .text-danger-strong {
+  color: #F87171 !important;
 }
 
