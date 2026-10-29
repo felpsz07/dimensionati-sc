@@ -1176,6 +1176,9 @@ const app = {
     const tbody = document.getElementById('tbodyLicitacoes');
     if (!tbody) return;
 
+    // Limpa menus de ações que foram movidos para o body (portal)
+    document.querySelectorAll('body > .acoes-menu-dropdown').forEach(m => m.remove());
+
     const footer = document.getElementById('tableCardFooter');
     const footerText = document.getElementById('footerCountText');
     const u = this.usuarioLogado;
@@ -1443,32 +1446,38 @@ const app = {
     const menu = document.getElementById(`menu-acoes-${protocolo}`);
     const todosMenus = document.querySelectorAll('.acoes-menu-dropdown');
     
-    const estaAtivo = menu && menu.classList.contains('active');
+    const estaAtivo = menu && menu.classList.contains('active') && menu.style.display !== 'none';
 
     // Fecha todos os menus abertos primeiro
     todosMenus.forEach(m => {
       m.classList.remove('active');
-      m.style.display = '';
+      m.style.display = 'none';
       m.style.visibility = '';
     });
 
     if (!menu || estaAtivo) return;
 
-    // Achar o bot?o disparador para posicionamento preciso por cima de qualquer elemento
+    // Move para document.body (portal) para evitar que backdrop-filter/overflow dos pais criem containing-block
+    if (menu.parentElement !== document.body) {
+      document.body.appendChild(menu);
+    }
+
+    // Achar o botão disparador para posicionamento preciso por cima de qualquer elemento
     const btn = (evt && evt.currentTarget) ? evt.currentTarget : (evt && evt.target ? evt.target.closest('button') : null);
     
     if (btn) {
       const rect = btn.getBoundingClientRect();
 
-      // Ativa temporariamente invis?vel para medir dimens?es reais
+      // Ativa temporariamente invisível para medir dimensões reais
       menu.style.visibility = 'hidden';
       menu.style.display = 'flex';
       menu.style.position = 'fixed';
       menu.style.zIndex = '9999999';
 
-      const menuHeight = menu.offsetHeight || 190;
+      const menuHeight = menu.offsetHeight || 220;
+      const menuWidth = menu.offsetWidth || 240;
 
-      // Verifica se h? espa?o vertical suficiente abaixo na janela (evita projetar dentro de outros quadros/rodap?)
+      // Verifica se há espaço vertical suficiente abaixo na janela (evita projetar fora da tela)
       const espacoAbaixo = window.innerHeight - rect.bottom;
       const abrirParaCima = espacoAbaixo < (menuHeight + 12) && rect.top > (menuHeight + 12);
 
@@ -1480,10 +1489,18 @@ const app = {
         menu.style.bottom = 'auto';
       }
 
-      // Alinha ? borda direita do bot?o
+      // Alinha à borda direita do botão, respeitando os limites da tela
       const rightPos = window.innerWidth - rect.right;
-      menu.style.right = `${Math.max(12, rightPos)}px`;
-      menu.style.left = 'auto';
+      if (rightPos < 12) {
+        menu.style.right = '12px';
+        menu.style.left = 'auto';
+      } else if (rect.right - menuWidth < 10) {
+        menu.style.left = '12px';
+        menu.style.right = 'auto';
+      } else {
+        menu.style.right = `${Math.max(12, rightPos)}px`;
+        menu.style.left = 'auto';
+      }
 
       menu.style.visibility = 'visible';
     }
@@ -1494,7 +1511,7 @@ const app = {
   fecharTodosMenusAcoes() {
     document.querySelectorAll('.acoes-menu-dropdown').forEach(m => {
       m.classList.remove('active');
-      m.style.display = '';
+      m.style.display = 'none';
       m.style.visibility = '';
     });
   },

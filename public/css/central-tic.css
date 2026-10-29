@@ -126,3 +126,53 @@ body.is-user-admin:not(.theme-light) #view-licitacoes #filtrosAdminWrap select o
  body.is-user-admin:not(.theme-light) #view-licitacoes :is(.header-main-row,.header-controls-row,.table-card-panel,.status-tab-btn) { backdrop-filter:none; background:#282039!important; }
  body.is-user-admin:not(.theme-light) #view-licitacoes .status-tab-btn.active { background:#c8b3ff!important; }
 }
+/* Dropdown de Ações alinhado ao Design Direção D */
+.acoes-menu-dropdown {
+  background: #24203c !important;
+  border: 1px solid #b09be53d !important;
+  border-radius: 14px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  padding: 8px !important;
+  min-width: 250px;
+}
+.theme-light .acoes-menu-dropdown,
+body:not(.theme-dark) .acoes-menu-dropdown {
+  background: #ffffff !important;
+  border: 1px solid #d5cfe2 !important;
+  box-shadow: 0 14px 35px rgba(26, 17, 43, 0.15) !important;
+}
+.acoes-menu-item {
+  color: #f0edfc !important;
+  border-radius: 10px !important;
+  padding: 10px 12px !important;
+  transition: background 0.15s ease, transform 0.15s ease;
+  font-size: 15px !important;
+  min-height: 44px !important;
+}
+.acoes-menu-item:hover {
+  background: rgba(201, 183, 255, 0.12) !important;
+}
+.acoes-menu-item strong {
+  color: #f0edfc !important;
+  font-size: 15px !important;
+}
+.acoes-menu-item small {
+  color: #cec5e5 !important;
+  font-size: 12px !important;
+}
+.theme-light .acoes-menu-item,
+body:not(.theme-dark) .acoes-menu-item {
+  color: #252034 !important;
+}
+.theme-light .acoes-menu-item:hover,
+body:not(.theme-dark) .acoes-menu-item:hover {
+  background: rgba(96, 68, 164, 0.08) !important;
+}
+.theme-light .acoes-menu-item strong,
+body:not(.theme-dark) .acoes-menu-item strong {
+  color: #252034 !important;
+}
+.theme-light .acoes-menu-item small,
+body:not(.theme-dark) .acoes-menu-item small {
+  color: #665d79 !important;
+}
