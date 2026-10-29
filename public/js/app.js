@@ -322,17 +322,161 @@ const app = {
     }
   },
 
+  // ==========================================
+  // SISTEMA DE TOASTS SONNER-LIKE & FEEDBACK TÁTIL (UX POLISH)
+  // ==========================================
+  toast(mensagem, tipo = 'info', duracao = 3800) {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      container.setAttribute('aria-live', 'polite');
+      document.body.appendChild(container);
+    }
+
+    const toastEl = document.createElement('div');
+    toastEl.className = `toast-pill toast-${tipo}`;
+    
+    const iconMap = {
+      success: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+      error: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+      warning: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+      info: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
+    };
+    const icon = iconMap[tipo] || iconMap.info;
+
+    toastEl.innerHTML = `
+      <span class="toast-icon">${icon}</span>
+      <span class="toast-msg">${String(mensagem).replace(/\n/g, '<br>')}</span>
+      <button type="button" class="toast-close" aria-label="Fechar">&times;</button>
+    `;
+
+    container.appendChild(toastEl);
+    requestAnimationFrame(() => {
+      toastEl.classList.add('show');
+    });
+
+    let removido = false;
+    const remover = () => {
+      if (removido) return;
+      removido = true;
+      toastEl.classList.remove('show');
+      toastEl.classList.add('hide');
+      setTimeout(() => toastEl.remove(), 260);
+    };
+
+    toastEl.querySelector('.toast-close').addEventListener('click', (e) => {
+      e.stopPropagation();
+      remover();
+    });
+    toastEl.addEventListener('click', remover);
+
+    if (duracao > 0) {
+      setTimeout(remover, duracao);
+    }
+  },
+
+  async copiarTexto(texto, label = 'Protocolo') {
+    let copiou = false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(texto);
+        copiou = true;
+      }
+    } catch (e) {}
+
+    if (!copiou) {
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = texto;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        textarea.style.top = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        copiou = document.execCommand('copy');
+        document.body.removeChild(textarea);
+      } catch (err) {}
+    }
+
+    if (copiou) {
+      this.toast(`📋 ${label} <strong>${texto}</strong> copiado para a área de transferência!`, 'success', 2600);
+    } else {
+      this.toast(`📋 ${label}: <strong>${texto}</strong>`, 'info', 3000);
+    }
+  },
+
+  fecharTodosModais() {
+    document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+    this.fecharCaixaEmail?.();
+    this.fecharCaixaEmailEtp?.();
+  },
+
+  limparBusca() {
+    const inp = document.getElementById('inputBusca');
+    if (inp) {
+      inp.value = '';
+      inp.focus();
+      this.filtrarTabela();
+    }
+  },
+
   async init() {
     this.aplicarTema(this.temaAtual);
     await this.carregarPerfis();
     this.renderizarDotGrid();
     this.verificarSessao();
 
-    // Fecha dropdowns de ações ao clicar fora
-    // Fecha dropdowns de a??es ao clicar fora ou rolar
+    // Fecha dropdowns de ações ao clicar fora ou rolar
     window.addEventListener('click', () => this.fecharTodosMenusAcoes());
     window.addEventListener('resize', () => this.fecharTodosMenusAcoes(), { passive: true });
     document.addEventListener('scroll', () => this.fecharTodosMenusAcoes(), { passive: true, capture: true });
+
+    // UX: Fechamento de modais ao clicar no backdrop (fora da caixa de diálogo)
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.classList.remove('active');
+          app.fecharCaixaEmail?.();
+          app.fecharCaixaEmailEtp?.();
+        }
+      });
+    });
+
+    // UX: Atalhos de teclado (Escape fecha modais/menus, Ctrl+K / '/' ativa busca)
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modalAtivo = document.querySelector('.modal-overlay.active');
+        if (modalAtivo) {
+          app.fecharTodosModais();
+        } else {
+          app.fecharTodosMenusAcoes();
+        }
+      }
+      if ((e.key === 'k' && (e.ctrlKey || e.metaKey)) || (e.key === '/' && document.activeElement && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA')) {
+        e.preventDefault();
+        const searchInput = document.getElementById('inputBusca');
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.select();
+        }
+      }
+    });
+
+    // UX: Redireciona window.alert para o sistema de Toasts fluído
+    window.alert = (msg) => {
+      const texto = String(msg || '');
+      let tipo = 'info';
+      if (/erro|falha|bloquead|inválid|obrigat/i.test(texto)) {
+        tipo = 'error';
+      } else if (/atenção|aviso|cuidado|requer/i.test(texto)) {
+        tipo = 'warning';
+      } else if (/sucesso|salv|valid|gerado|conclu/i.test(texto)) {
+        tipo = 'success';
+      }
+      app.toast(texto, tipo, 4200);
+    };
   },
 
   mostrarTela(id) {
@@ -997,6 +1141,10 @@ const app = {
 
   filtrarTabela() {
     const term = (document.getElementById('inputBusca')?.value || '').toLowerCase().trim();
+    const btnLimpar = document.getElementById('btnLimparBusca');
+    if (btnLimpar) {
+      btnLimpar.style.display = term ? 'flex' : 'none';
+    }
     const todas = this.demandasCarregadas || [];
 
     // Filtra pelo termo de busca
@@ -1127,7 +1275,10 @@ const app = {
       return `
         <tr class="table-row-item ${(ehCancelado || ehReprovado) ? 'row-canceled' : ''}">
           <td class="col-protocolo">
-            <span class="badge-protocolo">${d.protocolo}</span>
+            <span class="badge-protocolo clickable-copy" onclick="app.copiarTexto('${d.protocolo}', 'Protocolo')" title="Clique para copiar protocolo">
+              <span>${d.protocolo}</span>
+              <svg class="copy-hint-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </span>
             ${(d.etp_numero || d.etp_gerado === 1) ? `
               <div class="badge-etp-sub" title="Demanda unificada no Estudo Técnico Preliminar">
                 <span class="etp-tag-pill" style="cursor: pointer; background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; font-weight: 700;" onclick="app.abrirModalEtpCompleto('${d.protocolo}')">

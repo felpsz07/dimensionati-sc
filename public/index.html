@@ -544,7 +544,8 @@
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
-              <input type="text" id="inputBusca" class="search-pro-field" placeholder="Buscar..." autocomplete="off" oninput="app.filtrarTabela()">
+              <input type="text" id="inputBusca" class="search-pro-field" placeholder="Buscar por protocolo, unidade, solicitante... (Ctrl+K ou /)" autocomplete="off" oninput="app.filtrarTabela()">
+              <button type="button" id="btnLimparBusca" class="btn-clear-search" onclick="app.limparBusca()" style="display: none;" title="Limpar busca">&times;</button>
             </div>
 
             <!-- FILTROS AVANÇADOS EXCLUSIVOS PARA ADMIN/TI -->
