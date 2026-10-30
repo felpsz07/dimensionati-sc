@@ -35,12 +35,17 @@ module.exports = function install(app, db) {
     const u=req.authUser;
     if(!u) return res.status(401).json({error:'Entre novamente.'});
     if(!u.cadastro_pendente) return res.status(409).json({error:'Cadastro já confirmado.'});
-    const {instituicaoId,matricula}=req.body;
-    if(typeof matricula!=='string' || !matricula.trim() || matricula.trim().length>80 || !Number.isSafeInteger(Number(instituicaoId)) || Number(instituicaoId)<1) return res.status(400).json({error:'Selecione onde trabalha e informe uma matrícula de até 80 caracteres.'});
-    const inst=db.prepare('SELECT * FROM instituicoes WHERE id=? AND ativo=1').get(Number(instituicaoId));
-    if(!inst) return res.status(400).json({error:'Selecione uma unidade válida.'});
+    const {instituicaoNome,matricula}=req.body;
+    const nome = typeof instituicaoNome === 'string' ? instituicaoNome.trim().replace(/\s+/g,' ') : '';
+    if(nome.length<3 || nome.length>180 || /[<>\x00-\x1f]/.test(nome) || typeof matricula!=='string' || !matricula.trim() || matricula.trim().length>80) return res.status(400).json({error:'Informe o nome completo da escola/unidade (3 a 180 caracteres) e sua matrícula (até 80 caracteres).'});
+    const normalizar = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().replace(/\s+/g,' ').toLocaleLowerCase('pt-BR');
     db.exec('BEGIN');
     try {
+      let inst=db.prepare("SELECT * FROM instituicoes WHERE ativo=1 AND municipio='Lages'").all().find(i=>normalizar(i.nome)===normalizar(nome));
+      if(!inst) {
+        const id=db.prepare("INSERT INTO instituicoes(nome,tipo,secretaria,municipio,ativo) VALUES(?,'escola','Secretaria Municipal de Educação','Lages',1)").run(nome).lastInsertRowid;
+        inst=db.prepare('SELECT * FROM instituicoes WHERE id=?').get(id);
+      }
       db.prepare('UPDATE usuarios SET instituicao_id=?,setor=?,orgao=?,municipio=?,matricula=? WHERE id=?').run(inst.id,inst.nome,inst.secretaria,inst.municipio,matricula.trim(),u.id);
       db.prepare('INSERT INTO perfis_confirmados VALUES(?,?)').run(u.id,new Date().toISOString());
       record(u,'sessao','cadastro_institucional_confirmado');
@@ -82,9 +87,9 @@ module.exports = function install(app, db) {
     if(req.authUser.tipo_usuario!=='admin') return res.status(403).json({error:'Acesso exclusivo da administração.'});
     const {inicio='2000-01-01',fim='2100-01-01'}=req.query;
     if(![inicio,fim].every(x=>typeof x==='string' && /^\d{4}-\d{2}-\d{2}$/.test(x)) || inicio>fim) return res.status(400).json({error:'Período inválido.'});
-    const eventos=db.prepare('SELECT * FROM eventos_uso WHERE data>=? AND data<=? ORDER BY data DESC,id DESC').all(inicio+'T00:00:00.000Z',fim+'T23:59:59.999Z');
+    const eventos=db.prepare('SELECT e.*,u.setor AS escola,u.matricula FROM eventos_uso e JOIN usuarios u ON u.id=e.usuario_id WHERE e.data>=? AND e.data<=? ORDER BY e.data DESC,e.id DESC').all(inicio+'T00:00:00.000Z',fim+'T23:59:59.999Z');
     const users=new Map();
-    for(const e of eventos) { if(!users.has(e.usuario_id)) users.set(e.usuario_id,{id:e.usuario_id,nome:e.nome,email:e.email,primeiro:e.data,ultimo:e.data,acessos:0,acoes:0,google:false}); const u=users.get(e.usuario_id); u.primeiro=e.data; if(e.acao==='login') {u.acessos++; if(e.metodo==='google') u.google=true;} else if(e.resultado<400) u.acoes++; }
+    for(const e of eventos) { if(!users.has(e.usuario_id)) users.set(e.usuario_id,{id:e.usuario_id,nome:e.nome,email:e.email,escola:e.escola,matricula:e.matricula,primeiro:e.data,ultimo:e.data,acessos:0,acoes:0,google:false}); const u=users.get(e.usuario_id); u.primeiro=e.data; if(e.acao==='login') {u.acessos++; if(e.metodo==='google') u.google=true;} else if(e.resultado<400) u.acoes++; }
     res.set('Cache-Control','no-store').json({usuarios:[...users.values()],eventos});
   });
 };

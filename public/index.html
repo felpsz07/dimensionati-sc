@@ -339,10 +339,14 @@
           </div>
           <p class="tag-label">02 / LOTAÇÃO</p>
           <h2 class="section-title">Onde você atua em Lages?</h2>
-          <p class="section-subtitle">Selecione sua unidade e confirme a matrícula para continuar.</p>
+          <p class="section-subtitle">Informe o nome da escola em que você trabalha e sua matrícula.</p>
         </div>
 
-        <div class="quick-pill-grid" id="wpGridSetores" role="group" aria-label="Unidade de trabalho"></div>
+        <div>
+          <label class="field-label" for="wpEscola">Nome completo da escola / unidade pública</label>
+          <input type="text" id="wpEscola" class="dark-input" required minlength="3" maxlength="180" placeholder="Digite o nome da sua escola em Lages" autocomplete="organization" aria-describedby="wpEscolaAjuda">
+          <p id="wpEscolaAjuda" class="section-subtitle">Esse nome ficará vinculado ao seu cadastro e às suas solicitações.</p>
+        </div>
 
         <div class="grid-2col" style="margin-top: 18px;">
           <div>

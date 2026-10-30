@@ -489,44 +489,22 @@ const app = {
     this.mostrarTela('screen-workplace');
     document.getElementById('wpNome').value = usuario.nome || '';
     document.getElementById('wpMatricula').value = usuario.matricula || '';
-    const grid = document.getElementById('wpGridSetores');
-    const feedback = document.getElementById('wpFeedback');
-    const btn = document.getElementById('wpContinuar');
-    grid.replaceChildren(); feedback.textContent = 'Carregando unidades…'; btn.disabled = true;
-    this.lotacaoInstituicaoId = null;
-    try {
-      const res = await fetch('/api/instituicoes');
-      if (!res.ok) throw Error('Não foi possível carregar as unidades. Recarregue a página.');
-      const unidades = await res.json();
-      for (const inst of unidades) {
-        const card = document.createElement('button'); card.type = 'button'; card.className = 'dark-pill';
-        card.setAttribute('aria-pressed', 'false');
-        const icon = document.createElement('span'); icon.className = 'pill-ico'; icon.textContent = inst.tipo === 'escola' ? '🏫' : inst.tipo === 'saude' ? '🏥' : '🏛️';
-        const meta = document.createElement('div'); meta.className = 'pill-meta';
-        const nome = document.createElement('strong'); nome.textContent = inst.nome;
-        const secretaria = document.createElement('small'); secretaria.textContent = inst.secretaria;
-        meta.append(nome, secretaria); card.append(icon, meta);
-        card.onclick = () => {
-          grid.querySelectorAll('.dark-pill').forEach(c => { c.classList.remove('active'); c.setAttribute('aria-pressed','false'); });
-          card.classList.add('active'); card.setAttribute('aria-pressed','true'); this.lotacaoInstituicaoId = inst.id;
-          feedback.textContent = ''; btn.disabled = false;
-        };
-        grid.append(card);
-        if (inst.id === usuario.instituicao_id) card.click();
-      }
-      feedback.textContent = unidades.length ? '' : 'Nenhuma unidade disponível. Contate a administração.';
-    } catch (e) { feedback.textContent = e.message; }
+    document.getElementById('wpEscola').value = '';
+    document.getElementById('wpFeedback').textContent = '';
+    document.getElementById('wpContinuar').disabled = false;
+    document.getElementById('wpEscola').focus();
   },
 
   async confirmarLotacao() {
     const input = document.getElementById('wpMatricula');
     const feedback = document.getElementById('wpFeedback');
     const btn = document.getElementById('wpContinuar');
-    if (!this.lotacaoInstituicaoId) { feedback.textContent = 'Selecione sua unidade de trabalho.'; return; }
+    const escola = document.getElementById('wpEscola');
+    if (escola.value.trim().length < 3 || !escola.reportValidity()) { feedback.textContent = 'Digite o nome completo da sua escola ou unidade.'; escola.focus(); return; }
     if (!input.value.trim() || !input.reportValidity()) { feedback.textContent = 'Informe sua matrícula.'; input.focus(); return; }
     btn.disabled = true; feedback.textContent = 'Salvando seus dados…';
     try {
-      const res = await fetch('/api/auth/perfil', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({instituicaoId:this.lotacaoInstituicaoId,matricula:input.value.trim()}) });
+      const res = await fetch('/api/auth/perfil', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({instituicaoNome:escola.value.trim(),matricula:input.value.trim()}) });
       const data = await res.json(); if (!res.ok) throw Error(data.error || 'Não foi possível salvar.');
       await this.verificarSessao();
     } catch (e) { feedback.textContent = e.message; btn.disabled = false; }
