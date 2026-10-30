@@ -35,7 +35,164 @@ body.theme-dark { --ui-bg:#100d25; --ui-panel:#28203dd9; --ui-field:#151024; --u
  body.is-user-common #view-licitacoes .status-tab-btn.active { background:var(--ui-accent)!important; color:var(--ui-on-accent)!important; }
  body.is-user-common #view-licitacoes .table-card-footer { background:var(--ui-field)!important; color:var(--ui-muted)!important; }
 }
-@media(max-width:760px) { body .modal-content { max-width:calc(100vw - 24px); } body :is(#screen-app,#screen-workplace) .dark-card-box { border-radius:18px; } }
+@media(max-width:760px) {
+  body .modal-content { max-width:calc(100vw - 24px); }
+  body :is(#screen-app,#screen-workplace) .dark-card-box { border-radius:18px; }
+
+  /* Navbar Mobile Responsiva e Fluida em Duas Linhas Perfeitas (Garante especificidade máxima em Dark e Light) */
+  html body .dark-navbar,
+  body .dark-navbar,
+  body:not(.theme-dark) .dark-navbar,
+  body.theme-dark .dark-navbar,
+  body.is-user-admin .dark-navbar,
+  body.is-user-common .dark-navbar,
+  body.is-user-admin:has(#view-licitacoes.active) .dark-navbar {
+    padding: 10px 14px !important;
+    height: auto !important;
+    min-height: auto !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px 12px !important;
+  }
+  body .dark-nav-left {
+    display: contents !important;
+  }
+  body .brand-badge {
+    order: 1 !important;
+    gap: 6px !important;
+  }
+  body .brand-icon {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+  }
+  body .brand-text {
+    font-size: 1.1rem !important;
+  }
+  body .dark-nav-right {
+    order: 2 !important;
+    margin-left: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  body .dark-nav-links {
+    order: 3 !important;
+    width: 100% !important;
+    display: flex !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 2px 0 !important;
+  }
+  body .dark-nav-links::-webkit-scrollbar {
+    display: none;
+  }
+  body .nav-link-btn {
+    padding: 7px 14px !important;
+    font-size: 0.88rem !important;
+    white-space: nowrap !important;
+    border-radius: 9999px !important;
+  }
+  body .dark-nav-right {
+    gap: 6px !important;
+  }
+  body #navInstituicaoTag {
+    display: none !important;
+  }
+  body .user-text-mini {
+    display: none !important;
+  }
+  body .user-pill-badge {
+    padding: 4px !important;
+    background: transparent !important;
+    border: none !important;
+  }
+  body .user-avatar-mini {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 0.82rem !important;
+  }
+  body .btn-theme-toggle {
+    padding: 6px 10px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    border-radius: 8px !important;
+  }
+  body #themeToggleText {
+    display: none !important;
+  }
+  body .btn-ghost-icon {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    font-size: 1rem !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Painel e Título Mobile */
+  body :is(#screen-app,#screen-workplace) .header-main-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+    padding: 18px !important;
+  }
+  body :is(#screen-app,#screen-workplace) .header-page-title {
+    font-size: 1.6rem !important;
+    line-height: 1.2 !important;
+    max-width: 100% !important;
+  }
+  body :is(#screen-app,#screen-workplace) .header-page-subtitle {
+    font-size: 0.92rem !important;
+    line-height: 1.4 !important;
+  }
+  body :is(#screen-app,#screen-workplace) .header-main-row > div:last-child {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  body :is(#screen-app,#screen-workplace) .header-main-row > div:last-child button {
+    width: 100% !important;
+  }
+
+  /* Abas de Status com Rolagem Touch Suave */
+  body :is(#screen-app,#screen-workplace) .status-tabs-wrapper {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 6px !important;
+  }
+  body :is(#screen-app,#screen-workplace) .status-tabs-container {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    width: max-content !important;
+  }
+  body :is(#screen-app,#screen-workplace) .status-tab-btn {
+    white-space: nowrap !important;
+    padding: 8px 14px !important;
+    font-size: 0.88rem !important;
+    min-height: 40px !important;
+  }
+
+  /* Tabela de Demandas com Rolagem Horizontal Preservada */
+  body :is(#screen-app,#screen-workplace) .table-card-panel {
+    border-radius: 14px !important;
+    margin-top: 14px !important;
+  }
+  body :is(#screen-app,#screen-workplace) .table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  body :is(#screen-app,#screen-workplace) .enterprise-table {
+    min-width: 680px !important;
+  }
+}
 @media(prefers-reduced-motion:reduce) { body :is(#screen-app,#screen-workplace,.modal-overlay) * { animation:none!important; transition:none!important; } }
 @media(prefers-reduced-transparency:reduce) { body { --ui-panel:#fff; } body.theme-dark { --ui-panel:#28203d; } body :is(.dark-navbar,.modal-overlay,.modal-content,.dark-card-box) { backdrop-filter:none!important; } }
 /* Lotação integrada: preserva os componentes existentes e permite rolagem. */

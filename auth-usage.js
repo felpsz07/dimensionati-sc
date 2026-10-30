@@ -5,7 +5,8 @@ module.exports = function install(app, db) {
     CREATE TABLE IF NOT EXISTS identidades_google (sub TEXT PRIMARY KEY, usuario_id INTEGER UNIQUE NOT NULL);
     CREATE TABLE IF NOT EXISTS sessoes_uso (token TEXT PRIMARY KEY, usuario_id INTEGER NOT NULL, expira INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS eventos_uso (id INTEGER PRIMARY KEY, usuario_id INTEGER NOT NULL, nome TEXT NOT NULL, email TEXT NOT NULL, metodo TEXT NOT NULL, acao TEXT NOT NULL, resultado INTEGER NOT NULL, data TEXT NOT NULL);
-    CREATE INDEX IF NOT EXISTS eventos_uso_data ON eventos_uso(data);`);
+    CREATE INDEX IF NOT EXISTS eventos_uso_data ON eventos_uso(data);
+    INSERT OR IGNORE INTO perfis_confirmados(usuario_id, data) SELECT id, CURRENT_TIMESTAMP FROM usuarios WHERE matricula IS NOT NULL AND TRIM(matricula) != '';`);
   const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, process.env.GOOGLE_REDIRECT_URI);
   const cookie = (req, name) => (req.headers.cookie || '').split('; ').find(v => v.startsWith(name + '='))?.slice(name.length + 1);
   const options = { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: '/' };
