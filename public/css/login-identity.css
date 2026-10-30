@@ -65,3 +65,13 @@
  #screen-login .glass-input { transition:border-color .18s ease,box-shadow .18s ease; }
 }
 @media(prefers-reduced-motion:reduce) { #screen-login * { animation:none!important; transition:none!important; } }
+
+/* Login Google: superfície branca, marca colorida e alvo confortável. */
+#screen-login .auth-divider { display:flex; align-items:center; gap:14px; margin:18px 0; color:#bcb4ca; font-size:12px; }
+#screen-login .auth-divider::before, #screen-login .auth-divider::after { content:""; height:1px; flex:1; background:#ffffff24; }
+#screen-login .google-signin-button { box-sizing:border-box; display:flex; align-items:center; justify-content:center; gap:12px; width:100%; min-height:48px; padding:12px 20px; border:1px solid #747775; border-radius:12px; background:#fff; color:#1f1f1f; font-family:Arial,sans-serif; font-size:14px; font-weight:500; line-height:20px; letter-spacing:.25px; text-decoration:none; transition:background .15s ease,box-shadow .15s ease; }
+#screen-login .google-signin-icon { flex:none; width:20px; height:20px; }
+#screen-login .google-signin-button:hover { background:#f2f5fc; box-shadow:0 2px 8px #0002; }
+#screen-login .google-signin-button:active { background:#e8edf7; }
+#screen-login .google-signin-button:focus-visible { outline:3px solid #bfa5ff; outline-offset:4px; }
+#screen-login .auth-privacy-note { margin:14px 0 0; font-size:11px; line-height:1.5; color:#bcb4ca; text-align:center; }
