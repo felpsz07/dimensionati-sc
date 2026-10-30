@@ -13,7 +13,7 @@ test('sessões, isolamento administrativo, registros e logout',async()=>{
  const me=await fetch(base+'/api/auth/me',{headers:{cookie:user}}).then(r=>r.json());assert.equal(me.usuario.cadastro_pendente,false);
  assert.equal((await save({instituicaoId:1,matricula:'456'})).status,409);
  await fetch(base+'/api/demandas',{method:'POST',headers:{cookie:user}});
- const admin=await login(1);const report=await fetch(base+'/api/uso',{headers:{cookie:admin}}).then(r=>r.json());assert.equal(report.usuarios.length,2);assert.equal(report.usuarios.find(u=>u.id===2).acoes,2);assert.equal(report.usuarios.find(u=>u.id===2).google,false);
+ const admin=await login(1);const adminMe=await fetch(base+'/api/auth/me',{headers:{cookie:admin}}).then(r=>r.json());assert.equal(adminMe.usuario.cadastro_pendente,false);const report=await fetch(base+'/api/uso',{headers:{cookie:admin}}).then(r=>r.json());assert.equal(report.usuarios.length,2);assert.equal(report.usuarios.find(u=>u.id===2).acoes,2);assert.equal(report.usuarios.find(u=>u.id===2).google,false);
  assert.equal((await fetch(base+'/api/uso?inicio=invalid',{headers:{cookie:admin}})).status,400);
  await fetch(base+'/api/auth/logout',{method:'POST',headers:{cookie:admin}});assert.equal((await fetch(base+'/api/uso',{headers:{cookie:admin}})).status,401);
  assert.equal((await fetch(base+'/api/auth/google/callback?state=fake&code=fake',{redirect:'manual'})).status,302);

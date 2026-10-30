@@ -339,70 +339,29 @@
           </div>
           <p class="tag-label">02 / LOTAÇÃO</p>
           <h2 class="section-title">Onde você atua em Lages?</h2>
-          <p class="section-subtitle">Escolha seu setor para preencher as licitações com seus dados.</p>
+          <p class="section-subtitle">Selecione sua unidade e confirme a matrícula para continuar.</p>
         </div>
 
-        <div class="quick-pill-grid" id="wpGridSetores">
-          <div class="dark-pill active" onclick="app.selecionarLotacao('Escolas Municipais (SME)', 'Prefeitura de Lages - Educação (SME)', 'Professora / Coordenadora', this)">
-            <span class="pill-ico">🏫</span>
-            <div class="pill-meta">
-              <strong>Educação (SME)</strong>
-              <small>Escolas e CMEIs</small>
-            </div>
-          </div>
-          <div class="dark-pill" onclick="app.selecionarLotacao('Saúde e Postos (UBS)', 'Prefeitura de Lages - Saúde (SMS)', 'Atendente / Gestor UBS', this)">
-            <span class="pill-ico">🏥</span>
-            <div class="pill-meta">
-              <strong>Saúde (SMS)</strong>
-              <small>Postos de Saúde e UBS</small>
-            </div>
-          </div>
-          <div class="dark-pill" onclick="app.selecionarLotacao('Administração Geral', 'Prefeitura de Lages - Administração', 'Assistente Administrativo', this)">
-            <span class="pill-ico">🏢</span>
-            <div class="pill-meta">
-              <strong>Administração</strong>
-              <small>Escritório e Atendimento</small>
-            </div>
-          </div>
-          <div class="dark-pill" onclick="app.selecionarLotacao('Fazenda e Tributos', 'Prefeitura de Lages - Fazenda', 'Auditor Fiscal', this)">
-            <span class="pill-ico">📊</span>
-            <div class="pill-meta">
-              <strong>Fazenda</strong>
-              <small>Arrecadação e Contas</small>
-            </div>
-          </div>
-          <div class="dark-pill" onclick="app.selecionarLotacao('SEPLAN e Obras', 'Prefeitura de Lages - Planejamento e Obras', 'Engenheiro / Fiscal', this)">
-            <span class="pill-ico">🚧</span>
-            <div class="pill-meta">
-              <strong>Obras (SEPLAN)</strong>
-              <small>Projetos e Fiscalização</small>
-            </div>
-          </div>
-          <div class="dark-pill" onclick="app.selecionarLotacao('Câmara de Vereadores', 'Câmara de Vereadores de Lages', 'Assessor Legislativo', this)">
-            <span class="pill-ico">🏛️</span>
-            <div class="pill-meta">
-              <strong>Câmara Municipal</strong>
-              <small>Gabinete e Sessões</small>
-            </div>
-          </div>
-        </div>
+        <div class="quick-pill-grid" id="wpGridSetores" role="group" aria-label="Unidade de trabalho"></div>
 
         <div class="grid-2col" style="margin-top: 18px;">
           <div>
             <label class="field-label">Seu Nome</label>
-            <input type="text" id="wpNome" class="dark-input" placeholder="Ex: Maria Eduarda Alencar">
+            <input type="text" id="wpNome" class="dark-input" readonly placeholder="Ex: Maria Eduarda Alencar">
           </div>
           <div>
             <label class="field-label">Matrícula</label>
-            <input type="text" id="wpMatricula" class="dark-input" placeholder="Ex: MAT-48921/PML">
+            <input type="text" id="wpMatricula" class="dark-input" required maxlength="80" placeholder="Ex: MAT-48921/PML">
           </div>
         </div>
 
         <input type="hidden" id="wpCargo">
 
-        <button type="button" class="btn-primary-neon" onclick="app.confirmarLotacao()" style="margin-top: 24px;">
+        <p id="wpFeedback" role="status" class="section-subtitle" style="margin-top:16px;"></p>
+        <button id="wpContinuar" disabled type="button" class="btn-primary-neon" onclick="app.confirmarLotacao()" style="margin-top: 24px;">
           Continuar para o Painel <span class="arrow-icon">↗</span>
         </button>
+        <button type="button" class="btn-ghost" onclick="app.logout()" style="margin-top:12px;">Sair da conta</button>
 
       </div>
     </div>

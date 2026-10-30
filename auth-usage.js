@@ -21,11 +21,11 @@ module.exports = function install(app, db) {
   }
   app.use((req,res,next)=>{
     req.authUser = session(req);
-    if(req.authUser) req.authUser.cadastro_pendente = !db.prepare('SELECT 1 FROM perfis_confirmados WHERE usuario_id=?').get(req.authUser.id);
+    if(req.authUser) req.authUser.cadastro_pendente = req.authUser.tipo_usuario !== 'admin' && !db.prepare('SELECT 1 FROM perfis_confirmados WHERE usuario_id=?').get(req.authUser.id);
     if (req.method === 'POST' && req.headers.origin && req.headers.origin !== (process.env.GOOGLE_REDIRECT_URI ? new URL(process.env.GOOGLE_REDIRECT_URI).origin : `${req.protocol}://${req.get('host')}`)) return res.status(403).json({error:'Origem não permitida.'});
     if(req.authUser?.cadastro_pendente && req.method==='POST' && !['/api/auth/perfil','/api/auth/logout','/api/login'].includes(req.path)) return res.status(403).json({error:'Informe seu local de trabalho e matrícula antes de continuar.'});
     const send = res.json.bind(res);
-    res.json = data => { if(['/api/login','/api/cadastro'].includes(req.path) && data.success && data.usuario) { data.usuario.cadastro_pendente = !db.prepare('SELECT 1 FROM perfis_confirmados WHERE usuario_id=?').get(data.usuario.id); start(req,res,data.usuario,'senha'); } return send(data); };
+    res.json = data => { if(['/api/login','/api/cadastro'].includes(req.path) && data.success && data.usuario) { data.usuario.cadastro_pendente = data.usuario.tipo_usuario !== 'admin' && !db.prepare('SELECT 1 FROM perfis_confirmados WHERE usuario_id=?').get(data.usuario.id); start(req,res,data.usuario,'senha'); } return send(data); };
     if(req.authUser && req.method === 'POST' && !req.path.startsWith('/api/auth') && !['/api/login','/api/cadastro'].includes(req.path)) {
       res.on('finish',()=>record(req.authUser,'sessao',req.path,res.statusCode));
     }
