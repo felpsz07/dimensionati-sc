@@ -10,7 +10,30 @@ module.exports = function install(app, db) {
   const cookie = (req, name) => (req.headers.cookie || '').split('; ').find(v => v.startsWith(name + '='))?.slice(name.length + 1);
   const options = { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: '/' };
   const hash = x => crypto.createHash('sha256').update(x).digest('hex');
-  function record(u, method, action, status = 200) { db.prepare('INSERT INTO eventos_uso(usuario_id,nome,email,metodo,acao,resultado,data) VALUES(?,?,?,?,?,?,?)').run(u.id,u.nome,u.email,method,action,status,new Date().toISOString()); }
+  const WEBHOOK_URL = process.env.WEBHOOK_USO_URL || 'https://script.google.com/macros/s/AKfycbxOOVTCz5psxABCbK_UbsEIvnCOijZcSpzBGjhoqQioYmx1aScJju1GKRaWdwuRRtaMIQ/exec';
+  function sendWebhook(payload) {
+    if (!WEBHOOK_URL) return;
+    try {
+      fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      }).catch(err => console.error('[Webhook Sheets] Falha silenciosa ao sincronizar:', err.message));
+    } catch (e) {}
+  }
+  function record(u, method, action, status = 200) {
+    const dataISO = new Date().toISOString();
+    db.prepare('INSERT INTO eventos_uso(usuario_id,nome,email,metodo,acao,resultado,data) VALUES(?,?,?,?,?,?,?)').run(u.id,u.nome,u.email,method,action,status,dataISO);
+    sendWebhook({
+      nome: u.nome || '',
+      email: u.email || '',
+      escola: u.setor || u.orgao || '',
+      matricula: u.matricula || '',
+      metodo: method || 'sessao',
+      acao: action || '',
+      resultado: status
+    });
+  }
   function session(req) { const token = cookie(req, 'dim_session'); return token ? db.prepare('SELECT u.* FROM sessoes_uso s JOIN usuarios u ON u.id=s.usuario_id WHERE token=? AND expira>?').get(hash(token),Date.now()) : null; }
   function start(req,res,u,method) {
     const old = cookie(req,'dim_session'); if(old) db.prepare('DELETE FROM sessoes_uso WHERE token=?').run(hash(old));

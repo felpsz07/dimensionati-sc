@@ -913,6 +913,7 @@ const app = {
     const subSecao = document.getElementById('subtituloSecaoLicitacoes');
     const badgePapel = document.getElementById('badgePapelUsuario');
     const btnAuditor = document.getElementById('btnNavAuditor');
+    const btnNavUso = document.getElementById('btnNavUso');
     const btnAgruparEtp = document.getElementById('btnAbrirAgrupamentoEtp');
     const btnEditEtp = document.getElementById('btnToggleEdicaoEtp');
     const filtrosAdminWrap = document.getElementById('filtrosAdminWrap');
@@ -943,6 +944,7 @@ const app = {
         badgePapel.style.color = '#1D4ED8';
       }
       if (btnAuditor) btnAuditor.style.display = 'inline-block';
+      if (btnNavUso) btnNavUso.style.display = 'inline-flex';
       if (btnAgruparEtp) btnAgruparEtp.style.display = 'inline-flex';
       if (btnEditEtp) btnEditEtp.style.display = 'inline-flex';
       if (filtrosAdminWrap) filtrosAdminWrap.style.display = 'flex';
@@ -958,6 +960,7 @@ const app = {
         badgePapel.style.color = '#334155';
       }
       if (btnAuditor) btnAuditor.style.display = 'none';
+      if (btnNavUso) btnNavUso.style.display = 'none';
       if (btnAgruparEtp) btnAgruparEtp.style.display = 'none';
       if (btnEditEtp) btnEditEtp.style.display = 'none';
       if (filtrosAdminWrap) filtrosAdminWrap.style.display = 'none';
