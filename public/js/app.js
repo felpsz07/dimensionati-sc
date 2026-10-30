@@ -489,6 +489,7 @@ const app = {
       const res = await fetch('/api/auth/me');
       if (res.ok) {
         const {usuario} = await res.json();
+        if(usuario.cadastro_pendente) { location.replace('/primeiro-acesso.html'); return; }
         this.usuarioLogado = usuario;
         this.aplicarUsuario(usuario);
         this.mostrarTela('screen-app');
@@ -536,6 +537,7 @@ const app = {
         return;
       }
 
+      if(data.usuario.cadastro_pendente) { location.replace('/primeiro-acesso.html'); return; }
       this.usuarioLogado = data.usuario;
       localStorage.setItem('dimensionati_sessao', JSON.stringify(data.usuario));
 
@@ -701,6 +703,7 @@ const app = {
       }
 
       // Login automático direto no painel principal (lotação e matrícula ficam salvas e fixadas)
+      if(data.usuario.cadastro_pendente) { location.replace('/primeiro-acesso.html'); return; }
       this.usuarioLogado = data.usuario;
       localStorage.setItem('dimensionati_sessao', JSON.stringify(data.usuario));
       this.alternarModoCadastro(false);

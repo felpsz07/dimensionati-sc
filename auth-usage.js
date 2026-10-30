@@ -1,7 +1,8 @@
 const crypto = require('node:crypto');
 const { OAuth2Client } = require('google-auth-library');
 module.exports = function install(app, db) {
-  db.exec(`CREATE TABLE IF NOT EXISTS identidades_google (sub TEXT PRIMARY KEY, usuario_id INTEGER UNIQUE NOT NULL);
+  db.exec(`CREATE TABLE IF NOT EXISTS perfis_confirmados (usuario_id INTEGER PRIMARY KEY, data TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS identidades_google (sub TEXT PRIMARY KEY, usuario_id INTEGER UNIQUE NOT NULL);
     CREATE TABLE IF NOT EXISTS sessoes_uso (token TEXT PRIMARY KEY, usuario_id INTEGER NOT NULL, expira INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS eventos_uso (id INTEGER PRIMARY KEY, usuario_id INTEGER NOT NULL, nome TEXT NOT NULL, email TEXT NOT NULL, metodo TEXT NOT NULL, acao TEXT NOT NULL, resultado INTEGER NOT NULL, data TEXT NOT NULL);
     CREATE INDEX IF NOT EXISTS eventos_uso_data ON eventos_uso(data);`);
@@ -20,13 +21,31 @@ module.exports = function install(app, db) {
   }
   app.use((req,res,next)=>{
     req.authUser = session(req);
+    if(req.authUser) req.authUser.cadastro_pendente = !db.prepare('SELECT 1 FROM perfis_confirmados WHERE usuario_id=?').get(req.authUser.id);
     if (req.method === 'POST' && req.headers.origin && req.headers.origin !== (process.env.GOOGLE_REDIRECT_URI ? new URL(process.env.GOOGLE_REDIRECT_URI).origin : `${req.protocol}://${req.get('host')}`)) return res.status(403).json({error:'Origem não permitida.'});
+    if(req.authUser?.cadastro_pendente && req.method==='POST' && !['/api/auth/perfil','/api/auth/logout','/api/login'].includes(req.path)) return res.status(403).json({error:'Informe seu local de trabalho e matrícula antes de continuar.'});
     const send = res.json.bind(res);
-    res.json = data => { if(['/api/login','/api/cadastro'].includes(req.path) && data.success && data.usuario) start(req,res,data.usuario,'senha'); return send(data); };
+    res.json = data => { if(['/api/login','/api/cadastro'].includes(req.path) && data.success && data.usuario) { data.usuario.cadastro_pendente = !db.prepare('SELECT 1 FROM perfis_confirmados WHERE usuario_id=?').get(data.usuario.id); start(req,res,data.usuario,'senha'); } return send(data); };
     if(req.authUser && req.method === 'POST' && !req.path.startsWith('/api/auth') && !['/api/login','/api/cadastro'].includes(req.path)) {
       res.on('finish',()=>record(req.authUser,'sessao',req.path,res.statusCode));
     }
     next();
+  });
+  app.post('/api/auth/perfil',(req,res)=>{
+    const u=req.authUser;
+    if(!u) return res.status(401).json({error:'Entre novamente.'});
+    if(!u.cadastro_pendente) return res.status(409).json({error:'Cadastro já confirmado.'});
+    const {instituicaoId,matricula}=req.body;
+    if(typeof matricula!=='string' || !matricula.trim() || matricula.trim().length>80 || !Number.isSafeInteger(Number(instituicaoId)) || Number(instituicaoId)<1) return res.status(400).json({error:'Selecione onde trabalha e informe uma matrícula de até 80 caracteres.'});
+    const inst=db.prepare('SELECT * FROM instituicoes WHERE id=? AND ativo=1').get(Number(instituicaoId));
+    if(!inst) return res.status(400).json({error:'Selecione uma unidade válida.'});
+    db.exec('BEGIN');
+    try {
+      db.prepare('UPDATE usuarios SET instituicao_id=?,setor=?,orgao=?,municipio=?,matricula=? WHERE id=?').run(inst.id,inst.nome,inst.secretaria,inst.municipio,matricula.trim(),u.id);
+      db.prepare('INSERT INTO perfis_confirmados VALUES(?,?)').run(u.id,new Date().toISOString());
+      record(u,'sessao','cadastro_institucional_confirmado');
+      db.exec('COMMIT');res.json({success:true});
+    } catch {db.exec('ROLLBACK');res.status(500).json({error:'Não foi possível salvar. Tente novamente.'});}
   });
   app.get('/api/auth/me',(req,res)=> { if(!req.authUser) return res.status(401).json({error:'Entre novamente.'}); const {senha,...u}=req.authUser; u.atividades_padrao=JSON.parse(u.atividades_padrao||'[]'); res.json({usuario:u}); });
   app.post('/api/auth/logout',(req,res)=>{ const token=cookie(req,'dim_session'); if(token) db.prepare('DELETE FROM sessoes_uso WHERE token=?').run(hash(token)); res.clearCookie('dim_session',options); res.json({success:true}); });
