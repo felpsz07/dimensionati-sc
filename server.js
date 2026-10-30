@@ -2,6 +2,9 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+// Local credentials stay outside Git; hosting environment variables take precedence.
+const localEnv = path.join(__dirname, '.env');
+if (require('node:fs').existsSync(localEnv)) process.loadEnvFile(localEnv);
 const { db, registrarHistorico } = require('./database');
 
 const app = express();
@@ -9,6 +12,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+require('./auth-usage')(app, db);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 1. Autenticação e Login de Usuários (Flexível e Seguro para Apresentação)
@@ -81,7 +85,7 @@ app.post('/api/cadastro', (req, res) => {
       return res.status(400).json({ error: 'Este endereço de e-mail já está cadastrado. Faça login.' });
     }
 
-    const tipoFinal = (tipoUsuario === 'admin') ? 'admin' : 'diretora';
+    const tipoFinal = 'diretora';
     let idInstFinal = instituicaoId ? Number(instituicaoId) : null;
     let instRow = null;
 
@@ -182,6 +186,7 @@ app.get('/api/instituicoes', (req, res) => {
 app.post('/api/usuario/configuracoes', (req, res) => {
   try {
     const { usuarioId, nome, novaSenha } = req.body;
+    if (!req.authUser || req.authUser.id !== Number(usuarioId)) return res.status(403).json({error: 'Entre na sua conta para alterar suas configurações.'});
     if (!usuarioId) {
       return res.status(400).json({ error: 'ID de usuário obrigatório.' });
     }

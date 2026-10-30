@@ -3,7 +3,7 @@ const { DatabaseSync } = require('node:sqlite');
 const path = require('path');
 const fs = require('fs');
 
-const dbPath = path.join(__dirname, 'dimensionati.db');
+const dbPath = process.env.DATABASE_PATH || path.join(__dirname, 'dimensionati.db');
 const db = new DatabaseSync(dbPath);
 
 try {

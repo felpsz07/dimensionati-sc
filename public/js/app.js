@@ -484,20 +484,19 @@ const app = {
     document.getElementById(id)?.classList.add('active');
   },
 
-  verificarSessao() {
+  async verificarSessao() {
     try {
-      const salva = localStorage.getItem('dimensionati_sessao');
-      if (salva) {
-        const u = JSON.parse(salva);
-        if (u && u.id && u.nome) {
-          this.usuarioLogado = u;
-          this.aplicarUsuario(u);
-          this.mostrarTela('screen-app');
-          this.navegar('licitacoes');
-          return;
-        }
+      const res = await fetch('/api/auth/me');
+      if (res.ok) {
+        const {usuario} = await res.json();
+        this.usuarioLogado = usuario;
+        this.aplicarUsuario(usuario);
+        this.mostrarTela('screen-app');
+        this.navegar('licitacoes');
+        return;
       }
-    } catch (e) {}
+    } catch {}
+    localStorage.removeItem('dimensionati_sessao');
     this.mostrarTela('screen-login');
   },
 
@@ -948,6 +947,7 @@ const app = {
   },
 
   logout() {
+    fetch('/api/auth/logout', {method:'POST'});
     this.usuarioLogado = null;
     this.demandasCarregadas = [];
     this.jaInicializouAbaSessao = false;
