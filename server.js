@@ -13,7 +13,20 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 require('./auth-usage')(app, db);
+const conformidade = require('./conformidade').install(app, db, registrarHistorico);
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Helper de verificação de permissão de TI para rotas administrativas de demanda
+function checarPermissaoTi(req, res) {
+  const u = conformidade.resolverUsuario(req);
+  if (u && u.tipo_usuario !== 'admin') {
+    res.status(403).json({
+      error: 'Acesso Negado (HTTP 403): Apenas a equipe técnica de TIC possui permissão para realizar esta operação.'
+    });
+    return false;
+  }
+  return true;
+}
 
 // 1. Autenticação e Login de Usuários (Flexível e Seguro para Apresentação)
 app.post('/api/login', (req, res) => {
@@ -470,11 +483,16 @@ app.post('/api/demandas', (req, res) => {
       'Enviado para TI'
     );
 
+    // Executa verificação automática de conformidade normativa e técnica
+    conformidade.verificarDemanda(novaDemanda, 'automatica');
+    const resumoConformidade = conformidade.resumoParaDocumento(novaDemanda);
+
     res.status(201).json({
       success: true,
       protocolo,
-      demanda: novaDemanda,
-      perfilEsc
+      demanda: { ...novaDemanda, conformidade_resumo: resumoConformidade },
+      perfilEsc,
+      conformidade: resumoConformidade
     });
   } catch (error) {
     console.error('Erro ao salvar demanda:', error);
@@ -563,6 +581,22 @@ app.get('/api/demandas', (req, res) => {
     query += ' ORDER BY d.id DESC';
 
     const demandas = db.prepare(query).all(...params);
+    if (ehAdmin) {
+      for (const item of demandas) {
+        const resumo = conformidade.resumoParaDocumento(item);
+        if (resumo) {
+          item.conformidade_resumo = {
+            resultado: resumo.resultado,
+            rotulo: resumo.rotulo,
+            pendencias_count: (resumo.pendencias || []).length,
+            excepcionalidade: resumo.excepcionalidade ? {
+              status: resumo.excepcionalidade.status,
+              rotulo_status: resumo.excepcionalidade.rotulo_status
+            } : null
+          };
+        }
+      }
+    }
     res.json(demandas);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -614,12 +648,14 @@ app.get('/api/demandas/:id', (req, res) => {
 
     const perfilEsc = db.prepare('SELECT * FROM perfis_hardware WHERE id = ?').get(demanda.perfil_escolhido_id);
     const perfilRec = db.prepare('SELECT * FROM perfis_hardware WHERE id = ?').get(demanda.perfil_recomendado_id);
+    const resumoConformidade = conformidade.resumoParaDocumento(demanda);
 
     res.json({
-      demanda,
+      demanda: { ...demanda, conformidade_resumo: resumoConformidade },
       perfilEsc,
       perfilRec,
-      softwares: JSON.parse(demanda.softwares || '[]')
+      softwares: JSON.parse(demanda.softwares || '[]'),
+      conformidade: resumoConformidade
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -683,6 +719,7 @@ app.get('/api/demandas/:protocolo/historico', (req, res) => {
 // 8.3 Iniciar Análise pelo Técnico de TI
 app.post('/api/demandas/:protocolo/em-analise', (req, res) => {
   try {
+    if (!checarPermissaoTi(req, res)) return;
     const { protocolo } = req.params;
     const { usuarioNome = 'Técnico de TI', usuarioCargo = 'Diretoria de TIC' } = req.body;
 
@@ -716,11 +753,22 @@ app.post('/api/demandas/:protocolo/em-analise', (req, res) => {
 // 8.4 Validar DOD pelo TI (Libera a geração do ETP)
 app.post('/api/demandas/:protocolo/validar-dod', (req, res) => {
   try {
+    if (!checarPermissaoTi(req, res)) return;
     const { protocolo } = req.params;
-    const { usuarioNome = 'Técnico de TIC', usuarioCargo = 'Diretoria Geral de TIC' } = req.body;
+    const { usuarioNome = 'Técnico de TIC', usuarioCargo = 'Diretoria Geral de TIC', parecerConformidade = '' } = req.body;
 
     const dem = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
     if (!dem) return res.status(404).json({ error: 'Demanda não encontrada.' });
+
+    const autorTi = conformidade.resolverUsuario(req) || { id: null, nome: usuarioNome, cargo: usuarioCargo };
+    const chk = conformidade.checarValidacao(dem, parecerConformidade, {
+      id: autorTi.id,
+      nome: usuarioNome || autorTi.nome,
+      cargo: usuarioCargo || autorTi.cargo
+    });
+    if (!chk.ok) {
+      return res.status(chk.status || 409).json(chk);
+    }
 
     const validadorFormatado = `${usuarioNome} (${usuarioCargo})`;
 
@@ -741,12 +789,12 @@ app.post('/api/demandas/:protocolo/validar-dod', (req, res) => {
       usuarioNome,
       usuarioCargo,
       'admin',
-      'Documento de Formalização da Demanda (DOD) aprovado pela equipe técnica de TIC. Opção de geração do ETP liberada.',
+      `Documento de Formalização da Demanda (DOD) aprovado pela equipe técnica de TIC (${chk.resumo}). Opção de geração do ETP liberada.`,
       'Validado pelo TI'
     );
 
     const atualizada = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
-    res.json({ success: true, demanda: atualizada });
+    res.json({ success: true, demanda: atualizada, conformidade: conformidade.resumoParaDocumento(atualizada) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -755,6 +803,7 @@ app.post('/api/demandas/:protocolo/validar-dod', (req, res) => {
 // 8.5 Solicitar Ajustes pelo TI
 app.post('/api/demandas/:protocolo/solicitar-ajustes', (req, res) => {
   try {
+    if (!checarPermissaoTi(req, res)) return;
     const { protocolo } = req.params;
     const { motivo, usuarioNome = 'Técnico de TIC', usuarioCargo = 'Diretoria de TIC' } = req.body;
 
@@ -794,6 +843,7 @@ app.post('/api/demandas/:protocolo/solicitar-ajustes', (req, res) => {
 // 8.6 Reprovar Demanda pelo TI
 app.post('/api/demandas/:protocolo/reprovar', (req, res) => {
   try {
+    if (!checarPermissaoTi(req, res)) return;
     const { protocolo } = req.params;
     const { motivo, usuarioNome = 'Técnico de TIC', usuarioCargo = 'Diretoria de TIC' } = req.body;
 
@@ -830,21 +880,32 @@ app.post('/api/demandas/:protocolo/reprovar', (req, res) => {
   }
 });
 
-// 8.7 Responder Ajustes pelo Servidor (Reenvia solicitação)
+// 8.7 Responder Ajustes pelo Servidor (Reenvia solicitação e reexecuta conformidade)
 app.post('/api/demandas/:protocolo/responder-ajustes', (req, res) => {
   try {
     const { protocolo } = req.params;
-    const { justificativaResposta, usuarioNome = 'Servidor', usuarioCargo = 'Solicitante' } = req.body;
+    const { justificativaResposta, respostasDiagnostico, usuarioNome = 'Servidor', usuarioCargo = 'Solicitante' } = req.body;
 
     const dem = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
     if (!dem) return res.status(404).json({ error: 'Demanda não encontrada.' });
 
-    db.prepare(`
-      UPDATE demandas 
-      SET status = 'Enviado para TI',
-          justificativa_usuario = COALESCE(?, justificativa_usuario)
-      WHERE protocolo = ?
-    `).run(justificativaResposta || '', protocolo);
+    if (respostasDiagnostico) {
+      const respJson = typeof respostasDiagnostico === 'string' ? respostasDiagnostico : JSON.stringify(respostasDiagnostico);
+      db.prepare(`
+        UPDATE demandas 
+        SET status = 'Enviado para TI',
+            justificativa_usuario = COALESCE(?, justificativa_usuario),
+            respostas_diagnostico = ?
+        WHERE protocolo = ?
+      `).run(justificativaResposta || '', respJson, protocolo);
+    } else {
+      db.prepare(`
+        UPDATE demandas 
+        SET status = 'Enviado para TI',
+            justificativa_usuario = COALESCE(?, justificativa_usuario)
+        WHERE protocolo = ?
+      `).run(justificativaResposta || '', protocolo);
+    }
 
     registrarHistorico(
       dem.id,
@@ -858,7 +919,8 @@ app.post('/api/demandas/:protocolo/responder-ajustes', (req, res) => {
     );
 
     const atualizada = db.prepare('SELECT * FROM demandas WHERE protocolo = ?').get(protocolo);
-    res.json({ success: true, demanda: atualizada });
+    conformidade.aoResponderAjustes(atualizada, justificativaResposta, usuarioNome);
+    res.json({ success: true, demanda: atualizada, conformidade: conformidade.resumoParaDocumento(atualizada) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -867,6 +929,7 @@ app.post('/api/demandas/:protocolo/responder-ajustes', (req, res) => {
 // 8.8 Gerar ETP (Disponível apenas após o DOD ser validado)
 app.post('/api/demandas/:protocolo/gerar-etp', (req, res) => {
   try {
+    if (!checarPermissaoTi(req, res)) return;
     const { protocolo } = req.params;
     const { usuarioNome = 'Técnico de TIC', usuarioCargo = 'Equipe de Planejamento da Contratação', etpConteudo = null } = req.body;
 
@@ -1316,12 +1379,15 @@ app.get('/api/etps/:protocolo', (req, res) => {
     }
 
     const dodsVinculados = db.prepare(`
-      SELECT ed.*, d.respostas_diagnostico, d.diagnostico_interpretado, d.recursos_existentes, d.setor, d.orgao
+      SELECT ed.*, d.respostas_diagnostico, d.diagnostico_interpretado, d.recursos_existentes, d.setor, d.orgao, d.perfil_recomendado_id, d.perfil_escolhido_id, d.softwares, d.justificativa_usuario, d.tipo_necessidade, d.quantidade_usuarios
       FROM etp_dods ed
       LEFT JOIN demandas d ON ed.demanda_id = d.id
       WHERE ed.etp_id = ?
       ORDER BY ed.id ASC
-    `).all(etp.id);
+    `).all(etp.id).map(ed => ({
+      ...ed,
+      conformidade: conformidade.resumoParaDocumento({ id: ed.demanda_id, protocolo: ed.dod_protocolo, ...ed })
+    }));
 
     const instituicoesParticipantes = db.prepare(`
       SELECT * FROM etp_instituicoes 
@@ -1426,9 +1492,13 @@ app.get('/api/estatisticas', (req, res) => {
 });
 
 // Inicia servidor
-app.listen(PORT, () => {
-  console.log(`=======================================================`);
-  console.log(`   🚀 DimensionaTI SC (Lages) - Ativo na porta ${PORT}`);
-  console.log(`   🌐 Acesse: http://localhost:3000`);
-  console.log(`=======================================================`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`=======================================================`);
+    console.log(`   🚀 DimensionaTI SC (Lages) - Ativo na porta ${PORT}`);
+    console.log(`   🌐 Acesse: http://localhost:3000`);
+    console.log(`=======================================================`);
+  });
+}
+
+module.exports = { app, conformidade };

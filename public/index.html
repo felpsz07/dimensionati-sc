@@ -987,6 +987,31 @@
                 </div>
               </div>
 
+              <!-- 4. NECESSIDADE ESPECÍFICA (LINGUAGEM SIMPLES PARA O SERVIDOR) -->
+              <div class="pergunta-bloco" id="blocoNecessidadeEspecifica">
+                <span class="pergunta-titulo">4. Alguma necessidade específica de uso? (Opcional)</span>
+                <div class="chips-softwares-grid" id="gridChipsNecessidadesEspeciais">
+                  <button type="button" class="chip-sistema-btn chip-nec-especial active" data-nec="nenhuma" onclick="app.toggleNecessidadeEspecial('nenhuma', this)">
+                    <span>✓</span> Nenhuma necessidade especial
+                  </button>
+                  <button type="button" class="chip-sistema-btn chip-nec-especial" data-nec="acessibilidade" onclick="app.toggleNecessidadeEspecial('acessibilidade', this)">
+                    <span>♿</span> Acessibilidade (leitor de tela, ampliação ou teclado adaptado)
+                  </button>
+                  <button type="button" class="chip-sistema-btn chip-nec-especial" data-nec="edicao_multimidia" onclick="app.toggleNecessidadeEspecial('edicao_multimidia', this)">
+                    <span>🎬</span> Edição de vídeo, fotos ou materiais gráficos
+                  </button>
+                  <button type="button" class="chip-sistema-btn chip-nec-especial" data-nec="trabalho_campo" onclick="app.toggleNecessidadeEspecial('trabalho_campo', this)">
+                    <span>🏕️</span> Uso externo / em campo
+                  </button>
+                  <button type="button" class="chip-sistema-btn chip-nec-especial" data-nec="programa_nao_listado" onclick="app.toggleNecessidadeEspecial('programa_nao_listado', this)">
+                    <span>➕</span> Outro programa que não está na lista acima
+                  </button>
+                </div>
+                <div id="boxDetalheNecessidadeEspecial" style="display: none; margin-top: 10px;">
+                  <input type="text" id="inputDetalheNecessidadeEspecial" class="dark-input" placeholder="Qual programa ou necessidade específica você precisa utilizar no dia a dia?" oninput="app.setDetalheNecessidadeEspecial(this.value)">
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -1661,6 +1686,11 @@
           <span class="tab-icon">🧠</span>
           <span>Interpretação & Recomendação</span>
         </button>
+        <button type="button" class="drawer-tab-btn" id="tabAnaliseConformidade" onclick="app.setAbaAnaliseTi('conformidade')">
+          <span class="tab-icon">⚖️</span>
+          <span>Conformidade & Exceções</span>
+          <span id="badgeTabConformidade" class="conf-tab-pill" style="display: none;"></span>
+        </button>
         <button type="button" class="drawer-tab-btn" id="tabAnaliseDod" onclick="app.setAbaAnaliseTi('dod')">
           <span class="tab-icon">📄</span>
           <span>DOD Oficial (SC) com Anexos</span>
@@ -1705,6 +1735,13 @@
         <div class="drawer-tab-pane" id="paneAnaliseInterpretacao">
           <div class="analise-interpretacao-box" id="analiseCorpoInterpretacao">
             <!-- Preenchido via JS -->
+          </div>
+        </div>
+
+        <!-- ABA 2B: VALIDAÇÃO DE CONFORMIDADE & ANÁLISE DE EXCEPCIONALIDADES (EXCLUSIVA DO TI) -->
+        <div class="drawer-tab-pane" id="paneAnaliseConformidade">
+          <div id="analiseCorpoConformidade">
+            <!-- Preenchido via conformidade-ui.js -->
           </div>
         </div>
 
@@ -2018,6 +2055,7 @@
 
   <script src="js/assets-dod.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/conformidade-ui.js"></script>
   <script src="js/usage.js"></script>
 </body>
 </html>
