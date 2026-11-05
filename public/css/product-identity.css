@@ -196,7 +196,7 @@ body.theme-dark { --ui-bg:#100d25; --ui-panel:#28203dd9; --ui-field:#151024; --u
 @media(prefers-reduced-motion:reduce) { body :is(#screen-app,#screen-workplace,.modal-overlay) * { animation:none!important; transition:none!important; } }
 @media(prefers-reduced-transparency:reduce) { body { --ui-panel:#fff; } body.theme-dark { --ui-panel:#28203d; } body :is(.dark-navbar,.modal-overlay,.modal-content,.dark-card-box) { backdrop-filter:none!important; } }
 /* Lotação integrada: preserva os componentes existentes e permite rolagem. */
-#screen-workplace { overflow-y: auto; }
+#screen-workplace { overflow-x: clip; overflow-y: visible; }
 #screen-workplace .center-modal-wrap { align-items: flex-start; }
 #screen-workplace .dark-pill { text-align: left; font-family: inherit; }
 #screen-workplace .dark-pill:focus-visible { outline: 2px solid var(--dark-accent); outline-offset: 3px; }
